@@ -1,10 +1,12 @@
 
 import cryptography
-from cryptography.fernet import Fernet
 
-key = Fernet.generate_key()
+import os
+import cherrypy
 
-file = open('user/key/key.key', 'wb') #wb = write bytes
+
+
+'''file = open('user/key/key.key', 'wb') #wb = write bytes
 file.write(key)
 file.close()
 
@@ -33,3 +35,4 @@ decrypted = fernet.decrypt(data)
 # Write the decrypted file
 with open('user/unencrypted/Rechnung_2012_08_051.pdf.decrypted', 'wb') as f:
     f.write(decrypted)
+'''

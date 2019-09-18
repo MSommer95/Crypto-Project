@@ -2,6 +2,15 @@ from cryptography.fernet import Fernet
 import cherrypy
 import os
 import base64
+import MySQLdb
+from jinja2 import Environment, FileSystemLoader
+
+ENV = Environment(loader=FileSystemLoader('/server/'))
+
+params = {'dbname': 'project',
+          'user': 'root',
+          'password': 'HMpXB44P',
+          'dbhost': '127.0.0.1'}
 
 
 class Index(object):
@@ -45,6 +54,33 @@ class Index(object):
         with open('../profiles/000001/files/' + file.filename + '.encrypted', 'wb') as f:
             f.write(encrypted)
             return 'done'
+
+    @cherrypy.expose()
+    def users(self):
+        return db_getusers()
+
+
+def db_getusers():
+    tmpl = ENV.get_template('users.html')
+    db = MySQLdb.connect(params['dbhost'],
+                         params['user'],
+                         params['password'],
+                         params['dbname'])
+    cursor = db.cursor()
+    sql = "SELECT * FROM users"
+
+    try:
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        print(results)
+        user = {}
+        user['id'] = results[0][0]
+        user['email'] = results[0][1]
+        user['password'] = results[0][2]
+    except:
+        print("Error: unable to fetch data")
+
+    return tmpl.render(user)
 
 
 if __name__ == '__main__':

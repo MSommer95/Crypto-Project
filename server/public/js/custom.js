@@ -40,6 +40,12 @@ $(document).ready(function () {
 
     });*/
 
+    $('#key-btn').on('click', function (e) {
+        getDBData('/public_key_exchange', function (cb) {
+            console.log(cb)
+        });
+    });
+
 
 
 });
@@ -50,7 +56,6 @@ function getDBData(url, cb) {
     $.ajax({
         type: 'GET',
         url: url,
-        dataType: 'json',
         complete: function (jqXHR) {
             cb(jqXHR.responseJSON);
         }

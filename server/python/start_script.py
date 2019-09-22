@@ -1,8 +1,12 @@
 from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dh
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 import cherrypy
 import os
-import base64
-import MySQLdb
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -56,6 +60,18 @@ class Index(object):
             return 'done'
 
     @cherrypy.expose()
+    def public_key_exchange(self):
+
+        parameters = dh.generate_parameters(generator=2, key_size=1028, backend=default_backend())
+        private_key = parameters.generate_private_key()
+        peer_public_key = parameters.generate_private_key().public_key()
+        shared_key = private_key.exchange(peer_public_key)
+
+        derived_key = HKDF(algorithm = hashes.SHA256(),length = 32,salt = None,info = b'handshake data',backend = default_backend()).derive(shared_key)
+
+        return derived_key
+
+    '''    @cherrypy.expose()
     def users(self):
         return db_getusers()
 
@@ -81,6 +97,23 @@ def db_getusers():
         print("Error: unable to fetch data")
 
     return tmpl.render(user)
+'''
+
+
+def forge_key():
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
+    pem_priv = private_key.private_bytes(encoding=serialization.Encoding.PEM,format=serialization.PrivateFormat.PKCS8,encryption_algorithm=serialization.BestAvailableEncryption(b'mypassword'))
+
+    with open('../private_key/private_key.pem', 'wb') as f:
+        f.write(pem_priv)
+        f.close()
+
+    public_key = private_key.public_key()
+    pem_pub = public_key.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
+
+    with open('../public/public_key/public_key.pem', 'wb') as f:
+        f.write(pem_pub)
+        f.close
 
 
 if __name__ == '__main__':
@@ -100,5 +133,6 @@ if __name__ == '__main__':
             'tools.staticdir.dir': '../public'
         }
     }
-
+    forge_key()
     cherrypy.quickstart(Index(), '/', conf)
+

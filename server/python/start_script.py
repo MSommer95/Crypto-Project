@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import cherrypy
 import os
+import pymysql.cursors
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -14,7 +15,8 @@ ENV = Environment(loader=FileSystemLoader('/server/'))
 params = {'dbname': 'project',
           'user': 'root',
           'password': 'HMpXB44P',
-          'dbhost': '127.0.0.1'}
+          'dbhost': '127.0.0.1',
+          'charset': 'utf8mb4'}
 
 
 class Index(object):
@@ -71,33 +73,35 @@ class Index(object):
 
         return derived_key
 
-    '''    @cherrypy.expose()
+    @cherrypy.expose()
     def users(self):
         return db_getusers()
 
 
 def db_getusers():
     tmpl = ENV.get_template('users.html')
-    db = MySQLdb.connect(params['dbhost'],
-                         params['user'],
-                         params['password'],
-                         params['dbname'])
-    cursor = db.cursor()
-    sql = "SELECT * FROM users"
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
 
     try:
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        print(results)
-        user = {}
-        user['id'] = results[0][0]
-        user['email'] = results[0][1]
-        user['password'] = results[0][2]
+        with db.cursor() as cursor:
+            sql = "SELECT * FROM users"
+            cursor.execute(sql)
+            db.commit()
+
+            results = cursor.fetchall()
+            print(results)
     except:
         print("Error: unable to fetch data")
+    finally:
+        db.close()
 
-    return tmpl.render(user)
-'''
+    return tmpl.render(results[0])
+
 
 
 def forge_key():

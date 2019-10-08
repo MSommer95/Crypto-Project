@@ -15,7 +15,7 @@ ENV = Environment(loader=FileSystemLoader('/server/'))
 
 params = {'dbname': 'project',
           'user': 'root',
-          'password': 'root',  # HMpXB44P
+          'password': 'HMpXB44P',  # root
           'dbhost': '127.0.0.1',
           'charset': 'utf8mb4'}
 

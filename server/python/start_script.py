@@ -10,13 +10,14 @@ import cherrypy
 import os
 from user_class import User
 import pymysql.cursors
+import json
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
 params = {'dbname': 'project',
           'user': 'root',
-          'password': 'HMpXB44P',
+          'password': 'HMpXB44P',  # root
           'dbhost': '127.0.0.1',
           'charset': 'utf8mb4'}
 
@@ -70,7 +71,7 @@ class Index(object):
             Filename: {}
             Length: {}
             Mime-type: {}
-            '''.format(file.filename, size, file.content_type, data)
+            .format(file.filename, size, file.content_type, data)'''
 
         key = Fernet.generate_key()
 
@@ -90,11 +91,16 @@ class Index(object):
 
     @cherrypy.expose()
     def users(self):
-        return db_getusers()
+        return open('../users.html')
+
+    @cherrypy.expose()
+    def get_users(self):
+        users = db_get_users()
+        cherrypy.serving.response.headers['Content-Type'] = 'application/json'
+        return json.dumps(users)
 
 
-def db_getusers():
-    tmpl = ENV.get_template('users.html')
+def db_get_users():
     db = pymysql.connect(host=params['dbhost'],
                          user=params['user'],
                          password=params['password'],
@@ -115,8 +121,7 @@ def db_getusers():
     finally:
         db.close()
 
-    return tmpl.render(results[0])
-
+    return results
 
 if __name__ == '__main__':
 

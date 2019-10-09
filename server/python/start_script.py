@@ -1,12 +1,14 @@
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import cherrypy
 import os
+from user_class import User
 import pymysql.cursors
 from jinja2 import Environment, FileSystemLoader
 
@@ -24,6 +26,31 @@ class Index(object):
     @cherrypy.expose()
     def index(self):
         return open('../index.html')
+
+    @cherrypy.expose()
+    def sign(self):
+        return open('../sign.html')
+
+    @cherrypy.expose()
+    def register(self, firstname, lastname, username, email, password):
+
+        user_instance = User(firstname, lastname, username, email)
+        user_instance.create_user_db(password)
+
+        return
+
+    @cherrypy.expose()
+    def sign_in(self, password, user_credentials='default'):
+
+        if '@' in user_credentials:
+            check_for_email = True
+        else:
+            check_for_email = False
+
+        print(check_for_email)
+        print(password)
+
+        return
 
     @cherrypy.expose()
     def file_upload(self, username, file):
@@ -62,18 +89,6 @@ class Index(object):
             return 'done'
 
     @cherrypy.expose()
-    def public_key_exchange(self):
-
-        parameters = dh.generate_parameters(generator=2, key_size=1028, backend=default_backend())
-        private_key = parameters.generate_private_key()
-        peer_public_key = parameters.generate_private_key().public_key()
-        shared_key = private_key.exchange(peer_public_key)
-
-        derived_key = HKDF(algorithm = hashes.SHA256(),length = 32,salt = None,info = b'handshake data',backend = default_backend()).derive(shared_key)
-
-        return derived_key
-
-    @cherrypy.expose()
     def users(self):
         return db_getusers()
 
@@ -103,23 +118,6 @@ def db_getusers():
     return tmpl.render(results[0])
 
 
-
-def forge_key():
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
-    pem_priv = private_key.private_bytes(encoding=serialization.Encoding.PEM,format=serialization.PrivateFormat.PKCS8,encryption_algorithm=serialization.BestAvailableEncryption(b'mypassword'))
-
-    with open('../private_key/private_key.pem', 'wb') as f:
-        f.write(pem_priv)
-        f.close()
-
-    public_key = private_key.public_key()
-    pem_pub = public_key.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
-
-    with open('../public/public_key/public_key.pem', 'wb') as f:
-        f.write(pem_pub)
-        f.close
-
-
 if __name__ == '__main__':
 
     conf = {
@@ -137,6 +135,5 @@ if __name__ == '__main__':
             'tools.staticdir.dir': '../public'
         }
     }
-    forge_key()
     cherrypy.quickstart(Index(), '/', conf)
 

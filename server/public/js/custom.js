@@ -2,51 +2,16 @@
 
 $(document).ready(function () {
 
-    /*$('#submit-btn').on('click', function (e) {
+    $('#send_login-btn').on('click', function (btn) {
 
-        let url = "/encryption";
-        let username = $('#username').val();
-        let file_input = $('#file');
-        let file = file_input[0].files[0];
-
-        let reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = shipOff;
+        let url = '/sign_in';
+        let data = {
 
 
-        function shipOff(event){
 
-            let test = JSON.stringify({ "dataURL": reader.result });
+        };
 
-            // View the file
-            let fileURL = JSON.parse(test).dataURL;
-            $("#display-pdf").empty();
-            $("#display-pdf").append(`<object data="${fileURL}"
-              type="application/pdf" width="400px" height="200px">
-            </object>`);
-
-            let result = event.target.result;
-            let filename = $('#file').prop('files')[0].name;
-            let data = {
-                username : username,
-                file : result,
-                filename: filename
-            };
-
-            postDBData(url, data, function (e) {
-                console.log(e);
-            });
-        }
-
-    });*/
-
-    $('#key-btn').on('click', function (e) {
-        getDBData('/public_key_exchange', function (cb) {
-            console.log(cb)
-        });
     });
-
-
 
 });
 

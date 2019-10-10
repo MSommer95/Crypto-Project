@@ -5,10 +5,7 @@ import os
 
 class User:
 
-    def __init__(self, firstname, lastname, username, email):
-        self.firstname = firstname
-        self.lastname = lastname
-        self.username = username
+    def __init__(self, email):
         self.email = email
 
     def create_user_db(self, password):
@@ -20,4 +17,4 @@ class User:
         digest.update(salt)
         hashed_password = digest.finalize()
 
-        print(self.firstname + ' ' + self.lastname + ' ' + hashed_password)
+        print(hashed_password)

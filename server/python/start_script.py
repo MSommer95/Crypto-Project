@@ -8,9 +8,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import cherrypy
 import os
-from user_class import User
+from hash_handler import HashHandler
 import pymysql.cursors
-import json
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -33,25 +32,19 @@ class Index(object):
         return open('../sign.html')
 
     @cherrypy.expose()
-    def register(self, firstname, lastname, username, email, password):
+    def register(self, email, password):
 
-        user_instance = User(firstname, lastname, username, email)
-        user_instance.create_user_db(password)
+        create_user_db(email, password)
 
-        return
+        return open('../sign.html')
 
     @cherrypy.expose()
-    def sign_in(self, password, user_credentials='default'):
+    def sign_in(self, usermail, userpassword):
 
-        if '@' in user_credentials:
-            check_for_email = True
+        if db_check_user(usermail, userpassword):
+            return open('../index.html')
         else:
-            check_for_email = False
-
-        print(check_for_email)
-        print(password)
-
-        return
+            return open('../sign.html')
 
     @cherrypy.expose()
     def file_upload(self, username, file):
@@ -94,10 +87,11 @@ class Index(object):
         return open('../users.html')
 
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def get_users(self):
         users = db_get_users()
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
-        return json.dumps(users)
+        return users
 
 
 def db_get_users():
@@ -113,15 +107,63 @@ def db_get_users():
             sql = "SELECT * FROM users"
             cursor.execute(sql)
             db.commit()
-
             results = cursor.fetchall()
-            print(results)
     except:
         print("Error: unable to fetch data")
     finally:
         db.close()
 
     return results
+
+
+def db_check_user(usermail, password):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with db.cursor() as cursor:
+            sql = "SELECT email, password FROM users WHERE email = %s"
+            cursor.execute(sql, (usermail, ))
+            db.commit()
+
+            result = cursor.fetchall()
+            print(result)
+    except:
+        print("Error: unable to fetch data")
+    finally:
+        db.close()
+
+    user_db_password = result[0]['password']
+
+    if len(result) > 0:
+        return HashHandler.verify_password(user_db_password, password)
+    else:
+        return False
+
+
+def create_user_db(usermail, password):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    hashed_password = HashHandler.hash_password(password)
+    try:
+        with db.cursor() as cursor:
+            sql = "INSERT INTO users (email, password) VALUES (%s, %s)"
+            cursor.execute(sql, (usermail, hashed_password))
+            db.commit()
+    except:
+        print("Error: unable to fetch data")
+    finally:
+        db.close()
+
+    return True
+
 
 if __name__ == '__main__':
 

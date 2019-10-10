@@ -1,21 +1,3 @@
-
-
-$(document).ready(function () {
-
-    $('#send_login-btn').on('click', function (btn) {
-
-        let url = '/sign_in';
-        let data = {
-
-
-
-        };
-
-    });
-
-});
-
-
 // Get Funktion für die Server-Datenbank Abfragen
 function getDBData(url, cb) {
     $.ajax({

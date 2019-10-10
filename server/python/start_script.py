@@ -32,16 +32,13 @@ class Index(object):
         return open('../sign.html')
 
     @cherrypy.expose()
-    def register(self, email, password):
-
+    def create_account(self, email, password):
         create_user_db(email, password)
-
         return open('../sign.html')
 
     @cherrypy.expose()
-    def sign_in(self, usermail, userpassword):
-
-        if db_check_user(usermail, userpassword):
+    def login_account(self, email, password):
+        if db_check_user(email, password):
             return open('../index.html')
         else:
             return open('../sign.html')
@@ -101,7 +98,6 @@ def db_get_users():
                          db=params['dbname'],
                          charset=params['charset'],
                          cursorclass=pymysql.cursors.DictCursor)
-
     try:
         with db.cursor() as cursor:
             sql = "SELECT * FROM users"
@@ -116,7 +112,7 @@ def db_get_users():
     return results
 
 
-def db_check_user(usermail, password):
+def db_check_user(email, password):
     db = pymysql.connect(host=params['dbhost'],
                          user=params['user'],
                          password=params['password'],
@@ -126,11 +122,9 @@ def db_check_user(usermail, password):
     try:
         with db.cursor() as cursor:
             sql = "SELECT email, password FROM users WHERE email = %s"
-            cursor.execute(sql, (usermail, ))
+            cursor.execute(sql, (email, ))
             db.commit()
-
             result = cursor.fetchall()
-            print(result)
     except:
         print("Error: unable to fetch data")
     finally:
@@ -144,7 +138,7 @@ def db_check_user(usermail, password):
         return False
 
 
-def create_user_db(usermail, password):
+def create_user_db(email, password):
     db = pymysql.connect(host=params['dbhost'],
                          user=params['user'],
                          password=params['password'],
@@ -155,13 +149,12 @@ def create_user_db(usermail, password):
     try:
         with db.cursor() as cursor:
             sql = "INSERT INTO users (email, password) VALUES (%s, %s)"
-            cursor.execute(sql, (usermail, hashed_password))
+            cursor.execute(sql, (email, hashed_password))
             db.commit()
     except:
         print("Error: unable to fetch data")
     finally:
         db.close()
-
     return True
 
 

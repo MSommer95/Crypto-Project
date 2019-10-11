@@ -1,15 +1,14 @@
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import dh
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.twofactor.hotp import HOTP
+from cryptography.hazmat.primitives.hashes import SHA1
 import cherrypy
 import os
 from hash_handler import HashHandler
+from email_sender import EmailSender
 import pymysql.cursors
+import logging
+import time
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -38,10 +37,25 @@ class Index(object):
 
     @cherrypy.expose()
     def login_account(self, email, password):
-        if db_check_user(email, password):
+        user = db_check_user(email, password)
+        if len(user) > 0:
+            user_settings = get_user_settings(user['id'])
+            cherrypy.session['user_id'] = user['id']
+            if user_settings['description'] == 1:
+                create_2FA(user['id'], email)
+                return 'Please send us your HOTP'
+
             return open('../index.html')
         else:
             return open('../sign.html')
+
+    @cherrypy.expose()
+    def verify_hotp(self, hotp):
+        check_value = check_2FA(cherrypy.session['user_id'], hotp)
+        if check_value:
+            return 'Varification valid'
+        else:
+            return 'Varification invalid'
 
     @cherrypy.expose()
     def file_upload(self, username, file):
@@ -104,8 +118,8 @@ def db_get_users():
             cursor.execute(sql)
             db.commit()
             results = cursor.fetchall()
-    except:
-        print("Error: unable to fetch data")
+    except pymysql.MySQLError as e:
+        logging.error(e)
     finally:
         db.close()
 
@@ -121,21 +135,67 @@ def db_check_user(email, password):
                          cursorclass=pymysql.cursors.DictCursor)
     try:
         with db.cursor() as cursor:
-            sql = "SELECT email, password FROM users WHERE email = %s"
+            sql = "SELECT id, email, password FROM users WHERE email = %s"
             cursor.execute(sql, (email, ))
             db.commit()
             result = cursor.fetchall()
-    except:
-        print("Error: unable to fetch data")
+    except pymysql.MySQLError as e:
+        logging.error(e)
     finally:
         db.close()
 
     user_db_password = result[0]['password']
 
-    if len(result) > 0:
-        return HashHandler.verify_password(user_db_password, password)
+    if len(result) > 0 and HashHandler.verify_password(user_db_password, password):
+        return result[0]
     else:
         return False
+
+
+def get_user_settings(user_id):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with db.cursor() as cursor:
+            sql = "SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON t1.settings_id = t2.id WHERE t1.user_id = %s"
+            cursor.execute(sql, (user_id, ))
+            db.commit()
+            result = cursor.fetchall()
+            settings = {}
+            for entry in result:
+                settings["description"] = int(entry["setting_value"])
+
+    except pymysql.MySQLError as e:
+        logging.error(e)
+    finally:
+        db.close()
+
+    return settings
+
+
+def update_user_2fa(user_id, hotp):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with db.cursor() as cursor:
+            ts = int(time.time())
+            sql = "DELETE FROM user_otp WHERE user_id = %s"
+            cursor.execute(sql, (user_id, ))
+            sql = "INSERT INTO user_otp (user_id, current_otp, timestamp) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (user_id, hotp, ts))
+            db.commit()
+    except pymysql.MySQLError as e:
+        logging.error(e)
+    finally:
+        db.close()
 
 
 def create_user_db(email, password):
@@ -151,11 +211,47 @@ def create_user_db(email, password):
             sql = "INSERT INTO users (email, password) VALUES (%s, %s)"
             cursor.execute(sql, (email, hashed_password))
             db.commit()
-    except:
-        print("Error: unable to fetch data")
+    except pymysql.MySQLError as e:
+        logging.error(e)
     finally:
         db.close()
     return True
+
+
+def create_2FA(user_id, email):
+    key = os.urandom(20)
+    hotp = HOTP(key, 8, SHA1(), backend=default_backend())
+    hotp_value = hotp.generate(0)
+    update_user_2fa(user_id, hotp_value)
+    message = 'Your HOTP: %s' % hotp_value.decode("utf-8")
+    EmailSender.send_mail(message, '2-Faktor-Auth', email)
+    return
+
+
+def check_2FA(user_id, hotp):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with db.cursor() as cursor:
+            sql = "SELECT current_otp FROM user_otp WHERE user_id = %s"
+            cursor.execute(sql, (user_id,))
+            db.commit()
+            result = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        logging.error(e)
+    finally:
+        db.close()
+
+    db_hotp = result[0]['current_otp']
+
+    if db_hotp == hotp:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':

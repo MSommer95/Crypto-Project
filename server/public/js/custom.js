@@ -11,6 +11,17 @@ $('#send_login-btn').on('click', ()=>{
 
 });
 
+
+$('#decrypt-btn').on('click', ()=>{
+    let url = '/file_decrypt';
+    let data = {
+        filename: 'Unbenannt.png'
+    };
+    postDBData(url, data, ()=>{
+
+    });
+});
+
 // Get Funktion für die Server-Datenbank Abfragen
 function getDBData(url, cb) {
     $.ajax({

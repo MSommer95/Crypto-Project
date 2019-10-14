@@ -1,38 +1,35 @@
-
-import cryptography
-
-import os
-import cherrypy
+from cryptography.fernet import Fernet
 
 
+class FileEncryptor:
 
-'''file = open('user/key/key.key', 'wb') #wb = write bytes
-file.write(key)
-file.close()
+    @staticmethod
+    def file_encryption(user_id, file):
+        key = Fernet.generate_key()
 
-#  Open the file to encrypt
-with open('user/unencrypted/Rechnung_2012_08_051.pdf', 'rb') as f:
-    data = f.read()
+        key_file = open('../storage/users/%s/keys/%s.key' % (user_id, file.filename), 'wb')
+        key_file.write(key)
+        key_file.close()
 
-fernet = Fernet(key)
-encrypted = fernet.encrypt(data)
+        with open('../storage/users/%s/files/%s' % (user_id, file.filename), 'rb') as f:
+            data_file = f.read()
 
-# Write the encrypted file
-with open('user/encrypted/Rechnung_2012_08_051.pdf.encrypted', 'wb') as f:
-    f.write(encrypted)
+        fernet = Fernet(key)
+        encrypted = fernet.encrypt(data_file)
 
-file = open('user/key/key.key', 'rb') # rb = read bytes
-keyToDecrypt = file.read()
-file.close()
+        with open('../storage/users/%s/files/%s.encrypted' % (user_id, file.filename), 'wb') as f:
+            f.write(encrypted)
 
-#  Open the file to decrypt
-with open('user/encrypted/Rechnung_2012_08_051.pdf.encrypted', 'rb') as f:
-    data = f.read()
+    @staticmethod
+    def file_decryption(user_id, filename):
+        with open('../storage/users/%s/keys/%s.key' % (user_id, filename), 'rb') as f:
+            key = f.read()
 
-fernet = Fernet(key)
-decrypted = fernet.decrypt(data)
+        with open('../storage/users/%s/files/%s.encrypted' % (user_id, filename), 'rb') as f:
+            file = f.read()
 
-# Write the decrypted file
-with open('user/unencrypted/Rechnung_2012_08_051.pdf.decrypted', 'wb') as f:
-    f.write(decrypted)
-'''
+        fernet = Fernet(key)
+        decrypted = fernet.decrypt(file)
+
+        with open('../storage/users/%s/files/%s' % (user_id, filename), 'wb') as f:
+            f.write(decrypted)

@@ -11,7 +11,6 @@ $('#send_login-btn').on('click', ()=>{
 
 });
 
-
 $('#decrypt-btn').on('click', ()=>{
     let url = '/file_decrypt';
     let data = {

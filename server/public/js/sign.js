@@ -7,8 +7,10 @@ $('#send_login-btn').on('click', ()=>{
     postDBData(url, data, (cb)=>{
         if(cb.responseText.includes('HOTP')){
             showElement($('#hotp-container'));
-        } else {
-            window.location.href = '../index.html'
+        } else if(cb.responseText.includes('index')) {
+            window.location.href = '/index'
+        } else if(cb.responseText.includes('sign')) {
+            window.location.href = '/sign'
         }
     });
 

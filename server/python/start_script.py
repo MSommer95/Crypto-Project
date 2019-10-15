@@ -48,7 +48,10 @@ class Index(object):
     @cherrypy.expose()
     def login_account(self, email, password):
         user = db_check_user(email, password)
+        check_log_status = False
         if len(user) > 0:
+            check_log_status = True
+        if check_log_status:
             user_settings = get_user_settings(user['id'])
             if user_settings['description'] == 1:
                 cherrypy.session['user_id'] = user['id']
@@ -59,9 +62,9 @@ class Index(object):
             else:
                 cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 0
-                return open('../index.html')
+                return 'Send me to index'
         else:
-            return open('../sign.html')
+            return 'Send me to sign'
 
     @cherrypy.expose()
     def verify_hotp(self, hotp):
@@ -156,7 +159,7 @@ def db_check_user(email, password):
     if len(result) > 0 and HashHandler.verify_password(user_db_password, password):
         return result[0]
     else:
-        return False
+        return []
 
 
 def get_user_settings(user_id):

@@ -1,6 +1,6 @@
-import os
-import hashlib
 import binascii
+import hashlib
+import os
 
 
 class HashHandler:

@@ -3,7 +3,7 @@ $(document).ready(function () {
         getUsers('/get_users', function (cb) {
             console.log(cb);
 
-            cb.forEach( user => {
+            cb.forEach(user => {
                 let table = document.getElementById("user-table");
                 table.innerHTML += `<tr id="tableRow" style="visibility:hidden">`;
                 table.innerHTML += `<td bgcolor=\"#F0E5CC\" id=\"id\"><h3>${user.id}</h3></td>

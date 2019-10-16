@@ -1,15 +1,12 @@
-from cryptography.fernet import Fernet
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.twofactor.hotp import HOTP
-from cryptography.hazmat.primitives.hashes import SHA1
-import cherrypy
+import logging
 import os
-from hash_handler import HashHandler
+import secrets
+import time
+import cherrypy
+import pymysql.cursors
 from email_sender import EmailSender
 from file_encryptor import FileEncryptor
-import pymysql.cursors
-import logging
-import time
+from hash_handler import HashHandler
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -146,7 +143,7 @@ def db_check_user(email, password):
     try:
         with db.cursor() as cursor:
             sql = "SELECT id, email, password FROM users WHERE email = %s"
-            cursor.execute(sql, (email, ))
+            cursor.execute(sql, (email,))
             db.commit()
             result = cursor.fetchall()
     except pymysql.MySQLError as e:
@@ -172,7 +169,7 @@ def get_user_settings(user_id):
     try:
         with db.cursor() as cursor:
             sql = "SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON t1.settings_id = t2.id WHERE t1.user_id = %s"
-            cursor.execute(sql, (user_id, ))
+            cursor.execute(sql, (user_id,))
             db.commit()
             result = cursor.fetchall()
             settings = {}
@@ -198,7 +195,7 @@ def update_user_2fa(user_id, hotp):
         with db.cursor() as cursor:
             ts = int(time.time())
             sql = "DELETE FROM user_otp WHERE user_id = %s"
-            cursor.execute(sql, (user_id, ))
+            cursor.execute(sql, (user_id,))
             sql = "INSERT INTO user_otp (user_id, current_otp, timestamp) VALUES (%s, %s, %s)"
             cursor.execute(sql, (user_id, hotp, ts))
             db.commit()
@@ -226,7 +223,7 @@ def create_user_db(email, password):
             db.commit()
             result = cursor.fetchall()
             sql = "INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 1)"
-            cursor.execute(sql, (result[0]['id'], ))
+            cursor.execute(sql, (result[0]['id'],))
             db.commit()
     except pymysql.MySQLError as e:
         logging.error(e)
@@ -236,11 +233,12 @@ def create_user_db(email, password):
 
 
 def create_2FA(user_id, email):
-    key = os.urandom(20)
-    hotp = HOTP(key, 8, SHA1(), backend=default_backend())
-    hotp_value = hotp.generate(0)
+    hotp_value = ''
+    for x in range(8):
+        hotp_value += str(secrets.randbelow(9))
+
     update_user_2fa(user_id, hotp_value)
-    message = 'Your HOTP: %s' % hotp_value.decode("utf-8")
+    message = 'Your HOTP: %s' % hotp_value
     EmailSender.send_mail(message, '2-Faktor-Auth', email)
     return
 
@@ -272,7 +270,6 @@ def check_2FA(user_id, hotp):
 
 
 def create_dirs(user_id):
-
     path = '../storage/users/'
     sub_dirs = ['/keys', '/files', '/others']
     try:
@@ -291,7 +288,6 @@ def create_dirs(user_id):
 
 
 if __name__ == '__main__':
-
     conf = {
         '/': {
             'tools.sessions.on': True,
@@ -308,4 +304,3 @@ if __name__ == '__main__':
         }
     }
     cherrypy.quickstart(Index(), '/', conf)
-

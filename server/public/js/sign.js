@@ -1,25 +1,57 @@
-$('#send_login-btn').on('click', ()=>{
+$('#send_login-btn').on('click', () => {
     let url = '/login_account';
     let data = {
         email: $('#login_email').val(),
         password: $('#login_password').val()
     };
-    postDBData(url, data, (cb)=>{
-        if(cb.responseText.includes('HOTP')){
+    postDBData(url, data, (cb) => {
+        if (cb.responseText.includes('HOTP')) {
             showElement($('#hotp-container'));
-        } else if(cb.responseText.includes('index')) {
+        } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
-        } else if(cb.responseText.includes('sign')) {
+        } else if (cb.responseText.includes('sign')) {
             window.location.href = '/sign'
         }
     });
 
 });
 
+function generatePassword(lower, upper, digit, special, length) {
+    let combinedString = '';
+    let password = '';
+    let lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    let upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let digits = '0123456789';
+    let specialCharacters = '!§$%&*+#üäöÜÄÖ';
 
-$('#send_hotp').on('click', ()=>{
+    if (lower) {
+        combinedString += lowerCaseLetters;
+    }
+    if (upper) {
+        combinedString += upperCaseLetters;
+    }
+    if (digit) {
+        combinedString += digits;
+    }
+    if (special) {
+        combinedString += specialCharacters;
+    }
+
+    let array = new Uint32Array(length);
+    window.crypto.getRandomValues(array);
+
+    for (let i = 0; i < array.length; i += 1) {
+        const randomNum = array[i] % combinedString.length;
+        password += combinedString.substring(randomNum, randomNum + 1);
+    }
+
+    return password
+}
+
+
+$('#send_hotp').on('click', () => {
     let hotp = $('#confirm_hotp').val();
-    if(hotp != null) {
+    if (hotp != null) {
         let url = '/verify_hotp';
         let data = {
             hotp: hotp
@@ -54,6 +86,42 @@ function postDBData(url, data, cb) {
         }
     });
 }
+
+$('#secure_password-generator').on('click', () => {
+    showElement($('#secure_password-popup'));
+    let password = generatePassword(true, true, true, true, 16);
+    $('#secure_password-pwd').val(password);
+    $('#create_password').val(password);
+});
+
+$('#secure_password-generate-btn').on('click', () => {
+    let lowerCase = $('#secure_password-letters_lower').prop('checked');
+    let upperCase = $('#secure_password-letters_upper').prop('checked');
+    let digits = $('#secure_password-digits').prop('checked');
+    let special = $('#secure_password-special_chars').prop('checked');
+    let length = $('#secure_password-length_input').val();
+    let password = generatePassword(lowerCase, upperCase, digits, special, length);
+    $('#secure_password-pwd').val(password);
+    $('#create_password').val(password);
+});
+
+$('#secure_password-copy').on('click', () => {
+    let password = $('#secure_password-pwd');
+    password.select();
+    document.execCommand('copy');
+});
+
+$('#secure_password-length_slider').on('input', ()=>{
+    let rangeVal = $('#secure_password-length_slider').val();
+    $('#secure_password-length_input').val(rangeVal);
+    console.log(`Change range Val: ${rangeVal}`);
+});
+
+$('#secure_password-length_input').on('input', ()=>{
+    let inputVal = $('#secure_password-length_input').val();
+    $('#secure_password-length_slider').val(inputVal);
+    console.log(`Change input Val: ${inputVal}`);
+});
 
 // show function
 function showElement(element) {

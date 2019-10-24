@@ -19,7 +19,7 @@ params = {'dbname': 'project',
 
 
 class Index(object):
-
+    ### Index Call Function: Bearbeitet die Index Request der Website. Solange keine user_id gesetzt wurde, wird der User auf die Login Seite
     @cherrypy.expose()
     def index(self):
         if cherrypy.session.get('user_id') is None:
@@ -184,6 +184,30 @@ def get_user_settings(user_id):
     return settings
 
 
+def check_for_used_otp(user_id, hotp):
+    db = pymysql.connect(host=params['dbhost'],
+                         user=params['user'],
+                         password=params['password'],
+                         db=params['dbname'],
+                         charset=params['charset'],
+                         cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with db.cursor() as cursor:
+            sql = "SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s"
+            cursor.execute(sql, (user_id, hotp))
+            db.commit()
+            result = cursor.fetchall()
+    except pymysql.MySQLError as e:
+        logging.error(e)
+    finally:
+        db.close()
+
+    if len(result) > 0:
+        return True
+    else:
+        return False
+
+
 def update_user_2fa(user_id, hotp):
     db = pymysql.connect(host=params['dbhost'],
                          user=params['user'],
@@ -197,6 +221,8 @@ def update_user_2fa(user_id, hotp):
             sql = "DELETE FROM user_otp WHERE user_id = %s"
             cursor.execute(sql, (user_id,))
             sql = "INSERT INTO user_otp (user_id, current_otp, timestamp) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (user_id, hotp, ts))
+            sql = "INSERT INTO user_otp_used (user_id, used_otp, timestamp) VALUES (%s, %s, %s)"
             cursor.execute(sql, (user_id, hotp, ts))
             db.commit()
     except pymysql.MySQLError as e:
@@ -237,10 +263,17 @@ def create_2FA(user_id, email):
     for x in range(8):
         hotp_value += str(secrets.randbelow(9))
 
-    update_user_2fa(user_id, hotp_value)
-    message = 'Your HOTP: %s' % hotp_value
-    EmailSender.send_mail(message, '2-Faktor-Auth', email)
-    return
+    hotp_used = check_for_used_otp(user_id, hotp_value)
+
+    if hotp_used:
+        create_2FA(user_id, email)
+        return
+    else:
+        update_user_2fa(user_id, hotp_value)
+        message = 'Your HOTP: %s' % hotp_value
+        EmailSender.send_mail(message, '2-Faktor-Auth', email)
+
+        return
 
 
 def check_2FA(user_id, hotp):

@@ -25,41 +25,6 @@
         <button type="submit" id="send_hotp">Submit</button>
     </div>
 
-    <!-- Popup - Secure Password Generator -->
-    <div id="secure_password-popup" class="popup-container hidden">
-        <div class="popup-inputs">
-            <div class="popup-title">
-                <span class="text-normal">Secure Password Generator</span>
-            </div>
-            <div class="">
-                <label class="text-normal --flex-item-margin" for="secure_password-pwd">Passwort</label>
-                <input type="text" name="secure_password-pwd" id="secure_password-pwd" placeholder="Password">
-                <button type="submit" id="secure_password-copy">Copy to Clipboard</button>
-            </div>
-            <div class="">
-                <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password Length</label>
-                <input type="range" min="1" max="99" value="16" class="slider" id="secure_password-length_slider">
-                <input type="number" value="16" id="secure_password-length_input">
-                <br>
-                <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase Letters</label>
-                <input type="checkbox" name="secure_password-letters_lower" id="secure_password-letters_lower" checked>
-                <br>
-                <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase Letters</label>
-                <input type="checkbox" name="secure_password-letters_upper" id="secure_password-letters_upper" checked>
-                <br>
-                <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
-                <input type="checkbox" name="secure_password-digits" id="secure_password-digits" checked>
-                <br>
-                <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special Characters</label>
-                <input type="checkbox" name="secure_password-special_chars" id="secure_password-special_chars" checked>
-                <br>
-            </div>
-        </div>
-        <div class="--flex-active --flex-center-content">
-            <button type="submit" id="secure_password-generate-btn" class="btn" name="secure_password-generate-btn">GENERATE</button>
-        </div>
-    </div>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="/static/js/sign.js"></script>
 </body>

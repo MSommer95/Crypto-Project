@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.settings: ~1 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.settings: ~0 rows (ungefähr)
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 INSERT INTO `settings` (`id`, `description`) VALUES
 	(1, '2FA');
@@ -35,17 +35,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(50) NOT NULL,
   `password` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.users: ~6 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.users: ~5 rows (ungefähr)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `email`, `password`) VALUES
-	(1, 'test@mail.de', '123'),
-	(2, 'test2@mail.de', '5132'),
-	(3, 'max@web.de', 'abc'),
 	(4, 'Test@test', 'a6906caa2528d9c60122a82f4d9de1832e0cace9c325f5d9d996fee11ed722ecd2b350401c89b9d1ba2d7faa41d184a3cf56ebe799ec0ff3bde074f789860e514e2ccc2d990b929a4f3e9350dc8269d74feff7aa634e950bd8cb5e3086eccfe0'),
 	(5, 'test@me.de', '624082f6e5546ad8a12bc8f75acd795b60da291700686711bbd652b12c4ab28255afe96f159d8f1739137ceb25dd2e02fcd943931bf85f6bd9e3d3fdeee7d5dfe75678459c2846cfc696cce5cb1d8ba933cdf36c730c88804e42a433ec5b2c9e'),
-	(6, 'zonaafa@web.de', 'e9fa407622d249111c65190d40fbc1107937ad8fc5e7e5d9ac14de64f00e8e22c340de148469e5097c0857f9c40c41ada366d1986b4c16047d6500a0ebf71d9512a3e4698ee32dbb3f15809345c7b0b47c2dc84918e3a103ea4b4c7494857203');
+	(6, 'zonaafa@web.de', 'e9fa407622d249111c65190d40fbc1107937ad8fc5e7e5d9ac14de64f00e8e22c340de148469e5097c0857f9c40c41ada366d1986b4c16047d6500a0ebf71d9512a3e4698ee32dbb3f15809345c7b0b47c2dc84918e3a103ea4b4c7494857203'),
+	(8, 'max.sommer_95@web.de', 'ca2681e47edcda6a0894d28ba3e4fae805d7309c69dbd4f1715067e7485a0a85b6b5469fb92509e00d0e3681bd48bcfe2ddf6d6425e891e4a0523b138d1c426da5a4d75fb2c4312091f8c7af8121596cc90f8b60ed71bc79b9f3db268c61a7eb');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_data
@@ -78,18 +76,48 @@ CREATE TABLE IF NOT EXISTS `user_key` (
 
 -- Exportiere Struktur von Tabelle project.user_otp
 CREATE TABLE IF NOT EXISTS `user_otp` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `current_otp` varchar(50) DEFAULT NULL,
   `timestamp` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_otp: ~1 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
-INSERT INTO `user_otp` (`user_id`, `current_otp`, `timestamp`) VALUES
-	(6, '71771509', 1570811729);
+INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`) VALUES
+	(12, 8, '72365167', 1571913040);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
+
+-- Exportiere Struktur von Tabelle project.user_otp_used
+CREATE TABLE IF NOT EXISTS `user_otp_used` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `used_otp` varchar(50) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+
+-- Exportiere Daten aus Tabelle project.user_otp_used: ~0 rows (ungefähr)
+/*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
+INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
+	(1, 8, '74083486', 1571910485),
+	(2, 8, '02630876', 1571910485),
+	(3, 8, '50022336', 1571910520),
+	(4, 8, '81102708', 1571910584),
+	(5, 8, '35815824', 1571911347),
+	(6, 8, '58180640', 1571912110),
+	(7, 8, '78848263', 1571912149),
+	(8, 8, '55483377', 1571912633),
+	(9, 8, '25063076', 1571912740),
+	(10, 8, '53080404', 1571912804),
+	(11, 8, '50552567', 1571912908),
+	(12, 8, '72365167', 1571913040);
+/*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting
 CREATE TABLE IF NOT EXISTS `user_setting` (
@@ -102,10 +130,11 @@ CREATE TABLE IF NOT EXISTS `user_setting` (
   CONSTRAINT `user_setting_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_setting: ~1 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_setting: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_setting` DISABLE KEYS */;
 INSERT INTO `user_setting` (`user_id`, `settings_id`, `setting_value`) VALUES
-	(6, 1, 1);
+	(6, 1, 1),
+	(8, 1, 1);
 /*!40000 ALTER TABLE `user_setting` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

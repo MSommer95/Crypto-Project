@@ -1,5 +1,6 @@
 # import necessary packages
 import smtplib
+import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -17,11 +18,14 @@ class EmailSender:
         # add in the message body
         msg.attach(MIMEText(message, 'plain'))
         # create server
-        server = smtplib.SMTP('smtp.gmail.com: 587')
-        server.starttls()
-        # Login Credentials for sending the mail
-        server.login(msg['From'], password)
-        # send the message via the server.
-        server.sendmail(msg['From'], msg['To'], msg.as_string())
-        server.quit()
-        print("successfully sent email to %s:" % (msg['To']))
+        try:
+            server_ssl = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+            server_ssl.ehlo()
+            # Login Credentials for sending the mail
+            server_ssl.login(msg['From'], password)
+            # send the message via the server.
+            server_ssl.sendmail(msg['From'], msg['To'], msg.as_string())
+            server_ssl.close()
+            print("successfully sent email to %s:" % (msg['To']))
+        except smtplib.SMTPException as e:
+            logging.error(e)

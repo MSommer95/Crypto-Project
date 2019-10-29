@@ -57,7 +57,14 @@ $('#send_hotp').on('click', () => {
             hotp: hotp
         };
         postDBData(url, data, (cb) => {
-            console.log(cb.responseText)
+            console.log(cb.responseText);
+
+            if(cb.responseText.includes('Varification valid')) {
+                window.location.href = '/index'
+            }
+            else {
+                alert('You entered the wrong HOTP or the time expired, please login again');
+            }
         });
     }
 });

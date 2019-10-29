@@ -70,7 +70,7 @@ class DbConnector:
                 result = cursor.fetchall()
                 settings = {}
                 for entry in result:
-                    settings["description"] = int(entry["setting_value"])
+                    settings[entry["description"]] = int(entry["setting_value"])
 
         except pymysql.MySQLError as e:
             logging.error(e)

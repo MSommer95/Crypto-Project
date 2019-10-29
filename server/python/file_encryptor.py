@@ -11,7 +11,7 @@ class FileEncryptor:
         key_file.write(key)
         key_file.close()
 
-        with open('../storage/users/%s/files/%s' % (user_id, file.filename), 'rb') as f:
+        with open('../storage/users/%s/files/unencrypted/%s' % (user_id, file.filename), 'rb') as f:
             data_file = f.read()
 
         fernet = Fernet(key)
@@ -25,11 +25,11 @@ class FileEncryptor:
         with open('../storage/users/%s/keys/%s.key' % (user_id, filename), 'rb') as f:
             key = f.read()
 
-        with open('../storage/users/%s/files/%s.encrypted' % (user_id, filename), 'rb') as f:
+        with open('../storage/users/%s/files/encrypted/%s.encrypted' % (user_id, filename), 'rb') as f:
             file = f.read()
 
         fernet = Fernet(key)
         decrypted = fernet.decrypt(file)
 
-        with open('../storage/users/%s/files/%s' % (user_id, filename), 'wb') as f:
+        with open('../storage/users/%s/files/unencrypted/%s' % (user_id, filename), 'wb') as f:
             f.write(decrypted)

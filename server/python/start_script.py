@@ -1,12 +1,11 @@
-
 import os
 import secrets
-import cherrypy
-from email_sender import EmailSender
-from file_encryptor import FileEncryptor
-from db_connector import DbConnector
-from jinja2 import Environment, FileSystemLoader
 
+import cherrypy
+from server.python.db_connector import DbConnector
+from server.python.email_sender import EmailSender
+from server.python.file_encryptor import FileEncryptor
+from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -55,6 +54,7 @@ class Index(object):
             else:
                 cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 0
+                check_for_dirs(str(cherrypy.session['user_id']))
                 return 'Send me to index'
         else:
             return 'Send me to sign'
@@ -65,6 +65,7 @@ class Index(object):
         check_value = DbConnector.check_2FA(db, cherrypy.session.get('user_id'), hotp)
         if check_value:
             cherrypy.session['2fa_varified'] = 1
+            check_for_dirs(str(cherrypy.session['user_id']))
             return 'Varification valid'
         else:
             return 'Varification invalid'
@@ -74,7 +75,7 @@ class Index(object):
         print(type(file))
         size = 0
         # Write the encrypted file
-        with open('../storage/users/%s/files/%s' % (str(cherrypy.session['user_id']), file.filename), 'wb') as f:
+        with open('../storage/users/%s/files/unencrypted/%s' % (str(cherrypy.session['user_id']), file.filename), 'wb') as f:
             while True:
                 data = file.file.read(8192)
                 if not data:
@@ -128,9 +129,19 @@ def create_2FA(user_id, email):
         return
 
 
+def make_dir(path):
+    try:
+        os.mkdir(path)
+    except OSError:
+        print('Creating Dir %s failed' % path)
+    else:
+        print('Successfully created Dir %s' % path)
+
+
 def create_dirs(user_id):
     path = '../storage/users/'
     sub_dirs = ['/keys', '/files', '/others']
+    sub_dirs_files = ['/unencrypted', '/encrypted']
     try:
         os.mkdir(path + user_id)
     except OSError:
@@ -138,12 +149,38 @@ def create_dirs(user_id):
     else:
         print('Successfully created Dir %s' % path)
         for dirs in sub_dirs:
-            try:
-                os.mkdir(path + user_id + dirs)
-            except OSError:
-                print('Creating Dir %s failed' % path)
-            else:
-                print('Successfully created Dir %s' % path + user_id + dirs)
+            make_dir(path + user_id + dirs)
+        for dirs in sub_dirs_files:
+            make_dir(path + user_id + '/files' + dirs)
+
+
+def check_for_dirs(user_id):
+    base_path = '../storage/users/%s' % user_id
+    paths = [
+        '/files',
+        '/keys',
+        '/others'
+    ]
+    inner_paths = [
+        '/unencrypted',
+        '/encrypted'
+    ]
+
+    if os.path.isdir(base_path):
+        if os.path.isdir(base_path + paths[0]):
+            for path in inner_paths:
+                if not os.path.isdir(base_path + paths[0] + path):
+                    make_dir(base_path + paths[0] + path)
+        else:
+            make_dir(base_path + paths[0])
+            for dirs in inner_paths:
+                make_dir(base_path + paths[0] + dirs)
+
+        for x in range(1, len(paths)):
+            if not os.path.isdir(base_path + paths[x]):
+                make_dir(base_path + paths[x])
+    else:
+        create_dirs(user_id)
 
 
 if __name__ == '__main__':

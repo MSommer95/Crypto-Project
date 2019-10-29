@@ -1,6 +1,6 @@
 # import necessary packages
-import smtplib
 import logging
+import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 

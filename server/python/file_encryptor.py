@@ -17,7 +17,7 @@ class FileEncryptor:
         fernet = Fernet(key)
         encrypted = fernet.encrypt(data_file)
 
-        with open('../storage/users/%s/files/%s.encrypted' % (user_id, file.filename), 'wb') as f:
+        with open('../storage/users/%s/files/encrypted/%s.encrypted' % (user_id, file.filename), 'wb') as f:
             f.write(encrypted)
 
     @staticmethod

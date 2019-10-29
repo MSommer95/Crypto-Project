@@ -1,7 +1,8 @@
 import logging
 import time
+
 import pymysql.cursors
-from hash_handler import HashHandler
+from server.python.hash_handler import HashHandler
 
 
 class DbConnector:

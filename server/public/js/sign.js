@@ -6,7 +6,7 @@ $('#send_login-btn').on('click', () => {
     };
     postDBData(url, data, (cb) => {
         if (cb.responseText.includes('HOTP')) {
-            showElement($('#hotp-container'));
+            showElement($('#otp-container'));
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
         } else if (cb.responseText.includes('sign')) {
@@ -49,12 +49,12 @@ function generatePassword(lower, upper, digit, special, length) {
 }
 
 
-$('#send_hotp').on('click', () => {
-    let hotp = $('#confirm_hotp').val();
-    if (hotp != null) {
-        let url = '/verify_hotp';
+$('#send_otp').on('click', () => {
+    let otp = $('#confirm_otp').val();
+    if (otp != null) {
+        let url = '/verify_otp';
         let data = {
-            hotp: hotp
+            otp: otp
         };
         postDBData(url, data, (cb) => {
             console.log(cb.responseText);

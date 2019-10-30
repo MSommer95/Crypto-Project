@@ -1,10 +1,10 @@
 import os
-import secrets
 
 import cherrypy
 from server.python.db_connector import DbConnector
-from server.python.email_sender import EmailSender
+from server.python.otp_handler import OtpHandler
 from server.python.file_encryptor import FileEncryptor
+from server.python.dir_handler import DirHandler
 from jinja2 import Environment, FileSystemLoader
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -36,7 +36,7 @@ class Index(object):
     @cherrypy.expose()
     def create_account(self, email, password):
         db = DbConnector.create_db_connection()
-        create_dirs(str(DbConnector.create_user_db(db, email, password)))
+        DirHandler.create_dirs(str(DbConnector.create_user_db(db, email, password)))
         return open('../sign.html')
 
     # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
@@ -56,24 +56,30 @@ class Index(object):
                 cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 1
                 cherrypy.session['2fa_varified'] = 0
-                create_2FA(user['id'], email)
+                otp = OtpHandler.create_2FA(user['id'], email)
+
+                # TODO if mail activated
+                OtpHandler.send_otp_mail(otp, email)
+                # TODO elif app activated
+                # TODO send_app(otp, params)
+
                 return 'Please send us your HOTP'
             else:
                 cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 0
-                check_for_dirs(str(cherrypy.session['user_id']))
+                DirHandler.check_for_dirs(str(cherrypy.session['user_id']))
                 return 'Send me to index'
         else:
             return 'Send me to sign'
 
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
-    def verify_hotp(self, hotp):
+    def verify_otp(self, otp):
         db = DbConnector.create_db_connection()
-        check_value = DbConnector.check_2FA(db, cherrypy.session.get('user_id'), hotp)
+        check_value = DbConnector.check_2FA(db, cherrypy.session.get('user_id'), otp)
         if check_value:
             cherrypy.session['2fa_varified'] = 1
-            check_for_dirs(str(cherrypy.session['user_id']))
+            DirHandler.check_for_dirs(str(cherrypy.session['user_id']))
             return 'Varification valid'
         else:
             return 'Varification invalid'
@@ -120,89 +126,6 @@ class Index(object):
         users = DbConnector.db_get_users(db)
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
         return users
-
-
-# 2FA Funktion nimmt eine user_id und emailadresse entgegen und erstellt einen otp. Anschließend wird dieser an die
-# emailadresse geschickt. Der otp wird in der DB gespeichert, zusammen mit einem timestamp
-def create_2FA(user_id, email):
-    hotp_value = ''
-    for x in range(8):
-        hotp_value += str(secrets.randbelow(9))
-    db = DbConnector.create_db_connection()
-    hotp_used = DbConnector.check_for_used_otp(db, user_id, hotp_value)
-
-    if hotp_used:
-        create_2FA(user_id, email)
-        return
-    else:
-        db = DbConnector.create_db_connection()
-        DbConnector.update_user_2fa(db, user_id, hotp_value)
-        message = 'Your HOTP: %s' % hotp_value
-        EmailSender.send_mail(message, '2-Faktor-Auth', email)
-        return
-
-
-# make_dir Funktion erstellt ein Verzeichnis beim angegebenen Pfad
-def make_dir(path):
-    try:
-        os.mkdir(path)
-    except OSError:
-        print('Creating Dir %s failed' % path)
-    else:
-        print('Successfully created Dir %s' % path)
-
-
-# create_dirs Funktion nimmt die user_id entgegen und erstellt alle notwendigen Ordner für den User
-def create_dirs(user_id):
-    path = '../storage/users/'
-    sub_dirs = [
-        '/keys',
-        '/files',
-        '/others']
-    sub_dirs_files = [
-        '/unencrypted',
-        '/encrypted']
-    try:
-        os.mkdir(path + user_id)
-    except OSError:
-        print('Creating Dir %s failed' % path)
-    else:
-        print('Successfully created Dir %s' % path)
-        for dirs in sub_dirs:
-            make_dir(path + user_id + dirs)
-        for dirs in sub_dirs_files:
-            make_dir(path + user_id + '/files' + dirs)
-
-
-# check_for_dirs Funktion nimmt eine user_id und überprüft, ob die notwendigen Ordner existieren / wenn nicht werden
-# die fehlenden Ordner erstellt
-def check_for_dirs(user_id):
-    base_path = '../storage/users/%s' % user_id
-    paths = [
-        '/files',
-        '/keys',
-        '/others'
-    ]
-    inner_paths = [
-        '/unencrypted',
-        '/encrypted'
-    ]
-
-    if os.path.isdir(base_path):
-        if os.path.isdir(base_path + paths[0]):
-            for path in inner_paths:
-                if not os.path.isdir(base_path + paths[0] + path):
-                    make_dir(base_path + paths[0] + path)
-        else:
-            make_dir(base_path + paths[0])
-            for dirs in inner_paths:
-                make_dir(base_path + paths[0] + dirs)
-
-        for x in range(1, len(paths)):
-            if not os.path.isdir(base_path + paths[x]):
-                make_dir(base_path + paths[x])
-    else:
-        create_dirs(user_id)
 
 
 if __name__ == '__main__':

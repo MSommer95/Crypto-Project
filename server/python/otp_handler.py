@@ -1,4 +1,3 @@
-
 # 2FA Funktion nimmt eine user_id und emailadresse entgegen und erstellt einen otp. Anschließend wird dieser an die
 # emailadresse geschickt. Der otp wird in der DB gespeichert, zusammen mit einem timestamp
 import secrets
@@ -10,19 +9,17 @@ from server.python.email_sender import EmailSender
 class OtpHandler:
 
     @staticmethod
-    def create_2FA(user_id, email):
+    def create_2fa(user_id, email):
         otp_value = ''
         for x in range(8):
             otp_value += str(secrets.randbelow(9))
-        db = DbConnector.create_db_connection()
-        otp_used = DbConnector.check_for_used_otp(db, user_id, otp_value)
+        otp_used = DbConnector.db_check_for_used_otp(user_id, otp_value)
 
         if otp_used:
-            OtpHandler.create_2FA(user_id, email)
+            OtpHandler.create_2fa(user_id, email)
             return
         else:
-            db = DbConnector.create_db_connection()
-            DbConnector.update_user_2fa(db, user_id, otp_value)
+            DbConnector.db_insert_user_2fa(user_id, otp_value)
             return otp_value
 
     @staticmethod

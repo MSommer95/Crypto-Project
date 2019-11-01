@@ -2,6 +2,7 @@ import logging
 import time
 
 import pymysql.cursors
+
 from server.python.hash_handler import HashHandler
 
 
@@ -24,8 +25,8 @@ class DbConnector:
         return db
 
     @staticmethod
-    def db_get_users(db):
-
+    def db_get_users():
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = "SELECT * FROM users"
@@ -40,7 +41,8 @@ class DbConnector:
         return results
 
     @staticmethod
-    def db_check_user(db, email, password):
+    def db_check_user(email, password):
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = "SELECT id, email, password FROM users WHERE email = %s"
@@ -60,8 +62,8 @@ class DbConnector:
             return []
 
     @staticmethod
-    def get_user_settings(db, user_id):
-
+    def db_get_user_settings(user_id):
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = "SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON t1.settings_id = t2.id WHERE t1.user_id = %s"
@@ -80,8 +82,8 @@ class DbConnector:
         return settings
 
     @staticmethod
-    def check_for_used_otp(db, user_id, hotp):
-
+    def db_check_for_used_otp(user_id, hotp):
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = "SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s"
@@ -99,7 +101,8 @@ class DbConnector:
             return False
 
     @staticmethod
-    def update_user_2fa(db, user_id, hotp):
+    def db_insert_user_2fa(user_id, hotp):
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 ts = int(time.time())
@@ -116,8 +119,8 @@ class DbConnector:
             db.close()
 
     @staticmethod
-    def create_user_db(db, email, password):
-
+    def db_insert_user(email, password):
+        db = DbConnector.create_db_connection()
         hashed_password = HashHandler.hash_password(password)
         try:
             with db.cursor() as cursor:
@@ -138,8 +141,8 @@ class DbConnector:
         return result[0]['id']
 
     @staticmethod
-    def check_2FA(db, user_id, hotp):
-
+    def db_check_2fa(user_id, hotp):
+        db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = "SELECT current_otp, timestamp FROM user_otp WHERE user_id = %s"
@@ -161,3 +164,36 @@ class DbConnector:
             return True
         else:
             return False
+
+    @staticmethod
+    def db_get_user_devices(user_id):
+        db = DbConnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = "SELECT device_id, device_name FROM user_device WHERE user_id = %s"
+                cursor.execute(sql, (user_id,))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result
+
+    @staticmethod
+    def db_insert_user_devices(user_id, device_id, device_name):
+        db = DbConnector.create_db_connection()
+        db_connection_state = 'pending'
+        try:
+            with db.cursor() as cursor:
+                sql = "INSERT INTO user_device (user_id, device_id, device_name) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (user_id, device_id, device_name))
+                db.commit()
+                db_connection_state = 'success'
+        except pymysql.MySQLError as e:
+            logging.error(e)
+            db_connection_state = 'failed'
+        finally:
+            db.close()
+            return db_connection_state

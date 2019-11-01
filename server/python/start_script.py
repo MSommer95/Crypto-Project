@@ -1,11 +1,13 @@
 import os
 
 import cherrypy
-from server.python.db_connector import DbConnector
-from server.python.otp_handler import OtpHandler
-from server.python.file_encryptor import FileEncryptor
-from server.python.dir_handler import DirHandler
 from jinja2 import Environment, FileSystemLoader
+
+from server.python.db_connector import DbConnector
+from server.python.dir_handler import DirHandler
+from server.python.file_encryptor import FileEncryptor
+from server.python.file_handler import FileHandler
+from server.python.otp_handler import OtpHandler
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -35,8 +37,7 @@ class Index(object):
     # zugehörige Ordner Struktur
     @cherrypy.expose()
     def create_account(self, email, password):
-        db = DbConnector.create_db_connection()
-        DirHandler.create_dirs(str(DbConnector.create_user_db(db, email, password)))
+        DirHandler.create_user_dir_structure(str(DbConnector.db_insert_user(email, password)))
         return open('../sign.html')
 
     # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
@@ -44,19 +45,16 @@ class Index(object):
     # jeweiligen Session Variablen
     @cherrypy.expose()
     def login_account(self, email, password):
-        db = DbConnector.create_db_connection()
-        user = DbConnector.db_check_user(db, email, password)
-        check_log_status = False
-        if len(user) > 0:
-            check_log_status = True
-        if check_log_status:
-            db = DbConnector.create_db_connection()
-            user_settings = DbConnector.get_user_settings(db, user['id'])
+        user = DbConnector.db_check_user(email, password)
+        user_count = len(user)
+        if user_count > 0:
+            cherrypy.session['user_id'] = user['id']
+            cherrypy.session['2fa_varified'] = 0
+            user_id = str(user['id'])
+            user_settings = DbConnector.db_get_user_settings(user_id)
             if user_settings['2FA'] == 1:
-                cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 1
-                cherrypy.session['2fa_varified'] = 0
-                otp = OtpHandler.create_2FA(user['id'], email)
+                otp = OtpHandler.create_2fa(user_id, email)
 
                 # TODO if mail activated
                 OtpHandler.send_otp_mail(otp, email)
@@ -65,9 +63,8 @@ class Index(object):
 
                 return 'Please send us your HOTP'
             else:
-                cherrypy.session['user_id'] = user['id']
                 cherrypy.session['2fa_status'] = 0
-                DirHandler.check_for_dirs(str(cherrypy.session['user_id']))
+                DirHandler.check_user_dir_structure(user_id)
                 return 'Send me to index'
         else:
             return 'Send me to sign'
@@ -75,11 +72,11 @@ class Index(object):
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
     def verify_otp(self, otp):
-        db = DbConnector.create_db_connection()
-        check_value = DbConnector.check_2FA(db, cherrypy.session.get('user_id'), otp)
+        user_id = str(cherrypy.session['user_id'])
+        check_value = DbConnector.db_check_2fa(user_id, otp)
         if check_value:
             cherrypy.session['2fa_varified'] = 1
-            DirHandler.check_for_dirs(str(cherrypy.session['user_id']))
+            DirHandler.check_user_dir_structure(user_id)
             return 'Varification valid'
         else:
             return 'Varification invalid'
@@ -88,32 +85,16 @@ class Index(object):
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
     def file_upload(self, file):
-        print(type(file))
-        size = 0
-        # Write the encrypted file
-        with open('../storage/users/%s/files/unencrypted/%s' % (str(cherrypy.session['user_id']), file.filename), 'wb') as f:
-            while True:
-                data = file.file.read(8192)
-                if not data:
-                    break
-                f.write(data)
-                size += len(data)
-            f = '''
-            File received.
-            Filename: {}
-            Length: {}
-            Mime-type: {}
-            .format(file.filename, size, file.content_type, data)'''
-
-            print(f)
-
-        FileEncryptor.file_encryption(str(cherrypy.session['user_id']), file)
+        user_id = str(cherrypy.session['user_id'])
+        FileHandler.write_file(user_id, file)
+        FileEncryptor.file_encryption(user_id, file)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_decrypt(self, filename):
         print(filename)
-        FileEncryptor.file_decryption(str(cherrypy.session.get('user_id')), filename)
+        user_id = str(cherrypy.session.get('user_id'))
+        FileEncryptor.file_decryption(user_id, filename)
 
     @cherrypy.expose()
     def users(self):
@@ -122,10 +103,26 @@ class Index(object):
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_users(self):
-        db = DbConnector.create_db_connection()
-        users = DbConnector.db_get_users(db)
+        users = DbConnector.db_get_users()
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
         return users
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def get_user_devices(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        devices = DbConnector.db_get_user_devices(user_id)
+        return devices
+
+    @cherrypy.expose()
+    def insert_user_device(self, device_id, device_name):
+        user_id = str(cherrypy.session.get('user_id'))
+        db_connection_state = DbConnector.db_insert_user_devices(user_id, device_id, device_name)
+
+        if db_connection_state == 'success':
+            return 'Successfully inserted device'
+        elif db_connection_state == 'failed':
+            return 'Failed to insert device'
 
 
 if __name__ == '__main__':

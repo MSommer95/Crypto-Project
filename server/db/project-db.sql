@@ -60,6 +60,21 @@ CREATE TABLE IF NOT EXISTS `user_data` (
 /*!40000 ALTER TABLE `user_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_data` ENABLE KEYS */;
 
+-- Exportiere Struktur von Tabelle project.user_device
+CREATE TABLE IF NOT EXISTS `user_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `device_id` varchar(258) DEFAULT NULL,
+  `device_name` varchar(258) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_user_device_users` (`user_id`),
+  CONSTRAINT `FK_user_device_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Exportiere Daten aus Tabelle project.user_device: ~0 rows (ungefähr)
+/*!40000 ALTER TABLE `user_device` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_device` ENABLE KEYS */;
+
 -- Exportiere Struktur von Tabelle project.user_key
 CREATE TABLE IF NOT EXISTS `user_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -83,12 +98,12 @@ CREATE TABLE IF NOT EXISTS `user_otp` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp: ~1 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
 INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`) VALUES
-	(12, 8, '72365167', 1571913040);
+	(32, 8, '38436633', 1572619535);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp_used
@@ -99,10 +114,10 @@ CREATE TABLE IF NOT EXISTS `user_otp_used` (
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+  CONSTRAINT `FK_user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
 
--- Exportiere Daten aus Tabelle project.user_otp_used: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp_used: ~31 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
 INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(1, 8, '74083486', 1571910485),
@@ -116,7 +131,27 @@ INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(9, 8, '25063076', 1571912740),
 	(10, 8, '53080404', 1571912804),
 	(11, 8, '50552567', 1571912908),
-	(12, 8, '72365167', 1571913040);
+	(12, 8, '72365167', 1571913040),
+	(13, 8, '84611052', 1571950172),
+	(14, 8, '34147863', 1571950277),
+	(15, 8, '01871640', 1571950363),
+	(16, 8, '87430075', 1571950560),
+	(17, 8, '42502223', 1571950587),
+	(18, 8, '68660811', 1571950589),
+	(19, 8, '55036408', 1571950623),
+	(20, 8, '56856001', 1571951410),
+	(21, 8, '01252255', 1571951472),
+	(22, 8, '30578667', 1572364603),
+	(23, 8, '28652555', 1572364718),
+	(24, 8, '75483806', 1572365781),
+	(25, 8, '87636717', 1572365907),
+	(26, 8, '44307658', 1572370475),
+	(27, 8, '03168477', 1572372872),
+	(28, 8, '06201081', 1572431351),
+	(29, 8, '26616575', 1572431470),
+	(30, 8, '78834551', 1572431531),
+	(31, 8, '40100722', 1572431594),
+	(32, 8, '38436633', 1572619535);
 /*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting
@@ -127,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `user_setting` (
   KEY `settings_id` (`settings_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_setting_settings` FOREIGN KEY (`settings_id`) REFERENCES `settings` (`id`),
-  CONSTRAINT `user_setting_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `FK_user_setting_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_setting: ~2 rows (ungefähr)

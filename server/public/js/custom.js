@@ -13,7 +13,19 @@ $('#send_login-btn').on('click', () => {
 $('#decrypt-btn').on('click', () => {
     let url = '/file_decrypt';
     let data = {
-        filename: 'Unbenannt.png'
+        file_id: 1572687529258,
+        filename: 'Tabellen-Differenzen.pdf'
+    };
+    postDBData(url, data, () => {
+
+    });
+});
+
+$('#encrypt-btn').on('click', () => {
+    let url = '/file_encrypt';
+    let data = {
+        file_id: 1572687529253,
+        filename: 'Tabellen-Differenzen.pdf'
     };
     postDBData(url, data, () => {
 

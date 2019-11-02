@@ -87,14 +87,26 @@ class Index(object):
     def file_upload(self, file):
         user_id = str(cherrypy.session['user_id'])
         FileHandler.write_file(user_id, file)
-        FileEncryptor.file_encryption(user_id, file)
+
+
+    # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
+    @cherrypy.expose()
+    def file_encrypt(self, file_id, filename):
+        user_id = str(cherrypy.session['user_id'])
+        FileEncryptor.file_encryption(user_id, file_id, filename)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
-    def file_decrypt(self, filename):
-        print(filename)
+    def file_decrypt(self, file_id, filename):
         user_id = str(cherrypy.session.get('user_id'))
-        FileEncryptor.file_decryption(user_id, filename)
+        FileEncryptor.file_decryption(user_id, file_id, filename)
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def get_user_files(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        files = DbConnector.db_get_user_files(user_id)
+        return files
 
     @cherrypy.expose()
     def users(self):

@@ -155,9 +155,11 @@ class Index(object):
                 devices = DbConnector.db_get_user_devices(user_id)
                 print(str(devices))
 
-                if len(devices) > 0 and device_id in devices[0]['device_id']:
-                    cherrypy.session['2fa_status'] = 1
-                    response = {'status': 200, 'message': 'Success'}
+                if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
+                    cherrypy.session['2fa_varified'] = 1
+                    response = {'status': 200, 'message': 'Success', 'data': user_id}
+                    print('response', str(response))
+
                     return response  # ToDo: Redirect to request_otp_app in app
                 else:
                     response = {'status': 404, 'message': 'Device not found'}
@@ -170,14 +172,14 @@ class Index(object):
             return response
 
     @cherrypy.expose()
-    def request_otp_app(self, email): # ToDo: Save user_id and email locally send to this route to request otp
+    def request_otp_app(self, user_id, email):  # ToDo: Save user_id and email locally send to this route to request otp
         if not cherrypy.session['2fa_status']:
             return 404  # 'No verification found'
         elif cherrypy.session['2fa_status'] == 0:
             return 403  # 'Unauthorized'
         else:
-            if cherrypy.session['user_id']:
-                return OtpHandler.create_2fa(cherrypy.session['user_id'], email)
+            if cherrypy.session['user_id'] and user_id == cherrypy.session['user_id']:
+                return OtpHandler.create_2fa(user_id, email)
             else:
                 return 404  # 'No user found'
 

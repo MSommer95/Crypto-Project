@@ -156,7 +156,7 @@ class Index(object):
                 print(str(devices))
 
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
-                    cherrypy.session['2fa_varified'] = 1
+                    cherrypy.session['2fa_status'] = 1
                     response = {'status': 200, 'message': 'Success', 'data': user_id}
                     print('response', str(response))
 

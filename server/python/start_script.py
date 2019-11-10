@@ -52,14 +52,14 @@ class Index(object):
             cherrypy.session['2fa_varified'] = 0
             user_id = str(user['id'])
             user_settings = DbConnector.db_get_user_settings(user_id)
-            if user_settings['2FA'] == 1:
+            if user_settings['2FA-Mail'] == 1:
                 cherrypy.session['2fa_status'] = 1
                 otp = OtpHandler.create_2fa(user_id, email)
 
                 # TODO if mail activated
                 OtpHandler.send_otp_mail(otp, email)
                 # TODO elif app activated
-                # TODO send_app(otp, params)
+                    # TODO send_app(otp, params)
 
                 return 'Please send us your HOTP'
             else:
@@ -87,7 +87,6 @@ class Index(object):
     def file_upload(self, file):
         user_id = str(cherrypy.session['user_id'])
         FileHandler.write_file(user_id, file)
-
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
@@ -135,6 +134,49 @@ class Index(object):
             return 'Successfully inserted device'
         elif db_connection_state == 'failed':
             return 'Failed to insert device'
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def authenticate_app(self, email, password, device_id):
+        user = DbConnector.db_check_user(email, password)
+        user_count = len(user)
+        cherrypy.serving.response.headers['Content-Type'] = 'application/json'
+
+        if user_count > 0:
+            cherrypy.session['user_id'] = user['id']
+            cherrypy.session['2fa_varified'] = 0
+            user_id = str(user['id'])
+            user_settings = DbConnector.db_get_user_settings(user_id)
+
+            if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
+                devices = DbConnector.db_get_user_devices(user_id)
+                print(str(devices))
+
+                if len(devices) > 0 and device_id in devices[0]['device_id']:
+                    cherrypy.session['2fa_varified'] = 1
+                    response = {'status': 200, 'message': 'Success'}
+                    return response  # ToDo: Redirect to request_otp_app in app
+                else:
+                    response = {'status': 404, 'message': 'Device not found'}
+                    return response
+            else:
+                response = {'status': 403, 'message': 'App auth inactive'}
+                return response
+        else:
+            response = {'status': 403, 'message': 'No such user found or password wrong'}
+            return response
+
+    @cherrypy.expose()
+    def request_otp_app(self, email):
+        if not cherrypy.session['2fa_varified']:
+            return 404  # 'No verification found'
+        elif cherrypy.session['2fa_varified'] == 0:
+            return 403  # 'Unauthorized'
+        else:
+            if cherrypy.session['user_id']:
+                return OtpHandler.create_2fa(cherrypy.session['user_id'], email)
+            else:
+                return 404  # 'No user found'
 
 
 if __name__ == '__main__':

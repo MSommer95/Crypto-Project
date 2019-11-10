@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS `settings` (
 -- Exportiere Daten aus Tabelle project.settings: ~0 rows (ungefähr)
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 INSERT INTO `settings` (`id`, `description`) VALUES
-	(1, '2FA');
+	(1, '2FA-Mail'),
+	(2, '2FA-App');
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.users

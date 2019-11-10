@@ -29,5 +29,5 @@ class OtpHandler:
 
     @staticmethod
     def send_otp_app(otp, params):
-        # TODO send otp to app
+        # TODO send otp to app | FCM Needed Probably
         return

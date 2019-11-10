@@ -134,6 +134,9 @@ class DbConnector:
                 sql = "INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 1)"
                 cursor.execute(sql, (result[0]['id'],))
                 db.commit()
+                sql = "INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 2, 0)"
+                cursor.execute(sql, (result[0]['id'],))
+                db.commit()
         except pymysql.MySQLError as e:
             logging.error(e)
         finally:

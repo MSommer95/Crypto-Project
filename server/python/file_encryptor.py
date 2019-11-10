@@ -1,6 +1,8 @@
-from cryptography.fernet import Fernet
-from server.python.db_connector import DbConnector
 import time
+
+from cryptography.fernet import Fernet
+
+from server.python.db_connector import DbConnector
 
 
 class FileEncryptor:
@@ -32,7 +34,6 @@ class FileEncryptor:
 
     @staticmethod
     def file_decryption(user_id, file_id, filename):
-
         db_file_key = DbConnector.db_get_file_key(file_id, user_id)
 
         key_file_path = db_file_key[0]['key_path']

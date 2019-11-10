@@ -52,23 +52,24 @@ class Index(object):
             cherrypy.session['2fa_verified'] = 0
             user_id = str(user['id'])
             user_settings = DbConnector.db_get_user_settings(user_id)
+
             if user_settings['2FA-Mail'] == 1:
                 cherrypy.session['2fa_status'] = 1
-                otp = OtpHandler.create_2fa(user_id, email)
-
-                # TODO if mail activated
+                otp = OtpHandler.create_2fa(user_id)
                 OtpHandler.send_otp_mail(otp, email)
-                # TODO elif app activated
-                # TODO send_app(otp, params)
-
                 return 'Please send us your HOTP'
+
             elif user_settings['2FA-App'] == 1:
                 cherrypy.session['2fa_status'] = 1
+                otp = OtpHandler.create_2fa(user_id)
+                OtpHandler.send_otp_app(otp, user_id)
                 return 'Please send us your HOTP'
+
             else:
                 cherrypy.session['2fa_status'] = 0
                 DirHandler.check_user_dir_structure(user_id)
                 return 'Send me to index'
+
         else:
             return 'Send me to sign'
 
@@ -125,7 +126,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_devices(self):
         user_id = str(cherrypy.session.get('user_id'))
-        devices = DbConnector.db_get_user_devices(user_id)
+        devices = DbConnector.db_get_user_devices_by_user_id(user_id)
         return devices
 
     @cherrypy.expose()
@@ -140,7 +141,8 @@ class Index(object):
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    def authenticate_app(self, email, password, device_id):
+    def authenticate_app(self, email, password, device_id, device_name):
+        print(device_id)
         user = DbConnector.db_check_user(email, password)
         user_count = len(user)
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
@@ -152,7 +154,7 @@ class Index(object):
             user_settings = DbConnector.db_get_user_settings(user_id)
 
             if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
-                devices = DbConnector.db_get_user_devices(user_id)
+                devices = DbConnector.db_get_user_devices_by_user_id(user_id)
                 print(str(devices))
 
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
@@ -162,7 +164,8 @@ class Index(object):
 
                     return response  # ToDo: Redirect to request_otp_app in app
                 else:
-                    response = {'status': 404, 'message': 'Device not found'}
+                    DbConnector.db_insert_user_devices(user_id, device_id, device_name)
+                    response = {'status': 200, 'message': 'Device added'}
                     return response
             else:
                 response = {'status': 403, 'message': 'App auth inactive'}
@@ -172,16 +175,14 @@ class Index(object):
             return response
 
     @cherrypy.expose()
-    def request_otp_app(self, user_id, email):  # ToDo: Save user_id and email locally send to this route to request otp
-        if not cherrypy.session['2fa_status']:
-            return 404  # 'No verification found'
-        elif cherrypy.session['2fa_status'] == 0:
-            return 403  # 'Unauthorized'
-        else:
-            if cherrypy.session['user_id'] and user_id == cherrypy.session['user_id']:
-                return OtpHandler.create_2fa(user_id, email)
-            else:
-                return 404  # 'No user found'
+    def request_otp_app(self, device_id):  # ToDo: Save user_id and email locally send to this route to request otp
+        device = DbConnector.db_get_user_devices_by_device_id(device_id)
+        user_id = str(device[0]['user_id'])
+        user_settings = DbConnector.db_get_user_settings(user_id)
+
+        if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
+            otp = OtpHandler.create_2fa(user_id)
+            OtpHandler.send_otp_app(otp, user_id)
 
 
 if __name__ == '__main__':

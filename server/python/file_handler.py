@@ -1,5 +1,6 @@
-from server.python.db_connector import DbConnector
 import time
+
+from server.python.db_connector import DbConnector
 
 
 class FileHandler:

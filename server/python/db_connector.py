@@ -169,12 +169,28 @@ class DbConnector:
             return False
 
     @staticmethod
-    def db_get_user_devices(user_id):
+    def db_get_user_devices_by_user_id(user_id):
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT device_id, device_name FROM user_device WHERE user_id = %s"
+                sql = "SELECT * FROM user_device WHERE user_id = %s"
                 cursor.execute(sql, (user_id,))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result
+
+    @staticmethod
+    def db_get_user_devices_by_device_id(device_id):
+        db = DbConnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = "SELECT * FROM user_device WHERE device_id = %s"
+                cursor.execute(sql, (device_id,))
                 db.commit()
                 result = cursor.fetchall()
         except pymysql.MySQLError as e:

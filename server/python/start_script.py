@@ -21,7 +21,7 @@ class Index(object):
             return open('../sign.html')
         else:
             if cherrypy.session.get('2fa_status') == 1:
-                if cherrypy.session.get('2fa_varified') == 1:
+                if cherrypy.session.get('2fa_verified') == 1:
                     return open('../index.html')
                 else:
                     return open('../sign.html')
@@ -49,7 +49,7 @@ class Index(object):
         user_count = len(user)
         if user_count > 0:
             cherrypy.session['user_id'] = user['id']
-            cherrypy.session['2fa_varified'] = 0
+            cherrypy.session['2fa_verified'] = 0
             user_id = str(user['id'])
             user_settings = DbConnector.db_get_user_settings(user_id)
             if user_settings['2FA-Mail'] == 1:
@@ -59,8 +59,11 @@ class Index(object):
                 # TODO if mail activated
                 OtpHandler.send_otp_mail(otp, email)
                 # TODO elif app activated
-                    # TODO send_app(otp, params)
+                # TODO send_app(otp, params)
 
+                return 'Please send us your HOTP'
+            elif user_settings['2FA-App'] == 1:
+                cherrypy.session['2fa_status'] = 1
                 return 'Please send us your HOTP'
             else:
                 cherrypy.session['2fa_status'] = 0
@@ -75,7 +78,7 @@ class Index(object):
         user_id = str(cherrypy.session['user_id'])
         check_value = DbConnector.db_check_2fa(user_id, otp)
         if check_value:
-            cherrypy.session['2fa_varified'] = 1
+            cherrypy.session['2fa_verified'] = 1
             DirHandler.check_user_dir_structure(user_id)
             return 'Varification valid'
         else:
@@ -144,7 +147,7 @@ class Index(object):
 
         if user_count > 0:
             cherrypy.session['user_id'] = user['id']
-            cherrypy.session['2fa_varified'] = 0
+            cherrypy.session['2fa_status'] = 0
             user_id = str(user['id'])
             user_settings = DbConnector.db_get_user_settings(user_id)
 
@@ -153,7 +156,7 @@ class Index(object):
                 print(str(devices))
 
                 if len(devices) > 0 and device_id in devices[0]['device_id']:
-                    cherrypy.session['2fa_varified'] = 1
+                    cherrypy.session['2fa_status'] = 1
                     response = {'status': 200, 'message': 'Success'}
                     return response  # ToDo: Redirect to request_otp_app in app
                 else:
@@ -168,9 +171,9 @@ class Index(object):
 
     @cherrypy.expose()
     def request_otp_app(self, email):
-        if not cherrypy.session['2fa_varified']:
+        if not cherrypy.session['2fa_status']:
             return 404  # 'No verification found'
-        elif cherrypy.session['2fa_varified'] == 0:
+        elif cherrypy.session['2fa_status'] == 0:
             return 403  # 'Unauthorized'
         else:
             if cherrypy.session['user_id']:

@@ -140,14 +140,7 @@ class Index(object):
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    @cherrypy.tools.json_in()
-    def authenticate_app(self):
-        input_json = cherrypy.request.json
-
-        email = input_json['email']
-        password = input_json['password']
-        device_id = input_json['device_id']
-
+    def authenticate_app(self, email, password, device_id):
         user = DbConnector.db_check_user(email, password)
         user_count = len(user)
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'

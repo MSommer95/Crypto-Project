@@ -73,10 +73,15 @@ class Index(object):
         else:
             return 'Send me to sign'
 
+    @cherrypy.expose()
+    def logout_accoint(self):
+        cherrypy.session.expire()
+        return 'You are logged out'
+
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
     def verify_otp(self, otp):
-        user_id = str(cherrypy.session['user_id'])
+        user_id = str(cherrypy.session.get('user_id'))
         check_value = DbConnector.db_check_2fa(user_id, otp)
         if check_value:
             cherrypy.session['2fa_verified'] = 1
@@ -89,13 +94,13 @@ class Index(object):
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
     def file_upload(self, file):
-        user_id = str(cherrypy.session['user_id'])
+        user_id = str(cherrypy.session.get('user_id'))
         FileHandler.write_file(user_id, file)
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_encrypt(self, file_id, filename):
-        user_id = str(cherrypy.session['user_id'])
+        user_id = str(cherrypy.session.get('user_id'))
         FileEncryptor.file_encryption(user_id, file_id, filename)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
@@ -189,7 +194,8 @@ if __name__ == '__main__':
     conf = {
         '/': {
             'tools.sessions.on': True,
-            'tools.staticdir.root': os.path.abspath(os.getcwd())
+            'tools.staticdir.root': os.path.abspath(os.getcwd()),
+            'tools.sessions.timeout': 20
         },
         '/generator': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),

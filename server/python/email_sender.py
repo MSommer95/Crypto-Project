@@ -11,7 +11,10 @@ class EmailSender:
     def send_mail(message, subject, email):
         msg = MIMEMultipart()
         # setup the parameters of the message
-        password = "HIER DAS EMAIL PASSWORT REIN"
+        email_key_path = '../storage/email_key/email_key'
+        with open(email_key_path, 'r') as f:
+            email_key = f.read()
+        password = email_key
         msg['From'] = "cryptoprojecthshl@gmail.com"
         msg['To'] = email
         msg['Subject'] = subject

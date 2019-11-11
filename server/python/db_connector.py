@@ -6,6 +6,7 @@ import pymysql.cursors
 from server.python.hash_handler import HashHandler
 
 
+# noinspection SqlNoDataSourceInspection
 class DbConnector:
 
     @staticmethod
@@ -29,7 +30,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM users"
+                sql = 'SELECT * FROM users'
                 cursor.execute(sql)
                 db.commit()
                 results = cursor.fetchall()
@@ -45,7 +46,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT id, email, password FROM users WHERE email = %s"
+                sql = 'SELECT id, email, password FROM users WHERE email = %s'
                 cursor.execute(sql, (email,))
                 db.commit()
                 result = cursor.fetchall()
@@ -66,13 +67,14 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON t1.settings_id = t2.id WHERE t1.user_id = %s"
+                sql = 'SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON ' \
+                      't1.settings_id = t2.id WHERE t1.user_id = %s '
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 result = cursor.fetchall()
                 settings = {}
                 for entry in result:
-                    settings[entry["description"]] = int(entry["setting_value"])
+                    settings[entry['description']] = int(entry['setting_value'])
 
         except pymysql.MySQLError as e:
             logging.error(e)
@@ -86,7 +88,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s"
+                sql = 'SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s'
                 cursor.execute(sql, (user_id, hotp))
                 db.commit()
                 result = cursor.fetchall()
@@ -106,11 +108,11 @@ class DbConnector:
         try:
             with db.cursor() as cursor:
                 ts = int(time.time())
-                sql = "DELETE FROM user_otp WHERE user_id = %s"
+                sql = 'DELETE FROM user_otp WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
-                sql = "INSERT INTO user_otp (user_id, current_otp, timestamp) VALUES (%s, %s, %s)"
+                sql = 'INSERT INTO user_otp (user_id, current_otp, timestamp) VALUES (%s, %s, %s)'
                 cursor.execute(sql, (user_id, hotp, ts))
-                sql = "INSERT INTO user_otp_used (user_id, used_otp, timestamp) VALUES (%s, %s, %s)"
+                sql = 'INSERT INTO user_otp_used (user_id, used_otp, timestamp) VALUES (%s, %s, %s)'
                 cursor.execute(sql, (user_id, hotp, ts))
                 db.commit()
         except pymysql.MySQLError as e:
@@ -124,17 +126,17 @@ class DbConnector:
         hashed_password = HashHandler.hash_password(password)
         try:
             with db.cursor() as cursor:
-                sql = "INSERT INTO users (email, password) VALUES (%s, %s)"
+                sql = 'INSERT INTO users (email, password) VALUES (%s, %s)'
                 cursor.execute(sql, (email, hashed_password))
                 db.commit()
-                sql = "SELECT id FROM users WHERE email = %s"
+                sql = 'SELECT id FROM users WHERE email = %s'
                 cursor.execute(sql, (email,))
                 db.commit()
                 result = cursor.fetchall()
-                sql = "INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 1)"
+                sql = 'INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 1)'
                 cursor.execute(sql, (result[0]['id'],))
                 db.commit()
-                sql = "INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 2, 0)"
+                sql = 'INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 2, 0)'
                 cursor.execute(sql, (result[0]['id'],))
                 db.commit()
         except pymysql.MySQLError as e:
@@ -148,7 +150,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT current_otp, timestamp FROM user_otp WHERE user_id = %s"
+                sql = 'SELECT current_otp, timestamp FROM user_otp WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 result = cursor.fetchall()
@@ -173,7 +175,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM user_device WHERE user_id = %s"
+                sql = 'SELECT * FROM user_device WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 result = cursor.fetchall()
@@ -189,7 +191,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM user_device WHERE device_id = %s"
+                sql = 'SELECT * FROM user_device WHERE device_id = %s'
                 cursor.execute(sql, (device_id,))
                 db.commit()
                 result = cursor.fetchall()
@@ -206,7 +208,7 @@ class DbConnector:
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
-                sql = "INSERT INTO user_device (user_id, device_id, device_name) VALUES (%s, %s, %s)"
+                sql = 'INSERT INTO user_device (user_id, device_id, device_name) VALUES (%s, %s, %s)'
                 cursor.execute(sql, (user_id, device_id, device_name))
                 db.commit()
                 db_connection_state = 'success'
@@ -223,7 +225,7 @@ class DbConnector:
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
-                sql = "INSERT INTO user_data (id, user_id, file_name, path, is_encrypted) VALUES (%s, %s, %s, %s, %s)"
+                sql = 'INSERT INTO user_data (id, user_id, file_name, path, is_encrypted) VALUES (%s, %s, %s, %s, %s)'
                 cursor.execute(sql, (file_id, user_id, file_name, path, is_encrypted))
                 db.commit()
                 db_connection_state = 'success'
@@ -239,7 +241,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT id, file_name, path, is_encrypted FROM user_data WHERE user_id = %s"
+                sql = 'SELECT id, file_name, path, is_encrypted FROM user_data WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 result = cursor.fetchall()
@@ -256,7 +258,7 @@ class DbConnector:
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
-                sql = "INSERT INTO user_key (user_id, file_id, key_path) VALUES (%s, %s, %s)"
+                sql = 'INSERT INTO user_key (user_id, file_id, key_path) VALUES (%s, %s, %s)'
                 cursor.execute(sql, (user_id, file_id, key_path))
                 db.commit()
                 db_connection_state = 'success'
@@ -272,7 +274,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM user_key WHERE file_id = %s AND user_id = %s"
+                sql = 'SELECT * FROM user_key WHERE file_id = %s AND user_id = %s'
                 cursor.execute(sql, (key_id, user_id))
                 db.commit()
                 result = cursor.fetchall()
@@ -288,7 +290,7 @@ class DbConnector:
         db = DbConnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = "SELECT * FROM user_data WHERE id = %s AND user_id = %s"
+                sql = 'SELECT * FROM user_data WHERE id = %s AND user_id = %s'
                 cursor.execute(sql, (file_id, user_id))
                 db.commit()
                 result = cursor.fetchall()

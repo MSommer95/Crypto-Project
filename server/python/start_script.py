@@ -24,7 +24,13 @@ class Index(object):
                 if cherrypy.session.get('2fa_verified') == 1:
                     return open('../index.html')
                 else:
-                    return open('../sign.html')
+                    user_id = str(cherrypy.session.get('user_id'))
+                    verified = DbConnector.db_check_otp_verified(user_id)
+                    if verified:
+                        cherrypy.session['2fa_verified'] = verified
+                        return open('../index.html')
+                    else:
+                        return open('../sign.html')
             elif cherrypy.session.get('2fa_status') == 0:
                 return open('../index.html')
 
@@ -89,6 +95,21 @@ class Index(object):
             return 'Varification valid'
         else:
             return 'Varification invalid'
+
+    @cherrypy.expose()
+    def verify_otp_app(self, otp, user_id):
+        check_value = DbConnector.db_check_2fa(user_id, otp)
+        if check_value:
+            DbConnector.db_update_otp_verified(user_id)
+            return 'Varification valid'
+        else:
+            return 'Varification invalid'
+
+    @cherrypy.expose()
+    def check_otp_verified(self):
+        user_id = cherrypy.session.get('user_id')
+        check_value = str(DbConnector.db_check_otp_verified(user_id))
+        return check_value
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt

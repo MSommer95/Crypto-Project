@@ -14,7 +14,7 @@ class AppSender:
 
         push_service = FCMNotification(api_key=api_key)
         message_title = "OTP-Push"
-        message_body = "Hey, dein OTP ist ready: %s" % otp
+        message_body = '{otp: "%s", user_id: "%s"}' % (otp, user_id)
         result = push_service.notify_single_device(registration_id=devices[0]['device_id'], message_title=message_title,
                                                    message_body=message_body)
         print(result)

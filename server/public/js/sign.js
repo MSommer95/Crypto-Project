@@ -7,6 +7,7 @@ $('#send_login-btn').on('click', () => {
     postDBData(url, data, (cb) => {
         if (cb.responseText.includes('HOTP')) {
             showElement($('#otp-container'));
+            setTimeout(request_2fa_verified, 5000);
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
         } else if (cb.responseText.includes('sign')) {
@@ -60,7 +61,7 @@ $('#send_otp').on('click', () => {
             console.log(cb.responseText);
 
             if(cb.responseText.includes('Varification valid')) {
-                window.location.href = '/index'
+                window.location.href = '/index';
             }
             else {
                 alert('You entered the wrong HOTP or the time expired, please login again');
@@ -69,13 +70,23 @@ $('#send_otp').on('click', () => {
     }
 });
 
+function request_2fa_verified() {
+    getDBData('/check_otp_verified', (cb) => {
+        if(cb === '0') {
+            setTimeout(request_2fa_verified, 5000);
+        } else {
+            window.location.href = '/index';
+        }
+    });
+}
+
 // Get Funktion für die Server-Datenbank Abfragen
 function getDBData(url, cb) {
     $.ajax({
         type: 'GET',
         url: url,
         complete: function (jqXHR) {
-            cb(jqXHR.responseJSON);
+            cb(jqXHR.responseText);
         }
     });
 }

@@ -74,7 +74,7 @@ class Index(object):
             return 'Send me to sign'
 
     @cherrypy.expose()
-    def logout_accoint(self):
+    def logout_account(self):
         cherrypy.session.expire()
         return 'You are logged out'
 

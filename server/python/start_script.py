@@ -164,10 +164,10 @@ class Index(object):
 
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
                     cherrypy.session['2fa_status'] = 1
-                    response = {'status': 200, 'message': 'Success', 'data': user_id}
+                    response = {'status': 200, 'message': 'Success'}
                     print('response', str(response))
 
-                    return response  # ToDo: Redirect to request_otp_app in app
+                    return response
                 else:
                     DbConnector.db_insert_user_devices(user_id, device_id, device_name)
                     response = {'status': 200, 'message': 'Device added'}
@@ -180,7 +180,7 @@ class Index(object):
             return response
 
     @cherrypy.expose()
-    def request_otp_app(self, device_id):  # ToDo: Save user_id and email locally send to this route to request otp
+    def request_otp_app(self, device_id):
         device = DbConnector.db_get_user_devices_by_device_id(device_id)
         user_id = str(device[0]['user_id'])
         user_settings = DbConnector.db_get_user_settings(user_id)
@@ -188,6 +188,7 @@ class Index(object):
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_2fa(user_id)
             OtpHandler.send_otp_app(otp, user_id)
+            return otp
 
 
 if __name__ == '__main__':

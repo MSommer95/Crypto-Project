@@ -40,7 +40,6 @@ $('#send_login-btn').on('click', () => {
             window.location.href = '/sign'
         }
     });
-
 });
 
 function generatePassword(lower, upper, digit, special, length) {

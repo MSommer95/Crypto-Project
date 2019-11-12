@@ -208,7 +208,6 @@ class Index(object):
 
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_2fa(user_id)
-            OtpHandler.send_otp_app(otp, user_id)
             return otp
 
 

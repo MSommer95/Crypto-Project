@@ -74,7 +74,6 @@ function generatePassword(lower, upper, digit, special, length) {
     return password
 }
 
-
 $('#send_otp').on('click', () => {
     let otp = $('#confirm_otp').val();
     if (otp != null) {

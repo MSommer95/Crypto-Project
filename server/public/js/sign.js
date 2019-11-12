@@ -1,3 +1,30 @@
+$('#registrationButton').on('click', function(){
+  chooseLogin(this);
+});
+$('#loginButton').on('click', function(){
+  chooseLogin(this);
+});
+
+function chooseLogin(button) {
+
+
+    const registrationDiv = $('#registration-section');
+    const loginDiv = $('#login-section');
+
+
+    // Anzeigen/ausblenden der entsprechenden Container
+    switch (button.id) {
+        case 'registrationButton':
+        showElement(registrationDiv);
+        hideElement(loginDiv);
+        break;
+    case 'loginButton':
+        hideElement(registrationDiv);
+        showElement(loginDiv);
+        break;
+    }
+}
+
 $('#send_login-btn').on('click', () => {
     let url = '/login_account';
     let data = {

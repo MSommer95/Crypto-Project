@@ -1,29 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Index</title>
-    <link href="/static/css/custom.css" rel="stylesheet">
+	<title>Krypto-Projekt</title>
+	<meta charset="utf-8">
+	<meta name="author" content="">
+	<meta name="description" content=""/>
+
+
+	<link rel="stylesheet" type="text/css" href="/static/css/tabulator.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+	<link href="/static/css/custom.css" rel="stylesheet">
+
+
+
 </head>
-<body>
-    <form action="/file_upload" method="post" enctype="multipart/form-data">
-        <label for="file">File: </label>
-        <input type="file" id="file" name="file">
-        <br>
-        <button id="submit-btn" type="submit">Submit</button>
-    </form>
 
-    <div id="display-pdf"></div>
+<body >
+	<div class="bg-container">
+		<div class="content">
+		  <header class="navbar-container --flex-navbar --shadow-normal">
+					<h4 style="font-size: 1.4em;" class="--margin-bottom-normal">
+					<div id="navbar-switcher" class="navbar">
+					  <a id="hotpButton" class="navigation-link  switcher__btn  switcher__btn--active">HOTP</a>
+					  <a id="fileButton" class="navigation-link  switcher__btn  switcher__btn--active">Files</a>
+						<a id="aboutButton" class="navigation-link  switcher__btn  switcher__btn--active">About</a>
+					  <div class="dropdown" style="float:right">
+					    <button class="dropbtn">User
+					      <i class="fa fa-caret-down"></i>
+					    </button>
+					    <div class="dropdown-content" style="right:0">
+					      <a  id="settingButton" class="navigation-link  switcher__btn  switcher__btn--active">Settings</a>
+					      <a id="logoutButton" class="navigation-link  switcher__btn  switcher__btn--active">Logout</a>
+					    </div>
+					  </div>
+					</div></h4>
+		  </header>
 
-    <div>
-        <button id="encrypt-btn">encrypt test button</button>
-    </div>
+			<div id="hotp-section" style="border-style:solid; border-color:black; padding-bottom: 30px;  background-color: #ffffffc4; width: 630px; margin: auto; margin-top: 55px;" class="c">
+				<form id="visibleHome" style="text-align: center;" action="/file_upload" method="post" enctype="multipart/form-data">
+					<h4 style="font-size: 1.4em;" class="--margin-bottom-normal">
+				  <label>Wählen Sie die hochzuladenden Dateien aus:</h4><br>
+				    <input style="margin-bottom: 35px;" name="file" type="file" multiple><br>
+				  </label>
+		  		<button class="btn btn_bestätigen --margin-bottom-big" id="submit-btn" type="submit">Hochladen und verschlüsseln</button>
+				</form>
+			</div>
+			<div id="file-section">
+				<div class="b">
+					<h4 style="font-size: 1.4em; text-align: left; " class="--margin-bottom-normal"><p>My HOTPs</p></h4>
+					<div id="hotp-table"></div>
+				</div>
+				<div class="a">
+					<h4 style="font-size: 1.4em; text-align: left;" class="--margin-bottom-normal"><p>My Devices</p></h4>
+					<div id="device-table"></div>
+				</div>
+			</div>
+			<div id="about-section" class="section hidden">
+				<h4 style="font-size: 1.4em; text-align: center;" class="--margin-bottom-normal"><p>About</p></h4>
+				<p style="text-align: center;">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+			</div>
+			<div id="setting-section" class="section hidden">
+				<h4 style="font-size: 1.4em; text-align: center;" class="--margin-bottom-normal"><p>Settings</p></h4>
+				<button class="btn btn_bestätigen --margin-bottom-big">E-Mail ändern</button>
+				<button class="btn btn_bestätigen --margin-bottom-big">Password ändern</button>
+			</div>
+			<div id="logout-section" class="section hidden">
+				<h4 style="font-size: 1.4em; text-align: center;" class="--margin-bottom-normal"><p>Logout</p></h4>
+				<button class="btn btn_bestätigen --margin-bottom-big">Logout</button>
+			</div>
+			<div id="display-pdf" class="section hidden"></div>
+	    <div class="section hidden">
+	        <button id="encrypt-btn">encrypt test button</button>
+	    </div>
+	    <div class="section hidden">
+	        <button id="decrypt-btn">decrypt test button</button>
+	    </div>
+		</div>
+	</div>
+			<script type="text/javascript" src="/static/js/jquery.js"></script>
+			<script type="text/javascript" src="/static/js/tabulator.js"></script>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   		 	<script src="/static/js/custom.js"></script>
 
-    <div>
-        <button id="decrypt-btn">decrypt test button</button>
-    </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="/static/js/custom.js"></script>
+
 </body>
 </html>

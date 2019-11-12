@@ -7,7 +7,6 @@ $('#loginButton').on('click', function(){
 
 function chooseLogin(button) {
 
-
     const registrationDiv = $('#registration-section');
     const loginDiv = $('#login-section');
 

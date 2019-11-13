@@ -32,7 +32,7 @@ $('#send_login-btn').on('click', () => {
     };
     postDBData(url, data, (cb) => {
         if (cb.responseText.includes('HOTP')) {
-            showElement($('#otp-container'));
+            showElement($('#otp-popup'));
             setTimeout(request_2fa_verified, 5000);
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
@@ -174,3 +174,7 @@ function showElement(element) {
 function hideElement(element) {
     $(element).addClass('hidden');
 }
+
+$('#close-btn_otp-popup').on('click', (button) => {
+    hideElement($('#otp-popup'));
+});

@@ -4,6 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     mode: 'development',
+    watch: true,
     entry: {
         main: './src/js/index.js',
         sign: './src/js/sign.js'

@@ -28,7 +28,6 @@ export function generatePassword(lower, upper, digit, special, length) {
         const randomNum = array[i] % combinedString.length;
         password += combinedString.substring(randomNum, randomNum + 1);
     }
-
     return password
 }
 

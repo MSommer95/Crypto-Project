@@ -1,0 +1,4 @@
+/server/public/dist/
+/server/public/node_modules/
+/server/storage/api_key/
+/server/storage/email_key/

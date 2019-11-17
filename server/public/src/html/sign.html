@@ -5,11 +5,6 @@
     <meta charset="utf-8">
     <meta content="" name="author">
     <meta content="" name="description"/>
-
-    <link href="/static/css/main.css" rel="stylesheet" type="text/css">
-    <link href="/static/css/custom.css" rel="stylesheet">
-
-
 </head>
 <body>
 <div class="bg-container">
@@ -34,20 +29,23 @@
             <div class="registration-form --border-normal --position-absolute --center-all" id="registration-form"
                  style="margin: auto;">
                 <form action="/create_account"
-                      class="login-form-inner --position-absolute --center-all --flex-v-center --flex-active --flex-column --flex-space-between" enctype="multipart/form-data" method="post"
+                      class="login-form-inner --position-absolute --center-all --flex-v-center --flex-active --flex-column --flex-space-between"
+                      enctype="multipart/form-data" method="post"
                       style="border-style:solid; border-color:black; padding-bottom: 30px;  background-color: #ffffffc4; width: 600px; margin: auto; margin-top: 200px;">
                     <h1 style="font-size: 3em; margin-top: 50px;  margin-bottom: 50px; ">Registrieren</h1>
                     <input id="ceate_email" name="email" placeholder=" Email" style="min-height: 2.5rem;" type="text">
                     <input id="create_password" name="password" placeholder=" Password" style="min-height: 2.5rem;"
                            type="password"><br><br>
                     <p>Falls sie schon einen Account haben: <a id="loginButton">Login</a></p>
-                    <button class="btn btn_bestätigen --margin-bottom-big" style="margin-top: 30px; padding-left: 25px; padding-right: 25px; "
+                    <button class="btn btn_bestätigen --margin-bottom-big"
+                            style="margin-top: 30px; padding-left: 25px; padding-right: 25px; "
                             type="submit">Registrieren
                     </button>
                     <br>
                 </form>
                 <button class="btn --margin-bottom-big"
-                        id="secure_password-generator" style="margin-top: 30px; padding-left: 25px; padding-right: 25px; ">Secure Password Generator
+                        id="secure_password-generator"
+                        style="margin-top: 30px; padding-left: 25px; padding-right: 25px; ">Secure Password Generator
                 </button>
                 <!-- Popup - Secure Password Generator -->
                 <div class="popup-container hidden" id="secure_password-popup">
@@ -96,23 +94,19 @@
                 </div>
             </div>
         </div>
-		<!--OTP POPUP -->
-		<div id="otp-popup" class="popup hidden">
+        <!--OTP POPUP -->
+        <div class="popup hidden" id="otp-popup">
 
-		  <!-- POPUP content -->
-		  <div class="popup-content">
-			  <span id="close-btn_otp-popup" class="close">&times;</span>
-			  <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
-			  <button class="btn --margin-bottom-big" id="send_otp" type="submit">Submit</button>
-		  </div>
+            <!-- POPUP content -->
+            <div class="popup-content">
+                <span class="close" id="close-btn_otp-popup">&times;</span>
+                <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
+                <button class="btn --margin-bottom-big" id="send_otp" type="submit">Submit</button>
+            </div>
 
-		</div>
+        </div>
 
     </div>
 </div>
-<script src="/static/js/jquery.js" type="text/javascript"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="/static/js/sign.js"></script>
-
 </body>
 </html>

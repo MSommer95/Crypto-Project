@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Krypto-Projekt</title>
+    <meta charset="utf-8">
+    <meta content="" name="author">
+    <meta content="" name="description"/>
+</head>
+
+<body>
+<div class="bg-container">
+    <div class="content">
+        <header class="navbar-container --flex-navbar --shadow-normal">
+            <h4 class="--margin-bottom-normal" style="font-size: 1.4em;">
+                <div class="navbar" id="navbar-switcher">
+                    <a class="navigation-link  switcher__btn  switcher__btn--active" id="hotpButton">HOTP</a>
+                    <a class="navigation-link  switcher__btn  switcher__btn--active" id="fileButton">Files</a>
+                    <a class="navigation-link  switcher__btn  switcher__btn--active" id="aboutButton">About</a>
+                    <div class="dropdown" style="float:right">
+                        <button class="dropbtn">User
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content" style="right:0">
+                            <a class="navigation-link  switcher__btn  switcher__btn--active"
+                               id="settingButton">Settings</a>
+                            <a class="navigation-link  switcher__btn  switcher__btn--active"
+                               id="logoutButton">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </h4>
+        </header>
+
+        <div class="c"
+             id="hotp-section"
+             style="border-style:solid; border-color:black; padding-bottom: 30px;  background-color: #ffffffc4; width: 630px; margin: auto; margin-top: 55px;">
+            <form action="/file_upload" enctype="multipart/form-data" id="visibleHome" method="post"
+                  style="text-align: center;">
+                <h4 class="--margin-bottom-normal" style="font-size: 1.4em;">
+                    <label>Wählen Sie die hochzuladenden Dateien aus:</h4><br>
+                <input multiple name="file" style="margin-bottom: 35px;" type="file"><br>
+                </label>
+                <button class="btn btn_bestätigen --margin-bottom-big" id="submit-btn" type="submit">Hochladen und
+                    verschlüsseln
+                </button>
+            </form>
+        </div>
+        <div id="file-section">
+            <div class="b">
+                <h4 class="--margin-bottom-normal" style="font-size: 1.4em; text-align: left; "><p>My HOTPs</p></h4>
+                <div id="hotp-table"></div>
+            </div>
+            <div class="a">
+                <h4 class="--margin-bottom-normal" style="font-size: 1.4em; text-align: left;"><p>My Devices</p></h4>
+                <div id="device-table"></div>
+            </div>
+        </div>
+        <div class="section hidden" id="about-section">
+            <h4 class="--margin-bottom-normal" style="font-size: 1.4em; text-align: center;"><p>About</p></h4>
+            <p style="text-align: center;">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et
+                accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+                ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+                tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
+                justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
+                sit amet.</p>
+        </div>
+        <div class="section hidden" id="setting-section">
+            <h4 class="--margin-bottom-normal" style="font-size: 1.4em; text-align: center;"><p>Settings</p></h4>
+            <button class="btn btn_bestätigen --margin-bottom-big">E-Mail ändern</button>
+            <button class="btn btn_bestätigen --margin-bottom-big">Password ändern</button>
+        </div>
+        <div class="section hidden" id="logout-section">
+            <h4 class="--margin-bottom-normal" style="font-size: 1.4em; text-align: center;"><p>Logout</p></h4>
+            <button class="btn btn_bestätigen --margin-bottom-big">Logout</button>
+        </div>
+        <div class="section hidden" id="display-pdf"></div>
+        <div class="section hidden">
+            <button id="encrypt-btn">encrypt test button</button>
+        </div>
+        <div class="section hidden">
+            <button id="decrypt-btn">decrypt test button</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

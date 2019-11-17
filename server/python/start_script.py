@@ -18,21 +18,21 @@ class Index(object):
     @cherrypy.expose()
     def index(self):
         if cherrypy.session.get('user_id') is None:
-            return open('../sign.html')
+            return open('../public/dist/sign.html')
         else:
             if cherrypy.session.get('2fa_status') == 1:
                 if cherrypy.session.get('2fa_verified') == 1:
-                    return open('../index.html')
+                    return open('../public/dist/index.html')
                 else:
                     user_id = str(cherrypy.session.get('user_id'))
                     verified = DbConnector.db_check_otp_verified(user_id)
                     if verified:
                         cherrypy.session['2fa_verified'] = verified
-                        return open('../index.html')
+                        return open('../public/dist/index.html')
                     else:
-                        return open('../sign.html')
+                        return open('../public/dist/sign.html')
             elif cherrypy.session.get('2fa_status') == 0:
-                return open('../index.html')
+                return open('../public/dist/index.html')
 
     # Sign redirect
     @cherrypy.expose()
@@ -44,7 +44,7 @@ class Index(object):
     @cherrypy.expose()
     def create_account(self, email, password):
         DirHandler.create_user_dir_structure(str(DbConnector.db_insert_user(email, password)))
-        return open('../sign.html')
+        return open('../public/dist/sign.html')
 
     # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
     # passwort stimmt. Innere if Abfrage checked, welche settings der User aktiviert hat und initialisiert die
@@ -138,10 +138,6 @@ class Index(object):
         return files
 
     @cherrypy.expose()
-    def users(self):
-        return open('../users.html')
-
-    @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_users(self):
         users = DbConnector.db_get_users()
@@ -225,7 +221,7 @@ if __name__ == '__main__':
         },
         '/static': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': '../public'
+            'tools.staticdir.dir': '../public/dist/'
         }
     }
     cherrypy.quickstart(Index(), '/', conf)

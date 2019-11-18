@@ -37,7 +37,7 @@ class Index(object):
     # Sign redirect
     @cherrypy.expose()
     def sign(self):
-        return open('../sign.html')
+        return open('../public/dist/sign.html')
 
     # create Funktion nimmt eine Emailadresse und Passwort entgegen und erstellt einen account in der DB + die
     # zugehörige Ordner Struktur
@@ -58,7 +58,7 @@ class Index(object):
             cherrypy.session['2fa_verified'] = 0
             user_id = str(user['id'])
             user_settings = DbConnector.db_get_user_settings(user_id)
-
+            DirHandler.check_user_dir_structure(user_id)
             if user_settings['2FA-Mail'] == 1:
                 cherrypy.session['2fa_status'] = 1
                 otp = OtpHandler.create_2fa(user_id)
@@ -73,7 +73,6 @@ class Index(object):
 
             else:
                 cherrypy.session['2fa_status'] = 0
-                DirHandler.check_user_dir_structure(user_id)
                 return 'Send me to index'
 
         else:
@@ -224,4 +223,5 @@ if __name__ == '__main__':
             'tools.staticdir.dir': '../public/dist/'
         }
     }
+    DirHandler.check_server_dirs()
     cherrypy.quickstart(Index(), '/', conf)

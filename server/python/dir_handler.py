@@ -65,3 +65,22 @@ class DirHandler:
                     DirHandler.create_dir(base_path + paths[x])
         else:
             DirHandler.create_user_dir_structure(user_id)
+
+    @staticmethod
+    def check_server_dirs():
+        base_path = '../storage'
+
+        sub_paths = [
+            '/api_key',
+            '/email_key',
+            '/users'
+        ]
+
+        if not os.path.isdir(base_path):
+            DirHandler.create_dir(base_path)
+            for path in sub_paths:
+                DirHandler.create_dir(base_path + path)
+        else:
+            for path in sub_paths:
+                if not os.path.isdir(base_path + path):
+                    DirHandler.create_dir(base_path + path)

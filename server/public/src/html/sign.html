@@ -7,106 +7,129 @@
     <meta content="" name="description"/>
 </head>
 <body>
-<div class="bg-container">
-    <div class="content">
-        <div id="login-section">
-            <div class="login-form --border-normal --position-absolute --center-all" id="login-form"
-                 style="margin: auto;">
-                <div class="login-form-inner --position-absolute --center-all --flex-v-center --flex-active --flex-column --flex-space-between"
-                     style="border-style:solid; border-color:black; padding-bottom: 30px;  background-color: #ffffffc4; width: 600px; margin: auto; margin-top: 200px;">
-                    <h1 style="font-size: 3em; margin-top: 50px;  margin-bottom: 50px; ">Login</h1>
-                    <input id="login_email" name="email" placeholder=" Email" style="min-height: 2.5rem;" type="text">
-                    <input id="login_password" name="password" placeholder=" Password" style="min-height: 2.5rem;"
-                           type="password"><br><br>
-                    <p>Falls sie noch keinen Account haben: <a id="registrationButton">Registrieren</a></p>
-                    <button class="btn btn_bestätigen --margin-bottom-big"
-                            id="send_login-btn" style="margin-top: 30px; padding-left: 25px; padding-right: 25px;">Login
-                    </button>
+<div class="content text-center" id="logo">
+    <img alt="pepe-hypers" class="ml-auto mr-auto" height="256" src="../img/flat,750x,075,f-pad,750x1000,f8f8f8.u2.jpg"
+         width="156">
+</div>
+<div id="login-section" class="container">
+    <div class="d-flex justify-content-center h-100" >
+        <div class="card">
+            <div class="card-header">
+                <h3>Login</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="login_email">Email address</label>
+                    <input aria-describedby="emailHelp" class="form-control" id="login_email"
+                           placeholder="Enter email"
+                           type="email">
+                </div>
+                <div class="form-group">
+                    <label for="login_password">Password</label>
+                    <input class="form-control" id="login_password" placeholder="Password" type="password">
+                </div>
+                <button class="btn btn-dark" id="send_login-btn">Login</button>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-center links">
+                    Don't have an account? <a class="ml-1" href="#" id="registrationButton"> Sign Up</a>
                 </div>
             </div>
         </div>
-        <div class="section hidden" id="registration-section">
-            <div class="registration-form --border-normal --position-absolute --center-all" id="registration-form"
-                 style="margin: auto;">
-                <form action="/create_account"
-                      class="login-form-inner --position-absolute --center-all --flex-v-center --flex-active --flex-column --flex-space-between"
-                      enctype="multipart/form-data" method="post"
-                      style="border-style:solid; border-color:black; padding-bottom: 30px;  background-color: #ffffffc4; width: 600px; margin: auto; margin-top: 200px;">
-                    <h1 style="font-size: 3em; margin-top: 50px;  margin-bottom: 50px; ">Registrieren</h1>
-                    <input id="ceate_email" name="email" placeholder=" Email" style="min-height: 2.5rem;" type="text">
-                    <input id="create_password" name="password" placeholder=" Password" style="min-height: 2.5rem;"
-                           type="password"><br><br>
-                    <p>Falls sie schon einen Account haben: <a id="loginButton">Login</a></p>
-                    <button class="btn btn_bestätigen --margin-bottom-big"
-                            style="margin-top: 30px; padding-left: 25px; padding-right: 25px; "
-                            type="submit">Registrieren
-                    </button>
-                    <br>
-                </form>
-                <button class="btn --margin-bottom-big"
-                        id="secure_password-generator"
-                        style="margin-top: 30px; padding-left: 25px; padding-right: 25px; ">Secure Password Generator
-                </button>
-                <!-- Popup - Secure Password Generator -->
-                <div class="popup-container hidden" id="secure_password-popup">
-                    <div class="popup-inputs">
-                        <div class="popup-title">
-                            <span class="text-normal">Secure Password Generator</span>
-                        </div>
-                        <div class="">
-                            <label class="text-normal --flex-item-margin" for="secure_password-pwd">Passwort</label>
-                            <input id="secure_password-pwd" name="secure_password-pwd" placeholder="Password"
-                                   type="text">
-                            <button id="secure_password-copy" type="submit">Copy to Clipboard</button>
-                        </div>
-                        <div class="">
-                            <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password
-                                Length</label>
-                            <input class="slider" id="secure_password-length_slider" max="99" min="1" type="range"
-                                   value="16">
-                            <input id="secure_password-length_input" type="number" value="16">
-                            <br>
-                            <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase
-                                Letters</label>
-                            <input checked id="secure_password-letters_lower"
-                                   name="secure_password-letters_lower" type="checkbox">
-                            <br>
-                            <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase
-                                Letters</label>
-                            <input checked id="secure_password-letters_upper"
-                                   name="secure_password-letters_upper" type="checkbox">
-                            <br>
-                            <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
-                            <input checked id="secure_password-digits" name="secure_password-digits" type="checkbox">
-                            <br>
-                            <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special
-                                Characters</label>
-                            <input checked id="secure_password-special_chars"
-                                   name="secure_password-special_chars" type="checkbox">
-                            <br>
-                        </div>
-                    </div>
-                    <div class=" --flex-active --flex-center-content ">
-                        <button class="btn" id="secure_password-generate-btn" name="secure_password-generate-btn"
-                                type="submit">GENERATE
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--OTP POPUP -->
-        <div class="popup hidden" id="otp-popup">
-
-            <!-- POPUP content -->
-            <div class="popup-content">
-                <span class="close" id="close-btn_otp-popup">&times;</span>
-                <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
-                <button class="btn --margin-bottom-big" id="send_otp" type="submit">Submit</button>
-            </div>
-
-        </div>
-
     </div>
 </div>
+
+<div id="registration-section" class="container hidden">
+    <div class="d-flex justify-content-center h-100">
+        <div class="card">
+            <div class="card-header">
+                <h3>Create Account</h3>
+            </div>
+            <div class="card-body">
+                <form action="/create_account" enctype="multipart/form-data" method="post">
+                    <div class="form-group">
+                        <label for="ceate_email">Email address</label>
+                        <input aria-describedby="emailHelp" class="form-control" id="ceate_email"
+                               placeholder="Enter email"
+                               type="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="create_password">Password</label>
+                        <input class="form-control" id="create_password" placeholder="Password" type="password">
+                    </div>
+                    <button class="btn btn-dark" type="submit">Create</button>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-center links">
+                    Already have an account? <a class="ml-1" href="#" id="loginButton"> Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn --margin-bottom-big"
+            id="secure_password-generator"
+            style="margin-top: 30px; padding-left: 25px; padding-right: 25px; ">Secure Password Generator
+    </button>
+</div>
+
+<!-- Popup - Secure Password Generator -->
+<div class="popup-container hidden" id="secure_password-popup">
+    <div class="popup-inputs">
+        <div class="popup-title">
+            <span class="text-normal">Secure Password Generator</span>
+        </div>
+        <div class="">
+            <label class="text-normal --flex-item-margin" for="secure_password-pwd">Passwort</label>
+            <input id="secure_password-pwd" name="secure_password-pwd" placeholder="Password"
+                   type="text">
+            <button id="secure_password-copy" type="submit">Copy to Clipboard</button>
+        </div>
+        <div class="">
+            <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password
+                Length</label>
+            <input class="slider" id="secure_password-length_slider" max="99" min="1" type="range"
+                   value="16">
+            <input id="secure_password-length_input" type="number" value="16">
+            <br>
+            <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase
+                Letters</label>
+            <input checked id="secure_password-letters_lower"
+                   name="secure_password-letters_lower" type="checkbox">
+            <br>
+            <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase
+                Letters</label>
+            <input checked id="secure_password-letters_upper"
+                   name="secure_password-letters_upper" type="checkbox">
+            <br>
+            <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
+            <input checked id="secure_password-digits" name="secure_password-digits" type="checkbox">
+            <br>
+            <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special
+                Characters</label>
+            <input checked id="secure_password-special_chars"
+                   name="secure_password-special_chars" type="checkbox">
+            <br>
+        </div>
+    </div>
+    <div class=" --flex-active --flex-center-content ">
+        <button class="btn" id="secure_password-generate-btn" name="secure_password-generate-btn"
+                type="submit">GENERATE
+        </button>
+    </div>
+</div>
+
+<!--OTP POPUP -->
+<div class="popup hidden" id="otp-popup">
+
+    <!-- POPUP content -->
+    <div class="popup-content">
+        <span class="close" id="close-btn_otp-popup">&times;</span>
+        <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
+        <button class="btn --margin-bottom-big" id="send_otp" type="submit">Submit</button>
+    </div>
+
+</div>
+
 </body>
 </html>

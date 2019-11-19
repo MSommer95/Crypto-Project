@@ -44,3 +44,11 @@
     text-decoration: none;
     cursor: pointer;
 }
+
+.card {
+    width: 420px;
+}
+
+a {
+    color: #1D68CD;
+}

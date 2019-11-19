@@ -2,10 +2,10 @@ import {chooseLogin, hideElement, showElement} from "./gui";
 import * as servCon from './serverConnector';
 import {generatePassword} from "./passwordGenerator";
 import $ from 'jquery/dist/jquery.min';
-
-import '../css/bootstrap.css'
-import '../css/custom.css'
-import '../css/main.css'
+import '../css/custom.css';
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/tabulator.css';
 
 function request_2fa_verified() {
     servCon.getDBData('/check_otp_verified', (cb) => {
@@ -35,7 +35,6 @@ $('#send_otp').on('click', () => {
         });
     }
 });
-
 
 
 $('#send_login-btn').on('click', () => {

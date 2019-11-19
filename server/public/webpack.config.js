@@ -21,8 +21,7 @@ module.exports = {
             filename: 'sign.html',
             chunks: ['sign'],
         }),
-        new CopyWebpackPlugin([
-        ]),
+        new CopyWebpackPlugin([]),
     ],
     devtool: 'inline-source-map',
     output: {
@@ -37,6 +36,25 @@ module.exports = {
                 use: [
                     'style-loader',
                     'css-loader',
+                ],
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    // MiniCssExtractPlugin.loader,
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
                 ],
             },
             {
@@ -58,6 +76,10 @@ module.exports = {
                         outputPath: 'fonts/',
                     },
                 },
+            },
+            {
+                test: /\.html$/,
+                use: ['html-loader']
             }
         ],
     },

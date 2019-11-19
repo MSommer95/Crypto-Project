@@ -80,7 +80,7 @@ class Index(object):
 
     @cherrypy.expose()
     def logout_account(self):
-        cherrypy.session.expire()
+        cherrypy.session.delete()
         return 'You are logged out'
 
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)

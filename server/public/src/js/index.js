@@ -33,7 +33,7 @@ $('#encrypt-btn').on('click', () => {
     });
 });
 
-$('#logoutButton').on('click', function () {
+$('#logout-btn').on('click', function () {
     let url = '/logout_account';
     servCon.getDBData(url, (cb) => {
         console.log(cb.responseText);

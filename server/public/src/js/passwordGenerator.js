@@ -1,12 +1,37 @@
 import $ from 'jquery/dist/jquery.min';
 
+function calculatePasswordRank(password, characters) {
+
+    const passwordLength = password.length;
+    const numberOfCharacters = characters.length;
+    const complexity = Math.pow(numberOfCharacters, passwordLength);
+    const attemptsPerSec = 50000000000;
+    const timeInDaysToCrack = complexity / attemptsPerSec / 3600 / 24;
+    let passwordRank = 'High';
+    const passwordRankPTag = $('#password-rank');
+    if (timeInDaysToCrack >= 1000000) {
+        console.log(`High rank: ${timeInDaysToCrack}`);
+        passwordRank = 'High';
+        passwordRankPTag.css('color', '#007F00');
+    } else if (timeInDaysToCrack >= 1000) {
+        console.log(`Medium rank: ${timeInDaysToCrack}`);
+        passwordRank = 'Medium';
+        passwordRankPTag.css('color', '#EFAF00');
+    } else {
+        console.log(`Low rank: ${timeInDaysToCrack}`);
+        passwordRank = 'Low';
+        passwordRankPTag.css('color', '#F90000');
+    }
+    passwordRankPTag.text(`${passwordRank}`);
+}
+
 export function generatePassword(lower, upper, digit, special, length) {
     let combinedString = '';
     let password = '';
-    let lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
-    let upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let digits = '0123456789';
-    let specialCharacters = '!§$%&*+#üäöÜÄÖ';
+    const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const specialCharacters = '!§$%&*+#üäöÜÄÖ';
 
     if (lower) {
         combinedString += lowerCaseLetters;
@@ -28,16 +53,17 @@ export function generatePassword(lower, upper, digit, special, length) {
         const randomNum = array[i] % combinedString.length;
         password += combinedString.substring(randomNum, randomNum + 1);
     }
+    calculatePasswordRank(password, combinedString);
     return password
 }
 
 $('#secure_password-generate-btn').on('click', () => {
-    let lowerCase = $('#secure_password-letters_lower').prop('checked');
-    let upperCase = $('#secure_password-letters_upper').prop('checked');
-    let digits = $('#secure_password-digits').prop('checked');
-    let special = $('#secure_password-special_chars').prop('checked');
-    let length = $('#secure_password-length_input').val();
-    let password = generatePassword(lowerCase, upperCase, digits, special, length);
+    const lowerCase = $('#secure_password-letters_lower').prop('checked');
+    const upperCase = $('#secure_password-letters_upper').prop('checked');
+    const digits = $('#secure_password-digits').prop('checked');
+    const special = $('#secure_password-special_chars').prop('checked');
+    const length = $('#secure_password-length_input').val();
+    const password = generatePassword(lowerCase, upperCase, digits, special, length);
     $('#secure_password-pwd').val(password);
     $('#create_password').val(password);
 });

@@ -5,7 +5,6 @@ import $ from 'jquery/dist/jquery.min';
 import '../css/custom.css';
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/tabulator.css';
 
 function request_2fa_verified() {
     servCon.getDBData('/check_otp_verified', (cb) => {

@@ -4,7 +4,7 @@ import * as tables from './tables';
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/custom.css';
-import '../css/tabulator.css';
+import 'tabulator-tables/dist/css/tabulator.min.css';
 import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 
 const deviceTable = tables.initDeviceTable();

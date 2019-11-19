@@ -49,6 +49,15 @@
     width: 420px;
 }
 
+.modal-footer {
+    background-color: #f9f9f9;
+}
+
+.modal-left {
+    display: unset;
+    text-align: left;
+}
+
 a {
     color: #1D68CD;
 }

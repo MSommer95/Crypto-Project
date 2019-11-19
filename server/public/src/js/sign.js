@@ -1,15 +1,16 @@
 import {chooseLogin, hideElement, showElement} from "./gui";
 import * as servCon from './serverConnector';
 import {generatePassword} from "./passwordGenerator";
-import $ from 'jquery/dist/jquery.min';
-import '../css/custom.css';
-import 'bootstrap'
+import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import '../css/custom.css';
 
 function request_2fa_verified() {
     servCon.getDBData('/check_otp_verified', (cb) => {
         if (cb.responseText === '0') {
             setTimeout(request_2fa_verified, 5000);
+
         } else {
             window.location.href = '/index';
         }
@@ -44,7 +45,7 @@ $('#send_login-btn').on('click', () => {
     };
     servCon.postDBData(url, data, (cb) => {
         if (cb.responseText.includes('HOTP')) {
-            showElement($('#otp-popup'));
+            $('#otp-popup').modal();
             setTimeout(request_2fa_verified, 5000);
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
@@ -59,10 +60,6 @@ $('#secure_password-generator').on('click', () => {
     let password = generatePassword(true, true, true, true, 16);
     $('#secure_password-pwd').val(password);
     $('#create_password').val(password);
-});
-
-$('#close-btn_otp-popup').on('click', (button) => {
-    hideElement($('#otp-popup'));
 });
 
 $('#registrationButton').on('click', function () {

@@ -74,6 +74,9 @@ export function chooseLogin(button) {
     }
 }
 
+$('#otp-popup').on('shown.bs.modal', function () {
+  $('#confirm_otp').trigger('focus')
+});
 $('#hotpButton').on('click', function () {
     chooseNavbar(this);
 });

@@ -11,8 +11,8 @@
     <img alt="pepe-hypers" class="ml-auto mr-auto" height="256" src="../img/flat,750x,075,f-pad,750x1000,f8f8f8.u2.jpg"
          width="156">
 </div>
-<div id="login-section" class="container">
-    <div class="d-flex justify-content-center h-100" >
+<div class="container" id="login-section">
+    <div class="d-flex justify-content-center h-100">
         <div class="card">
             <div class="card-header">
                 <h3>Login</h3>
@@ -39,26 +39,30 @@
     </div>
 </div>
 
-<div id="registration-section" class="container hidden">
+<div class="container hidden" id="registration-section">
     <div class="d-flex justify-content-center h-100">
         <div class="card">
             <div class="card-header">
                 <h3>Create Account</h3>
             </div>
             <div class="card-body">
-                <form action="/create_account" enctype="multipart/form-data" method="post">
+                <form action="/create_account" autocomplete="off" enctype="multipart/form-data" method="post" id="create_account-form">
                     <div class="form-group">
                         <label for="ceate_email">Email address</label>
-                        <input aria-describedby="emailHelp" class="form-control" id="ceate_email"
-                               placeholder="Enter email"
-                               type="email">
+                        <input aria-describedby="emailHelp" autocomplete="new-password" class="form-control"
+                               id="ceate_email" placeholder="Enter email" type="email" name="email">
                     </div>
                     <div class="form-group">
                         <label for="create_password">Password</label>
-                        <input class="form-control" id="create_password" placeholder="Password" type="password">
+                        <input autocomplete="new-password" class="form-control" id="create_password"
+                               placeholder="Password" type="password" name="password">
                     </div>
-                    <button class="btn btn-dark" type="submit">Create</button>
                 </form>
+                <button class="btn btn-dark" type="submit" form="create_account-form" id="send-create_account-btn">Create</button>
+                <button class="btn btn-dark ml-auto" data-target="#secure_password-popup" data-toggle="modal"
+                        id="secure_password-generator" type="button">Password Generator
+                </button>
+
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-center links">
@@ -67,68 +71,114 @@
             </div>
         </div>
     </div>
-    <button class="btn --margin-bottom-big"
-            id="secure_password-generator"
-            style="margin-top: 30px; padding-left: 25px; padding-right: 25px; ">Secure Password Generator
-    </button>
 </div>
 
-<!-- Popup - Secure Password Generator -->
-<div class="popup-container hidden" id="secure_password-popup">
-    <div class="popup-inputs">
-        <div class="popup-title">
-            <span class="text-normal">Secure Password Generator</span>
+<!-- Modal -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="secure_password-popup" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title">Secure Password Generator</h5>
+                </div>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input class="form-control col-sm-10" id="secure_password-pwd" name="secure_password-pwd"
+                               placeholder="Password"
+                               type="text">
+                    </div>
+                    <div class="col-md-4 ml-auto">
+                        <button class="btn btn-dark col-sm-10" id="secure_password-copy" type="submit">Copy</button>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-example">
+                        <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password
+                            Length</label>
+                        <input class="slider" id="secure_password-length_slider" max="99" min="1" type="range"
+                               value="16">
+                    </div>
+                    <div class="col-md-4 ml-auto col-example">
+                        <input class="col-sm-6" id="secure_password-length_input" max="99" min="1" type="number"
+                               value="16">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-example">
+                        <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase
+                            Letters</label>
+                    </div>
+                    <div class="col-md-4 ml-auto col-example">
+                        <input checked id="secure_password-letters_lower"
+                               name="secure_password-letters_lower" type="checkbox">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-example">
+                        <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase
+                            Letters</label>
+                    </div>
+                    <div class="col-md-4 ml-auto col-example">
+                        <input checked id="secure_password-letters_upper"
+                               name="secure_password-letters_upper" type="checkbox">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-example">
+                        <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
+                    </div>
+                    <div class="col-md-4 ml-auto col-example">
+                        <input checked id="secure_password-digits" name="secure_password-digits" type="checkbox">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-example">
+                        <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special
+                            Characters</label>
+                    </div>
+                    <div class="col-md-4 ml-auto col-example">
+                        <input checked id="secure_password-special_chars"
+                               name="secure_password-special_chars" type="checkbox">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer modal-left">
+                <button class="btn btn-dark" id="secure_password-generate-btn" name="secure_password-generate-btn"
+                        type="submit">Generate
+                </button>
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+            </div>
         </div>
-        <div class="">
-            <label class="text-normal --flex-item-margin" for="secure_password-pwd">Passwort</label>
-            <input id="secure_password-pwd" name="secure_password-pwd" placeholder="Password"
-                   type="text">
-            <button id="secure_password-copy" type="submit">Copy to Clipboard</button>
-        </div>
-        <div class="">
-            <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password
-                Length</label>
-            <input class="slider" id="secure_password-length_slider" max="99" min="1" type="range"
-                   value="16">
-            <input id="secure_password-length_input" type="number" value="16">
-            <br>
-            <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase
-                Letters</label>
-            <input checked id="secure_password-letters_lower"
-                   name="secure_password-letters_lower" type="checkbox">
-            <br>
-            <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase
-                Letters</label>
-            <input checked id="secure_password-letters_upper"
-                   name="secure_password-letters_upper" type="checkbox">
-            <br>
-            <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
-            <input checked id="secure_password-digits" name="secure_password-digits" type="checkbox">
-            <br>
-            <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special
-                Characters</label>
-            <input checked id="secure_password-special_chars"
-                   name="secure_password-special_chars" type="checkbox">
-            <br>
-        </div>
-    </div>
-    <div class=" --flex-active --flex-center-content ">
-        <button class="btn" id="secure_password-generate-btn" name="secure_password-generate-btn"
-                type="submit">GENERATE
-        </button>
     </div>
 </div>
 
-<!--OTP POPUP -->
-<div class="popup hidden" id="otp-popup">
-
-    <!-- POPUP content -->
-    <div class="popup-content">
-        <span class="close" id="close-btn_otp-popup">&times;</span>
-        <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
-        <button class="btn --margin-bottom-big" id="send_otp" type="submit">Submit</button>
+<!-- Modal -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="otp-popup" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please insert your OTP</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="confirm_otp" name="otp" placeholder="01234567" type="password">
+            </div>
+            <div class="modal-footer modal-left">
+                <button class="btn btn-primary" id="send_otp" type="button">Send OTP</button>
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
     </div>
-
 </div>
 
 </body>

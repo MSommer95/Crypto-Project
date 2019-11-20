@@ -8,6 +8,7 @@ from server.python.dir_handler import DirHandler
 from server.python.file_encryptor import FileEncryptor
 from server.python.file_handler import FileHandler
 from server.python.otp_handler import OtpHandler
+from server.python.qr_handler import QRHandler
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -204,6 +205,14 @@ class Index(object):
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_2fa(user_id)
             return otp
+
+    @cherrypy.expose()
+    def request_qr(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        otp = OtpHandler.create_2fa(user_id)
+        img_string = QRHandler.create_qr_image(otp)
+        cherrypy.response.headers['Content-Type'] = "image/png"
+        return img_string
 
 
 if __name__ == '__main__':

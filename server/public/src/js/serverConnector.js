@@ -1,4 +1,4 @@
-import $ from 'jquery/dist/jquery.min';
+import $ from 'jquery';
 
 // Get Funktion für die Server-Datenbank Abfragen
 export function getDBData(url, cb) {
@@ -23,4 +23,11 @@ export function postDBData(url, data, cb) {
             cb(jqXHR);
         }
     });
+}
+
+export function requestFile(url, filepath, method) {
+    let inputs = '<input type="hidden" name="file_path" value="' + filepath + '" />';
+    //send request
+    $('<form action="' + url + '" method="' + (method || 'post') + '">' + inputs + '</form>')
+        .appendTo('body').submit().remove();
 }

@@ -1,4 +1,4 @@
-import $ from 'jquery/dist/jquery.min';
+import $ from 'jquery';
 
 export function showElement(element) {
     $(element).removeClass('hidden');
@@ -75,7 +75,7 @@ export function chooseLogin(button) {
 }
 
 $('#otp-popup').on('shown.bs.modal', function () {
-  $('#confirm_otp').trigger('focus')
+    $('#confirm_otp').trigger('focus')
 });
 $('#hotpButton').on('click', function () {
     chooseNavbar(this);

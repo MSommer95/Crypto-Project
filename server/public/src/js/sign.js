@@ -1,4 +1,4 @@
-import {chooseLogin, hideElement, showElement} from "./gui";
+import {chooseLogin, showElement} from "./gui";
 import * as servCon from './serverConnector';
 import {generatePassword} from "./passwordGenerator";
 import $ from 'jquery';

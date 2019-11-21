@@ -1,6 +1,7 @@
 import os
 
 import cherrypy
+from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
 
 from server.python.db_connector import DbConnector
@@ -116,6 +117,13 @@ class Index(object):
     def file_upload(self, file):
         user_id = str(cherrypy.session.get('user_id'))
         FileHandler.write_file(user_id, file)
+        return open('../public/dist/index.html')
+
+    @cherrypy.expose()
+    def file_download(self, file_path):
+        user_id = str(cherrypy.session.get('user_id'))
+        absolute_file_paht = os.path.abspath(file_path)
+        return serve_file(absolute_file_paht, disposition="attachment")
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()

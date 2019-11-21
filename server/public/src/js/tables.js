@@ -1,5 +1,24 @@
 import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
-import lock from'../img/icons8-passwort-48.png';
+import lock from '../img/icons8-passwort-48.png';
+import dlIcon from '../img/baseline_cloud_download_black_18dp.png';
+import * as servCon from './serverConnector';
+
+const encryptIcon = () => {
+    const icon = new Image();
+    icon.src = lock;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
+
+const downloadIcon = () => {
+    const icon = new Image();
+    icon.src = dlIcon;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
+
 
 export function initDeviceTable() {
     const deviceTable = new Tabulator('#device-table', {
@@ -26,33 +45,28 @@ export function initOtpTable() {
 
 export function initFileTable() {
 
-    const encryptIcon = () => {
-        const icon =  new Image();
-        icon.src = lock;
-        icon.height = 32;
-        icon.width = 32;
-        return icon
-    };
-
-    const testData = [
-        {
-            preview: 'Preview',
-            id: 0,
-            filename: 'Filename',
-            description: 'Description',
-        }
-    ];
+    function downloadFile(e, cell) {
+        const rowData = cell.getRow().getData();
+        //const data = {file_path: rowData.path};
+        const filepath = rowData.path;
+        const url = '/file_download';
+        const method = 'post';
+        servCon.requestFile(url, filepath, method);
+    }
 
     const filesTable = new Tabulator('#files-table', {
         height: '100%',
-        data: testData,
         columns: [
             {title: 'Preview', field: 'preview'},
-            {title: 'id', field: 'id', sorter: 'number'},
-            {title: 'filename', field: 'filename'},
-            {title: 'description', field: 'description'},
-            {title: 'encryption', field: 'isEncrypted', formatter: encryptIcon},
+            {title: 'ID', field: 'id', sorter: 'number'},
+            {title: 'Filename', field: 'file_name'},
+            {title: 'Description', field: 'description'},
+            {title: 'Encryption', field: 'isEncrypted', formatter: encryptIcon},
+            {title: 'Download File', field: 'downloadFile', formatter: downloadIcon, cellClick: downloadFile}
         ],
     });
+
+    filesTable.setData('/get_user_files');
+
     return filesTable
 }

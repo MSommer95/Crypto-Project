@@ -1,5 +1,5 @@
 import * as servCon from './serverConnector';
-import $ from 'jquery/dist/jquery.min';
+import $ from 'jquery';
 import * as tables from './tables';
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -10,6 +10,7 @@ import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 const deviceTable = tables.initDeviceTable();
 const otpTable = tables.initOtpTable();
 const fileTable = tables.initFileTable();
+
 
 $('#decrypt-btn').on('click', () => {
     let url = '/file_decrypt';

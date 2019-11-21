@@ -1,4 +1,4 @@
-import $ from 'jquery/dist/jquery.min';
+import $ from 'jquery';
 
 function calculatePasswordRank(password, characters) {
 

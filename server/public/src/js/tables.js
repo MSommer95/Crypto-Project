@@ -47,12 +47,37 @@ export function initFileTable() {
 
     function downloadFile(e, cell) {
         const rowData = cell.getRow().getData();
-        //const data = {file_path: rowData.path};
         const filepath = rowData.path;
         const url = '/file_download';
         const method = 'post';
         servCon.requestFile(url, filepath, method);
     }
+
+    function encryption(e, cell) {
+        const rowData = cell.getRow().getData();
+        const filename = rowData.file_name;
+        const fileID = rowData.id;
+        const data = {
+            file_id: fileID,
+            filename: filename
+        };
+        let url = '';
+        if(rowData.is_encrypted) {
+            url = '/file_decrypt';
+        } else {
+            url = '/file_encrypt';
+        }
+        servCon.postDBData(url, data, (cb) => {
+            console.log(cb.responseText);
+            if(cb.responseText.includes('worked')) {
+                filesTable.setData('/get_user_files');
+            }
+            else if(cb.responseText.includes('wrong')) {
+                alert(cb.responseText)
+            }
+        });
+    }
+
 
     const filesTable = new Tabulator('#files-table', {
         height: '100%',
@@ -61,7 +86,7 @@ export function initFileTable() {
             {title: 'ID', field: 'id', sorter: 'number'},
             {title: 'Filename', field: 'file_name'},
             {title: 'Description', field: 'description'},
-            {title: 'Encryption', field: 'isEncrypted', formatter: encryptIcon},
+            {title: 'Encryption', field: 'is_encrypted', formatter: encryptIcon, cellClick: encryption},
             {title: 'Download File', field: 'downloadFile', formatter: downloadIcon, cellClick: downloadFile}
         ],
     });

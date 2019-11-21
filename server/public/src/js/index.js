@@ -11,7 +11,6 @@ const deviceTable = tables.initDeviceTable();
 const otpTable = tables.initOtpTable();
 const fileTable = tables.initFileTable();
 
-
 $('#decrypt-btn').on('click', () => {
     let url = '/file_decrypt';
     let data = {

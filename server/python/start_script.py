@@ -123,20 +123,21 @@ class Index(object):
     @cherrypy.expose()
     def file_download(self, file_path):
         user_id = str(cherrypy.session.get('user_id'))
-        absolute_file_paht = os.path.abspath(file_path)
-        return serve_file(absolute_file_paht, disposition="attachment")
+        user_path = '../storage/users/%s' % user_id
+        absolute_file_path = os.path.abspath(user_path + file_path)
+        return serve_file(absolute_file_path, disposition="attachment")
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_encrypt(self, file_id, filename):
         user_id = str(cherrypy.session.get('user_id'))
-        FileEncryptor.file_encryption(user_id, file_id, filename)
+        return FileEncryptor.file_encryption(user_id, file_id, filename)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_decrypt(self, file_id, filename):
         user_id = str(cherrypy.session.get('user_id'))
-        FileEncryptor.file_decryption(user_id, file_id, filename)
+        return FileEncryptor.file_decryption(user_id, file_id, filename)
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

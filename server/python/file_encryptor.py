@@ -9,46 +9,63 @@ class FileEncryptor:
 
     @staticmethod
     def file_encryption(user_id, file_id, filename):
-        file_id_encrypt = int(round(time.time() * 1000))
+        try:
+            file_id_encrypt = int(round(time.time() * 1000))
+            user_path = '../storage/users/%s' % user_id
 
-        key = Fernet.generate_key()
-        key_file_path = '../storage/users/%s/keys/%s.key' % (user_id, filename)
-        key_file = open(key_file_path, 'wb')
-        key_file.write(key)
-        key_file.close()
+            key = Fernet.generate_key()
+            key_file_path = '/keys/%s.key' % filename
+            key_file = open(user_path + key_file_path, 'wb')
+            key_file.write(key)
+            key_file.close()
 
-        db_file = DbConnector.db_get_user_file(file_id, user_id)
-        unencrypted_file_path = db_file[0]['path']
-        with open(unencrypted_file_path, 'rb') as f:
-            data_file = f.read()
+            db_file = DbConnector.db_get_user_file(file_id, user_id)
+            unencrypted_file_path = db_file[0]['path']
+            with open(user_path + unencrypted_file_path, 'rb') as f:
+                data_file = f.read()
 
-        fernet = Fernet(key)
-        encrypted = fernet.encrypt(data_file)
-        encrypted_file_path = '../storage/users/%s/files/encrypted/%s.encrypted' % (user_id, filename)
-        with open(encrypted_file_path, 'wb') as f:
-            f.write(encrypted)
+            fernet = Fernet(key)
+            encrypted = fernet.encrypt(data_file)
+            encrypted_file_path = '/files/encrypted/%s.encrypted' % filename
+            with open(user_path + encrypted_file_path, 'wb') as f:
+                f.write(encrypted)
 
-        is_encrypted = 1
-        DbConnector.db_insert_user_file(file_id_encrypt, user_id, filename, encrypted_file_path, is_encrypted)
-        DbConnector.db_insert_file_key(user_id, file_id_encrypt, key_file_path)
+            is_encrypted = 1
+            DbConnector.db_insert_user_file(file_id_encrypt, user_id, filename, encrypted_file_path, is_encrypted)
+            DbConnector.db_insert_file_key(user_id, file_id_encrypt, key_file_path)
+        except (RuntimeError, TypeError, NameError):
+            return 'Something went wrong'
+        else:
+            return 'Everything worked'
+
 
     @staticmethod
     def file_decryption(user_id, file_id, filename):
-        db_file_key = DbConnector.db_get_file_key(file_id, user_id)
+        try:
+            db_file_key = DbConnector.db_get_file_key(file_id, user_id)
+            file_id_decrypt = int(round(time.time() * 1000))
+            user_path = '../storage/users/%s' % user_id
 
-        key_file_path = db_file_key[0]['key_path']
-        with open(key_file_path, 'rb') as f:
-            key = f.read()
+            key_file_path = db_file_key[0]['key_path']
+            with open(user_path + key_file_path, 'rb') as f:
+                key = f.read()
 
-        db_file = DbConnector.db_get_user_file(file_id, user_id)
+            db_file = DbConnector.db_get_user_file(file_id, user_id)
 
-        encrypted_file_path = db_file[0]['path']
-        with open(encrypted_file_path, 'rb') as f:
-            file = f.read()
+            encrypted_file_path = db_file[0]['path']
+            with open(user_path + encrypted_file_path, 'rb') as f:
+                file = f.read()
 
-        fernet = Fernet(key)
-        decrypted = fernet.decrypt(file)
+            fernet = Fernet(key)
+            decrypted = fernet.decrypt(file)
 
-        decrypted_file_path = '../storage/users/%s/files/unencrypted/%s' % (user_id, filename)
-        with open(decrypted_file_path, 'wb') as f:
-            f.write(decrypted)
+            decrypted_file_path = '/files/unencrypted/%s' % filename
+            with open(user_path + decrypted_file_path, 'wb') as f:
+                f.write(decrypted)
+
+            is_encrypted = 0
+            DbConnector.db_insert_user_file(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
+        except (RuntimeError, TypeError, NameError):
+            return 'Something went wrong'
+        else:
+            return 'Everything worked'

@@ -7,7 +7,7 @@ import 'bootstrap';
 import '../css/custom.css';
 
 function request_2fa_verified() {
-    servCon.getDBData('/check_otp_verified', (cb) => {
+    servCon.getData('/check_otp_verified', (cb) => {
         if (cb.responseText === '0') {
             setTimeout(request_2fa_verified, 5000);
 

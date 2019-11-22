@@ -2,6 +2,7 @@ import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import lock from '../img/icons8-passwort-48.png';
 import dlIcon from '../img/baseline_cloud_download_black_18dp.png';
 import * as servCon from './serverConnector';
+import $ from 'jquery';
 
 const encryptIcon = () => {
     const icon = new Image();
@@ -29,6 +30,17 @@ export function initDeviceTable() {
         ],
     });
     return deviceTable
+}
+
+export function initDeviceQR() {
+    const url = '/request_qr';
+    servCon.getData(url, (cb) => {
+        const imgData = cb.responseText;
+        console.log(imgData);
+        const img = $('<img id="image_id" />');
+        img.attr('src', 'data:image/png;base64,' + imgData);
+        img.appendTo('#device-registration-qr');
+    });
 }
 
 export function initOtpTable() {

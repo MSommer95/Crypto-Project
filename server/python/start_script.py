@@ -1,5 +1,5 @@
 import os
-
+import base64
 import cherrypy
 from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
@@ -221,7 +221,7 @@ class Index(object):
         otp = OtpHandler.create_2fa(user_id)
         img_string = QRHandler.create_qr_image(otp)
         cherrypy.response.headers['Content-Type'] = "image/png"
-        return img_string
+        return base64.b64encode(img_string)
 
 
 if __name__ == '__main__':

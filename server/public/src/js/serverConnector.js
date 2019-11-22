@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
-// Get Funktion für die Server-Datenbank Abfragen
-export function getDBData(url, cb) {
+// Get Funktion für die Server(-Datenbank) Abfragen
+export function getData(url, cb) {
     $.ajax({
         type: 'GET',
         url: url,

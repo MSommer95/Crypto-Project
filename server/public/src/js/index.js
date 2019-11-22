@@ -10,6 +10,21 @@ import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 const deviceTable = tables.initDeviceTable();
 const otpTable = tables.initOtpTable();
 const fileTable = tables.initFileTable();
+const qrImage = tables.initDeviceQR();
+
+$('#reg-device-btn').on('click', () => {
+    const registerDiv = $('#device-registration-qr');
+    const registerBtn = $('#reg-device-btn');
+
+    if(registerDiv.css('display') === 'none') {
+        registerDiv.toggle();
+        registerBtn.html("Hide registration QR");
+    }
+    else if(registerDiv.css('display') === 'block') {
+        registerDiv.toggle();
+        registerBtn.html("Register new Device");
+    }
+});
 
 $('#decrypt-btn').on('click', () => {
     let url = '/file_decrypt';
@@ -35,7 +50,7 @@ $('#encrypt-btn').on('click', () => {
 
 $('#logout-btn').on('click', function () {
     let url = '/logout_account';
-    servCon.getDBData(url, (cb) => {
+    servCon.getData(url, (cb) => {
         console.log(cb.responseText);
         location.reload();
     });

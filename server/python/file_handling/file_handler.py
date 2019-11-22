@@ -23,8 +23,7 @@ class FileHandler:
                 size += len(data)
 
         is_encrypted = 0
-        file_description = ''
-        DBfiles.db_insert_user_file(file_id, user_id, file.filename, file_description, path, is_encrypted)
+        DBfiles.db_insert_user_file(file_id, user_id, file.filename, path, is_encrypted)
 
     @staticmethod
     def change_file_name(user_id, new_file_name, old_path, is_encrypted):

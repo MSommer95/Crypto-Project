@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `user_data` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `user_id` int(11) NOT NULL,
   `file_name` varchar(258) NOT NULL DEFAULT '',
-  `file_description` text,
+  `file_description` varchar(512) NOT NULL DEFAULT '',
   `path` longtext NOT NULL,
   `is_encrypted` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -63,13 +63,12 @@ CREATE TABLE IF NOT EXISTS `user_data` (
   CONSTRAINT `FK_user_data_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_data: ~2 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_data: ~4 rows (ungefähr)
 /*!40000 ALTER TABLE `user_data` DISABLE KEYS */;
 INSERT INTO `user_data` (`id`, `user_id`, `file_name`, `file_description`, `path`, `is_encrypted`) VALUES
-	(1574429152332, 15, 'Notizen AWS.txt', NULL, '/files/unencrypted/Notizen AWS.txt', 0),
-	(1574429156654, 15, 'Notizen AWS.txt', NULL, '/files/encrypted/Notizen AWS.txt.encrypted', 1),
-	(1574435698647, 15, 'AWS.pdf', NULL, '/files/unencrypted/AWS.pdf', 0),
-	(1574435707554, 15, 'AWS.pdf', NULL, '/files/encrypted/AWS.pdf.encrypted', 1);
+	(1574463515557, 15, 'Renamed.pdf', 'Test Beschreibung LG', '/files/unencrypted/Renamed.pdf', 0),
+	(1574463518051, 15, 'AWS.pdf.encrypted', '', '/files/encrypted/AWS.pdf.encrypted', 1),
+	(1574464344534, 15, 'AWS.pdf', '', '/files/unencrypted/AWS.pdf', 0);
 /*!40000 ALTER TABLE `user_data` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_device
@@ -101,13 +100,12 @@ CREATE TABLE IF NOT EXISTS `user_key` (
   KEY `FK_user_key_user_data` (`file_id`),
   CONSTRAINT `FK_user_key_user_data` FOREIGN KEY (`file_id`) REFERENCES `user_data` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_user_key_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_key: ~2 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_key: ~4 rows (ungefähr)
 /*!40000 ALTER TABLE `user_key` DISABLE KEYS */;
 INSERT INTO `user_key` (`id`, `user_id`, `file_id`, `key_path`) VALUES
-	(14, 15, 1574429156654, '/keys/Notizen AWS.txt.key'),
-	(15, 15, 1574435707554, '/keys/AWS.pdf.key');
+	(18, 15, 1574463518051, '/keys/AWS.pdf.key');
 /*!40000 ALTER TABLE `user_key` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp
@@ -120,13 +118,13 @@ CREATE TABLE IF NOT EXISTS `user_otp` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
 INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`, `verified`) VALUES
 	(145, 8, '33562210', 1574173026, 0),
-	(163, 15, '15504730', 1574436220, 0);
+	(204, 15, '50207057', 1574464341, 0);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp_used
@@ -138,9 +136,9 @@ CREATE TABLE IF NOT EXISTS `user_otp_used` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
 
--- Exportiere Daten aus Tabelle project.user_otp_used: ~150 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp_used: ~186 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
 INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(1, 8, '74083486', 1571910485),
@@ -305,7 +303,48 @@ INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(160, 15, '01021334', 1574435694),
 	(161, 15, '11428555', 1574435698),
 	(162, 15, '06648681', 1574436216),
-	(163, 15, '15504730', 1574436220);
+	(163, 15, '15504730', 1574436220),
+	(164, 15, '70747728', 1574438314),
+	(165, 15, '41435175', 1574438837),
+	(166, 15, '23448745', 1574438839),
+	(167, 15, '65012126', 1574439428),
+	(168, 15, '16127284', 1574439431),
+	(169, 15, '35357484', 1574439510),
+	(170, 15, '67021203', 1574439651),
+	(171, 15, '65885006', 1574439691),
+	(172, 15, '55058202', 1574440205),
+	(173, 15, '73871117', 1574440248),
+	(174, 15, '77647352', 1574443893),
+	(175, 15, '36536560', 1574445249),
+	(176, 15, '07874117', 1574445253),
+	(177, 15, '38583268', 1574445334),
+	(178, 15, '44070761', 1574445424),
+	(179, 15, '17544702', 1574445429),
+	(180, 15, '66553858', 1574445650),
+	(181, 15, '03722707', 1574445651),
+	(182, 15, '80412675', 1574446328),
+	(183, 15, '01055023', 1574446914),
+	(184, 15, '16307354', 1574447036),
+	(185, 15, '84172535', 1574447140),
+	(186, 15, '22607806', 1574447241),
+	(187, 15, '43401136', 1574461080),
+	(188, 15, '73462373', 1574461885),
+	(189, 15, '03485770', 1574462393),
+	(190, 15, '55540013', 1574462499),
+	(191, 15, '53548855', 1574462546),
+	(192, 15, '07551255', 1574462550),
+	(193, 15, '20122386', 1574463038),
+	(194, 15, '65623574', 1574463045),
+	(195, 15, '31655066', 1574463124),
+	(196, 15, '73783051', 1574463281),
+	(197, 15, '15120857', 1574463299),
+	(198, 15, '15235600', 1574463506),
+	(199, 15, '63641568', 1574463515),
+	(200, 15, '88644867', 1574463681),
+	(201, 15, '36358478', 1574463965),
+	(202, 15, '76801333', 1574464150),
+	(203, 15, '01450660', 1574464255),
+	(204, 15, '50207057', 1574464341);
 /*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting

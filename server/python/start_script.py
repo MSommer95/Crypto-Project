@@ -129,15 +129,15 @@ class Index(object):
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
-    def file_encrypt(self, file_id, filename):
+    def file_encrypt(self, file_id, file_name):
         user_id = str(cherrypy.session.get('user_id'))
-        return FileEncryptor.file_encryption(user_id, file_id, filename)
+        return FileEncryptor.file_encryption(user_id, file_id, file_name)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
-    def file_decrypt(self, file_id, filename):
+    def file_decrypt(self, file_id, file_name):
         user_id = str(cherrypy.session.get('user_id'))
-        return FileEncryptor.file_decryption(user_id, file_id, filename)
+        return FileEncryptor.file_decryption(user_id, file_id, file_name)
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(50) NOT NULL,
   `password` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.users: ~5 rows (ungefähr)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
@@ -45,7 +45,9 @@ INSERT INTO `users` (`id`, `email`, `password`) VALUES
 	(5, 'test@me.de', '624082f6e5546ad8a12bc8f75acd795b60da291700686711bbd652b12c4ab28255afe96f159d8f1739137ceb25dd2e02fcd943931bf85f6bd9e3d3fdeee7d5dfe75678459c2846cfc696cce5cb1d8ba933cdf36c730c88804e42a433ec5b2c9e'),
 	(6, 'zonaafa@web.de', 'e9fa407622d249111c65190d40fbc1107937ad8fc5e7e5d9ac14de64f00e8e22c340de148469e5097c0857f9c40c41ada366d1986b4c16047d6500a0ebf71d9512a3e4698ee32dbb3f15809345c7b0b47c2dc84918e3a103ea4b4c7494857203'),
 	(8, 'max.sommer_95@web.de', 'ca2681e47edcda6a0894d28ba3e4fae805d7309c69dbd4f1715067e7485a0a85b6b5469fb92509e00d0e3681bd48bcfe2ddf6d6425e891e4a0523b138d1c426da5a4d75fb2c4312091f8c7af8121596cc90f8b60ed71bc79b9f3db268c61a7eb'),
-	(15, 'maximilian.sommer@stud.hshl.de', '114d8f13ab287dd6a2f501955f50f2a134441c1f094f83ccc6d59140fd3b75d539b4aea4f141272a14a07f5d678dc316933efb253d67795b6d207e35ac3c08a7af13b5c374e4a3b7e16adce14470085873e00abaddd92db36c6d15ba8c8e90b7');
+	(15, 'maximilian.sommer@stud.hshl.de', '114d8f13ab287dd6a2f501955f50f2a134441c1f094f83ccc6d59140fd3b75d539b4aea4f141272a14a07f5d678dc316933efb253d67795b6d207e35ac3c08a7af13b5c374e4a3b7e16adce14470085873e00abaddd92db36c6d15ba8c8e90b7'),
+	(16, 'testMe@mail.de', '48b6cba61dcb54e4dc58f6c07c67fdd2893a271cc8d16f4026e923e37833f4935ebd969bb56d4ffddbb91d5f3f32c5e76808e1eb7443c2fdf4f4b624cdc75948ae906985838a6725d221c4a58f44db088c34eca4cf2b1d4c9eda180e71d51ab6'),
+	(17, 'test@test', '7e13dfd479e71d669c6658b4d043c8a2a4c7eebb9ea00b93b500cdd49347e81f774d799cfb405ab1dba5f6b6cf126c7b058f67fc34a66f53b0d7d94d29017bfe1d735dd9910aaebd519535e639a4bf22b7a7d03b74fe80ee11a5d34280e0d67b');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_data
@@ -62,10 +64,6 @@ CREATE TABLE IF NOT EXISTS `user_data` (
 
 -- Exportiere Daten aus Tabelle project.user_data: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_data` DISABLE KEYS */;
-INSERT INTO `user_data` (`id`, `user_id`, `file_name`, `path`, `is_encrypted`) VALUES
-	(1572687529253, 8, 'Tabellen-Differenzen.pdf', '../storage/users/8/files/unencrypted/Tabellen-Differenzen.pdf', 0),
-	(1572687529258, 8, 'Tabellen-Differenzen.pdf', '../storage/users/8/files/encrypted/Tabellen-Differenzen.pdf.encrypted', 1),
-	(1572690395558, 8, 'Tabellen-Differenzen.pdf', '../storage/users/8/files/encrypted/Tabellen-Differenzen.pdf.encrypted', 1);
 /*!40000 ALTER TABLE `user_data` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_device
@@ -97,13 +95,10 @@ CREATE TABLE IF NOT EXISTS `user_key` (
   KEY `FK_user_key_user_data` (`file_id`),
   CONSTRAINT `FK_user_key_user_data` FOREIGN KEY (`file_id`) REFERENCES `user_data` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_user_key_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_key: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_key` DISABLE KEYS */;
-INSERT INTO `user_key` (`id`, `user_id`, `file_id`, `key_path`) VALUES
-	(3, 8, 1572687529258, '../storage/users/8/keys/Tabellen-Differenzen.pdf.key'),
-	(4, 8, 1572690395558, '../storage/users/8/keys/Tabellen-Differenzen.pdf.key');
 /*!40000 ALTER TABLE `user_key` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp
@@ -116,13 +111,13 @@ CREATE TABLE IF NOT EXISTS `user_otp` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=156 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_otp: ~1 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
 INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`, `verified`) VALUES
-	(99, 8, '17860466', 1573512389, 0),
-	(105, 15, '10735241', 1573513283, 1);
+	(145, 8, '33562210', 1574173026, 0),
+	(155, 15, '31220851', 1574181073, 0);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp_used
@@ -134,9 +129,9 @@ CREATE TABLE IF NOT EXISTS `user_otp_used` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+) ENGINE=InnoDB AUTO_INCREMENT=156 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
 
--- Exportiere Daten aus Tabelle project.user_otp_used: ~37 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp_used: ~150 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
 INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(1, 8, '74083486', 1571910485),
@@ -243,7 +238,57 @@ INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(102, 15, '72653253', 1573512436),
 	(103, 15, '73417107', 1573512558),
 	(104, 15, '48018163', 1573512843),
-	(105, 15, '10735241', 1573513283);
+	(105, 15, '10735241', 1573513283),
+	(106, 8, '11282400', 1573554530),
+	(107, 15, '14325281', 1573948727),
+	(108, 15, '62143811', 1573948892),
+	(109, 15, '27460506', 1573948971),
+	(110, 8, '55304535', 1573949312),
+	(111, 8, '80787126', 1573997369),
+	(112, 8, '40661245', 1573997419),
+	(113, 8, '52004457', 1573997642),
+	(114, 8, '22734476', 1573998079),
+	(115, 15, '20456684', 1574085816),
+	(116, 15, '13280002', 1574086101),
+	(117, 15, '62805616', 1574086136),
+	(118, 15, '72820550', 1574087494),
+	(119, 15, '07023310', 1574087851),
+	(120, 8, '78624466', 1574114602),
+	(121, 15, '78264080', 1574168723),
+	(122, 15, '37017602', 1574169097),
+	(123, 15, '76238861', 1574169517),
+	(124, 15, '37026341', 1574169763),
+	(125, 15, '42881663', 1574169863),
+	(126, 15, '00417124', 1574170201),
+	(127, 8, '86055742', 1574170225),
+	(128, 8, '54742452', 1574170601),
+	(129, 15, '88726387', 1574171026),
+	(130, 15, '04876150', 1574171141),
+	(131, 15, '76104161', 1574171207),
+	(132, 15, '05631328', 1574171255),
+	(133, 15, '18650808', 1574171302),
+	(134, 15, '48420844', 1574171969),
+	(135, 15, '22844686', 1574172124),
+	(136, 15, '61610081', 1574172148),
+	(137, 15, '81508562', 1574172246),
+	(138, 15, '05054005', 1574172285),
+	(139, 15, '66726713', 1574172314),
+	(140, 15, '76672328', 1574172454),
+	(141, 15, '46456220', 1574172827),
+	(142, 15, '45287232', 1574172926),
+	(143, 15, '12125231', 1574172963),
+	(144, 15, '37886786', 1574172970),
+	(145, 8, '33562210', 1574173026),
+	(146, 15, '07100503', 1574173054),
+	(147, 15, '75155447', 1574173325),
+	(148, 15, '52747173', 1574173569),
+	(149, 15, '30351556', 1574173574),
+	(150, 15, '88420086', 1574173578),
+	(151, 15, '50075452', 1574173664),
+	(152, 15, '62441060', 1574173754),
+	(153, 15, '18116171', 1574173802),
+	(154, 15, '11821874', 1574173895),
+	(155, 15, '31220851', 1574181073);
 /*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting
@@ -257,17 +302,20 @@ CREATE TABLE IF NOT EXISTS `user_setting` (
   CONSTRAINT `FK_user_setting_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_setting: ~4 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_setting: ~9 rows (ungefähr)
 /*!40000 ALTER TABLE `user_setting` DISABLE KEYS */;
 INSERT INTO `user_setting` (`user_id`, `settings_id`, `setting_value`) VALUES
 	(6, 1, 1),
 	(8, 1, 0),
 	(8, 2, 1),
 	(15, 1, 0),
-	(15, 2, 1);
+	(15, 2, 0),
+	(16, 1, 0),
+	(16, 2, 0),
+	(4, 1, 1),
+	(4, 2, 0);
 /*!40000 ALTER TABLE `user_setting` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-project

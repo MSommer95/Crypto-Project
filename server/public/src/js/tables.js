@@ -59,7 +59,7 @@ export function initFileTable() {
         const fileID = rowData.id;
         const data = {
             file_id: fileID,
-            filename: filename
+            file_name: filename
         };
         let url = '';
         if(rowData.is_encrypted) {

@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `user_data` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `user_id` int(11) NOT NULL,
   `file_name` varchar(258) NOT NULL DEFAULT '',
+  `file_description` text,
   `path` longtext NOT NULL,
   `is_encrypted` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -64,6 +65,11 @@ CREATE TABLE IF NOT EXISTS `user_data` (
 
 -- Exportiere Daten aus Tabelle project.user_data: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_data` DISABLE KEYS */;
+INSERT INTO `user_data` (`id`, `user_id`, `file_name`, `file_description`, `path`, `is_encrypted`) VALUES
+	(1574429152332, 15, 'Notizen AWS.txt', NULL, '/files/unencrypted/Notizen AWS.txt', 0),
+	(1574429156654, 15, 'Notizen AWS.txt', NULL, '/files/encrypted/Notizen AWS.txt.encrypted', 1),
+	(1574435698647, 15, 'AWS.pdf', NULL, '/files/unencrypted/AWS.pdf', 0),
+	(1574435707554, 15, 'AWS.pdf', NULL, '/files/encrypted/AWS.pdf.encrypted', 1);
 /*!40000 ALTER TABLE `user_data` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_device
@@ -95,10 +101,13 @@ CREATE TABLE IF NOT EXISTS `user_key` (
   KEY `FK_user_key_user_data` (`file_id`),
   CONSTRAINT `FK_user_key_user_data` FOREIGN KEY (`file_id`) REFERENCES `user_data` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_user_key_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_key: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_key` DISABLE KEYS */;
+INSERT INTO `user_key` (`id`, `user_id`, `file_id`, `key_path`) VALUES
+	(14, 15, 1574429156654, '/keys/Notizen AWS.txt.key'),
+	(15, 15, 1574435707554, '/keys/AWS.pdf.key');
 /*!40000 ALTER TABLE `user_key` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp
@@ -111,13 +120,13 @@ CREATE TABLE IF NOT EXISTS `user_otp` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=156 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
 INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`, `verified`) VALUES
 	(145, 8, '33562210', 1574173026, 0),
-	(155, 15, '31220851', 1574181073, 0);
+	(163, 15, '15504730', 1574436220, 0);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp_used
@@ -129,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `user_otp_used` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=156 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
 
 -- Exportiere Daten aus Tabelle project.user_otp_used: ~150 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
@@ -288,7 +297,15 @@ INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(152, 15, '62441060', 1574173754),
 	(153, 15, '18116171', 1574173802),
 	(154, 15, '11821874', 1574173895),
-	(155, 15, '31220851', 1574181073);
+	(155, 15, '31220851', 1574181073),
+	(156, 15, '45728117', 1574434396),
+	(157, 15, '76602840', 1574434638),
+	(158, 15, '28088358', 1574435498),
+	(159, 15, '57601074', 1574435657),
+	(160, 15, '01021334', 1574435694),
+	(161, 15, '11428555', 1574435698),
+	(162, 15, '06648681', 1574436216),
+	(163, 15, '15504730', 1574436220);
 /*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting

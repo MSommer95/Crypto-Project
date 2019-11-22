@@ -8,52 +8,8 @@ export function hideElement(element) {
     $(element).addClass('hidden');
 }
 
-export function chooseNavbar(button) {
-
-    const hotpDiv = $('#hotp-section');
-    const fileDiv = $('#file-section');
-    const aboutDiv = $('#about-section');
-    const settingDiv = $('#setting-section');
-    const logoutDiv = $('#logout-section');
-
-    // Anzeigen/ausblenden der entsprechenden Container
-    switch (button.id) {
-        case 'hotpButton':
-            showElement(hotpDiv);
-            showElement(fileDiv);
-            hideElement(aboutDiv);
-            hideElement(settingDiv);
-            hideElement(logoutDiv);
-            break;
-        case 'fileButton':
-            hideElement(hotpDiv);
-            showElement(fileDiv);
-            hideElement(aboutDiv);
-            hideElement(settingDiv);
-            hideElement(logoutDiv);
-            break;
-        case 'aboutButton':
-            hideElement(hotpDiv);
-            hideElement(fileDiv);
-            showElement(aboutDiv);
-            hideElement(settingDiv);
-            hideElement(logoutDiv);
-            break;
-        case 'settingButton':
-            hideElement(hotpDiv);
-            hideElement(fileDiv);
-            hideElement(aboutDiv);
-            showElement(settingDiv);
-            hideElement(logoutDiv);
-            break;
-        case 'logoutButton':
-            hideElement(hotpDiv);
-            hideElement(fileDiv);
-            hideElement(aboutDiv);
-            hideElement(settingDiv);
-            showElement(logoutDiv);
-            break;
-    }
+export function scrollToID(element) {
+    $('html, body').animate({ scrollTop: element.offset().top }, 1000);
 }
 
 export function chooseLogin(button) {
@@ -74,25 +30,35 @@ export function chooseLogin(button) {
     }
 }
 
-$(".custom-file-input").on("change", function () {
-    const fileName = $(this).val().split("\\").pop();
-    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+$('.custom-file-input').on('change', function () {
+    const fileName = $(this).val().split('\\').pop();
+    $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
 });
 $('#otp-popup').on('shown.bs.modal', function () {
     $('#confirm_otp').trigger('focus')
 });
-$('#hotpButton').on('click', function () {
-    chooseNavbar(this);
+$('#device_nav-btn').on('click', function () {
+    scrollToID($('#device-section'));
 });
-$('#fileButton').on('click', function () {
-    chooseNavbar(this);
+$('#otp_nav-btn').on('click', function () {
+    scrollToID($('#otp-section'));
 });
-$('#aboutButton').on('click', function () {
-    chooseNavbar(this);
+$('#file_nav-btn').on('click', function () {
+    scrollToID($('#file-section'));
 });
-$('#settingButton').on('click', function () {
-    chooseNavbar(this);
+ $(window).scroll(function () {
+        if ($(this).scrollTop() > 50) {
+            $('#back-to-top').fadeIn();
+        } else {
+            $('#back-to-top').fadeOut();
+        }
+ });
+// scroll body to 0px on click
+$('#back-to-top').on('click', () => {
+    $('body,html').animate({
+        scrollTop: 0
+    }, 800);
+    return false;
 });
-$('#logoutButton').on('click', function () {
-    chooseNavbar(this);
-});
+
+

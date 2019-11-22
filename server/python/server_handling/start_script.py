@@ -145,6 +145,13 @@ class Index(object):
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
+    def get_users(self):
+        users = DBusers.db_get_users()
+        cherrypy.serving.response.headers['Content-Type'] = 'application/json'
+        return users
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def get_user_files(self):
         user_id = str(cherrypy.session.get('user_id'))
         files = DBfiles.db_get_user_files(user_id)
@@ -152,10 +159,10 @@ class Index(object):
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    def get_users(self):
-        users = DBusers.db_get_users()
-        cherrypy.serving.response.headers['Content-Type'] = 'application/json'
-        return users
+    def get_user_used_otps(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        used_otps = DBotp.db_get_used_otps(user_id)
+        return used_otps
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

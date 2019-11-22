@@ -7,23 +7,30 @@ import * as servCon from './serverConnector';
 export function initDeviceTable() {
     const deviceTable = new Tabulator('#device-table', {
         height: '100%',
+        layout:"fitColumns",
         columns: [
-            {title: 'ID', field: 'id', sorter: 'number'},
-            {title: 'Device', field: 'device'},
+            {title: 'DeviceID', field: 'device_id'},
+            {title: 'Device Name', field: 'device_name'},
         ],
     });
+
+    deviceTable.setData('/get_user_devices');
+
     return deviceTable
 }
 
 export function initOtpTable() {
     const otpTable = new Tabulator('#otp-table', {
-        height: '100%',
+        height: '512px',
+        layout:"fitColumns",
         columns: [
-            {title: 'ID', field: 'id', sorter: 'number'},
-            {title: 'OTP', field: 'otp'},
-            {title: 'Date', field: 'date', sorter: 'number', align: 'center'},
+            {title: 'OTP', field: 'used_otp'},
+            {title: 'Date', field: 'timestamp', sorter: 'number'},
         ],
     });
+
+    otpTable.setData('/get_user_used_otps');
+
     return otpTable
 }
 
@@ -81,13 +88,14 @@ export function initFileTable() {
 
 
     const filesTable = new Tabulator('#files-table', {
-        height: '100%',
+        height: '512px',
+        layout:"fitColumns",
         columns: [
             {title: 'Preview', field: 'preview'},
             {title: 'Filename', field: 'file_name'},
             {title: 'Description', field: 'description'},
-            {title: 'Encryption', field: 'is_encrypted', formatter: encryptIcon, cellClick: encryption},
-            {title: 'Download File', field: 'downloadFile', formatter: downloadIcon, cellClick: downloadFile}
+            {title: 'Encryption', field: 'is_encrypted', align: 'center', formatter: encryptIcon, cellClick: encryption},
+            {title: 'Download File', field: 'downloadFile', align: 'center', formatter: downloadIcon, cellClick: downloadFile}
         ],
     });
 

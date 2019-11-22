@@ -98,3 +98,18 @@ class DBotp:
             db.close()
         db_otp_verified = result[0]['verified']
         return db_otp_verified
+
+    @staticmethod
+    def db_get_used_otps(user_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'SELECT used_otp, timestamp FROM user_otp_used WHERE user_id = %s'
+                cursor.execute(sql, (user_id,))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+        return result

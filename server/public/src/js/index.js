@@ -15,7 +15,7 @@ const fileTable = tables.initFileTable();
 const qrImage = qrCode.initDeviceQR();
 
 $('#reg-device-btn').on('click', () => {
-    const registerDiv = $('#device-registration-qr');
+    const registerDiv = $('#qr-wrapper');
     const registerBtn = $('#reg-device-btn');
 
     if(registerDiv.css('display') === 'none') {

@@ -48,10 +48,14 @@
                 <h2>Devices</h2>
                 <div id="device-table"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" id="reg-device-btn">Register new Device</button>
+                    <button class="btn btn-primary mt-2 mb-3" id="reg-device-btn">Register new Device</button>
                 </div>
-                <div class="text-center mt-3" id="device-registration-qr" style="display: none">
-                    <p><b>Scan QR with Krypto2Factor App to register new Device</b></p>
+                <div id="qr-wrapper" style="display: none">
+                    <div class="card mx-auto mt-3 bg-light" id="device-registration-qr" >
+                        <div class="card-body bg-light">
+                            <p class="text-center mt-3"><b>Open Krypto2Factor App to Scan QR-Code</b></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

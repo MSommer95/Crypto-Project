@@ -9,7 +9,7 @@ export function hideElement(element) {
 }
 
 export function scrollToID(element) {
-    $('html, body').animate({ scrollTop: element.offset().top }, 1000);
+    $('html, body').animate({scrollTop: element.offset().top}, 1000);
 }
 
 export function chooseLogin(button) {
@@ -46,13 +46,13 @@ $('#otp_nav-btn').on('click', function () {
 $('#file_nav-btn').on('click', function () {
     scrollToID($('#file-section'));
 });
- $(window).scroll(function () {
-        if ($(this).scrollTop() > 50) {
-            $('#back-to-top').fadeIn();
-        } else {
-            $('#back-to-top').fadeOut();
-        }
- });
+$(window).scroll(function () {
+    if ($(this).scrollTop() > 50) {
+        $('#back-to-top').fadeIn();
+    } else {
+        $('#back-to-top').fadeOut();
+    }
+});
 // scroll body to 0px on click
 $('#back-to-top').on('click', () => {
     $('body,html').animate({

@@ -26,12 +26,15 @@ class FileEncryptor:
 
             fernet = Fernet(key)
             encrypted = fernet.encrypt(data_file)
-            encrypted_file_path = '/files/encrypted/%s.encrypted' % filename
+            encrypted_filename = filename + '.encrypted'
+            encrypted_file_path = '/files/encrypted/%s' % encrypted_filename
             with open(user_path + encrypted_file_path, 'wb') as f:
                 f.write(encrypted)
 
             is_encrypted = 1
-            DBfiles.db_insert_user_file(file_id_encrypt, user_id, filename, encrypted_file_path, is_encrypted)
+            file_description = ''
+            DBfiles.db_insert_user_file(file_id_encrypt, user_id, encrypted_filename, file_description,
+                                        encrypted_file_path, is_encrypted)
             DBfiles.db_insert_file_key(user_id, file_id_encrypt, key_file_path)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong'
@@ -63,7 +66,9 @@ class FileEncryptor:
                 f.write(decrypted)
 
             is_encrypted = 0
-            DBfiles.db_insert_user_file(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
+            file_description = ''
+            DBfiles.db_insert_user_file(file_id_decrypt, user_id, filename, file_description, decrypted_file_path,
+                                        is_encrypted)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong'
         else:

@@ -141,7 +141,18 @@ class Index(object):
     @cherrypy.expose()
     def file_decrypt(self, file_id, file_name):
         user_id = str(cherrypy.session.get('user_id'))
+        file_name = file_name.strip('.encrypted')
         return FileEncryptor.file_decryption(user_id, file_id, file_name)
+
+    @cherrypy.expose()
+    def file_update(self, file_id, file_description, path, file_name, is_encrypted):
+        user_id = str(cherrypy.session.get('user_id'))
+        if int(is_encrypted):
+            new_path = '/files/encrypted/%s' % file_name
+        else:
+            new_path = '/files/unencrypted/%s' % file_name
+        DBfiles.update_user_file(user_id, file_id, file_name, file_description, new_path)
+        return FileHandler.change_file_name(user_id, file_name, path, is_encrypted)
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

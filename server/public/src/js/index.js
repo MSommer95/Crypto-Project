@@ -1,7 +1,7 @@
 import * as servCon from './serverConnector';
 import $ from 'jquery';
 import * as tables from './tables';
-import * as qrCode from "./qrGenerator";
+import * as qrCode from './qrGenerator';
 import * as gui from './gui';
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,11 +18,10 @@ $('#reg-device-btn').on('click', () => {
     const registerDiv = $('#qr-wrapper');
     const registerBtn = $('#reg-device-btn');
 
-    if(registerDiv.css('display') === 'none') {
+    if (registerDiv.css('display') === 'none') {
         registerDiv.toggle();
         registerBtn.html("Hide registration QR");
-    }
-    else if(registerDiv.css('display') === 'block') {
+    } else if (registerDiv.css('display') === 'block') {
         registerDiv.toggle();
         registerBtn.html("Register new Device");
     }

@@ -8,13 +8,13 @@ from server.python.db_handling.db_connector import DBconnector
 class DBfiles:
 
     @staticmethod
-    def db_insert_user_file(file_id, user_id, file_name, path, is_encrypted):
+    def db_insert_user_file(file_id, user_id, file_name, file_description, path, is_encrypted):
         db = DBconnector.create_db_connection()
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
-                sql = 'INSERT INTO user_data (id, user_id, file_name, path, is_encrypted) VALUES (%s, %s, %s, %s, %s)'
-                cursor.execute(sql, (file_id, user_id, file_name, path, is_encrypted))
+                sql = 'INSERT INTO user_data (id, user_id, file_name, file_description, path, is_encrypted) VALUES (%s, %s, %s, %s, %s, %s)'
+                cursor.execute(sql, (file_id, user_id, file_name, file_description, path, is_encrypted))
                 db.commit()
                 db_connection_state = 'success'
         except pymysql.MySQLError as e:
@@ -56,6 +56,19 @@ class DBfiles:
         finally:
             db.close()
             return db_connection_state
+
+    @staticmethod
+    def update_user_file(user_id, file_id, file_name, file_description, path):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_data SET file_name = %s, file_description = %s, path = %s WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_name, file_description, path, file_id, user_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
 
     @staticmethod
     def db_get_file_key(key_id, user_id):

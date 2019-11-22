@@ -2,9 +2,9 @@
 # emailadresse geschickt. Der otp wird in der DB gespeichert, zusammen mit einem timestamp
 import secrets
 
-from server.python.app_sender import AppSender
-from server.python.db_connector import DbConnector
-from server.python.email_sender import EmailSender
+from server.python.comm_handling.app_sender import AppSender
+from server.python.comm_handling.email_sender import EmailSender
+from server.python.db_handling.db_otp import DBotp
 
 
 class OtpHandler:
@@ -14,13 +14,13 @@ class OtpHandler:
         otp_value = ''
         for x in range(8):
             otp_value += str(secrets.randbelow(9))
-        otp_used = DbConnector.db_check_for_used_otp(user_id, otp_value)
+        otp_used = DBotp.db_check_for_used_otp(user_id, otp_value)
 
         if otp_used:
             OtpHandler.create_2fa(user_id)
             return
         else:
-            DbConnector.db_insert_user_2fa(user_id, otp_value)
+            DBotp.db_insert_user_2fa(user_id, otp_value)
             return otp_value
 
     @staticmethod

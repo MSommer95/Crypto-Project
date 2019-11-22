@@ -1,13 +1,13 @@
 from pyfcm import FCMNotification
 
-from server.python.db_connector import DbConnector
+from server.python.db_handling.db_devices import DBdevices
 
 
 class AppSender:
 
     @staticmethod
     def send_otp_to_app(otp, user_id):
-        devices = DbConnector.db_get_user_devices_by_user_id(user_id)
+        devices = DBdevices.db_get_user_devices_by_user_id(user_id)
         api_key_path = '../storage/api_key/api_key'
         with open(api_key_path, 'r') as f:
             api_key = f.read()

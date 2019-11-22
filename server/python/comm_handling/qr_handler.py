@@ -1,5 +1,6 @@
-import qrcode
 import io
+
+import qrcode
 
 
 class QRHandler:

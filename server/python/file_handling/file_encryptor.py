@@ -2,7 +2,7 @@ import time
 
 from cryptography.fernet import Fernet
 
-from server.python.db_connector import DbConnector
+from server.python.db_handling.db_files import DBfiles
 
 
 class FileEncryptor:
@@ -19,7 +19,7 @@ class FileEncryptor:
             key_file.write(key)
             key_file.close()
 
-            db_file = DbConnector.db_get_user_file(file_id, user_id)
+            db_file = DBfiles.db_get_user_file(file_id, user_id)
             unencrypted_file_path = db_file[0]['path']
             with open(user_path + unencrypted_file_path, 'rb') as f:
                 data_file = f.read()
@@ -31,18 +31,17 @@ class FileEncryptor:
                 f.write(encrypted)
 
             is_encrypted = 1
-            DbConnector.db_insert_user_file(file_id_encrypt, user_id, filename, encrypted_file_path, is_encrypted)
-            DbConnector.db_insert_file_key(user_id, file_id_encrypt, key_file_path)
+            DBfiles.db_insert_user_file(file_id_encrypt, user_id, filename, encrypted_file_path, is_encrypted)
+            DBfiles.db_insert_file_key(user_id, file_id_encrypt, key_file_path)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong'
         else:
             return 'Everything worked'
 
-
     @staticmethod
     def file_decryption(user_id, file_id, filename):
         try:
-            db_file_key = DbConnector.db_get_file_key(file_id, user_id)
+            db_file_key = DBfiles.db_get_file_key(file_id, user_id)
             file_id_decrypt = int(round(time.time() * 1000))
             user_path = '../storage/users/%s' % user_id
 
@@ -50,7 +49,7 @@ class FileEncryptor:
             with open(user_path + key_file_path, 'rb') as f:
                 key = f.read()
 
-            db_file = DbConnector.db_get_user_file(file_id, user_id)
+            db_file = DBfiles.db_get_user_file(file_id, user_id)
 
             encrypted_file_path = db_file[0]['path']
             with open(user_path + encrypted_file_path, 'rb') as f:
@@ -64,7 +63,7 @@ class FileEncryptor:
                 f.write(decrypted)
 
             is_encrypted = 0
-            DbConnector.db_insert_user_file(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
+            DBfiles.db_insert_user_file(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong'
         else:

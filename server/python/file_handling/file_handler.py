@@ -1,6 +1,6 @@
 import time
 
-from server.python.db_connector import DbConnector
+from server.python.db_handling.db_files import DBfiles
 
 
 class FileHandler:
@@ -22,4 +22,4 @@ class FileHandler:
                 size += len(data)
 
         is_encrypted = 0
-        DbConnector.db_insert_user_file(file_id, user_id, file.filename, path, is_encrypted)
+        DBfiles.db_insert_user_file(file_id, user_id, file.filename, path, is_encrypted)

@@ -8,7 +8,7 @@ from server.python.db_handling.db_connector import DBconnector
 class DBdevices:
 
     @staticmethod
-    def db_get_user_devices_by_user_id(user_id):
+    def get_devices_by_user_id(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -24,7 +24,7 @@ class DBdevices:
         return result
 
     @staticmethod
-    def db_get_user_devices_by_device_id(device_id):
+    def get_devices_by_device_id(device_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -40,7 +40,7 @@ class DBdevices:
         return result
 
     @staticmethod
-    def db_insert_user_devices(user_id, device_id, device_name):
+    def insert_user_device(user_id, device_id, device_name):
         db = DBconnector.create_db_connection()
         db_connection_state = 'pending'
         try:

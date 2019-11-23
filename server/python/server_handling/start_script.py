@@ -31,7 +31,7 @@ class Index(object):
                     return open('../public/dist/index.html')
                 else:
                     user_id = str(cherrypy.session.get('user_id'))
-                    verified = DBotp.db_check_otp_verified(user_id)
+                    verified = DBotp.check_otp_verified(user_id)
                     if verified:
                         cherrypy.session['2fa_verified'] = verified
                         return open('../public/dist/index.html')
@@ -49,7 +49,7 @@ class Index(object):
     # zugehörige Ordner Struktur
     @cherrypy.expose()
     def create_account(self, email, password):
-        DirHandler.create_user_dir_structure(str(DBusers.db_insert_user(email, password)))
+        DirHandler.create_user_dirs(str(DBusers.insert_user(email, password)))
         return open('../public/dist/sign.html')
 
     # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
@@ -57,14 +57,14 @@ class Index(object):
     # jeweiligen Session Variablen
     @cherrypy.expose()
     def login_account(self, email, password):
-        user = DBusers.db_check_user(email, password)
+        user = DBusers.check_user(email, password)
         user_count = len(user)
         if user_count > 0:
             cherrypy.session['user_id'] = user['id']
             cherrypy.session['2fa_verified'] = 0
             user_id = str(user['id'])
-            user_settings = DBusers.db_get_user_settings(user_id)
-            DirHandler.check_user_dir_structure(user_id)
+            user_settings = DBusers.get_user_settings(user_id)
+            DirHandler.check_user_dirs(user_id)
             if user_settings['2FA-Mail'] == 1:
                 cherrypy.session['2fa_status'] = 1
                 otp = OtpHandler.create_2fa(user_id)
@@ -93,19 +93,19 @@ class Index(object):
     @cherrypy.expose()
     def verify_otp(self, otp):
         user_id = str(cherrypy.session.get('user_id'))
-        check_value = DBotp.db_check_2fa(user_id, otp)
+        check_value = DBotp.check_current_otp(user_id, otp)
         if check_value:
             cherrypy.session['2fa_verified'] = 1
-            DirHandler.check_user_dir_structure(user_id)
+            DirHandler.check_user_dirs(user_id)
             return 'Varification valid'
         else:
             return 'Varification invalid'
 
     @cherrypy.expose()
     def verify_otp_app(self, otp, user_id):
-        check_value = DBotp.db_check_2fa(user_id, otp)
+        check_value = DBotp.check_current_otp(user_id, otp)
         if check_value:
-            DBotp.db_update_otp_verified(user_id)
+            DBotp.update_otp_verified(user_id)
             return 'Varification valid'
         else:
             return 'Varification invalid'
@@ -113,7 +113,7 @@ class Index(object):
     @cherrypy.expose()
     def check_otp_verified(self):
         user_id = cherrypy.session.get('user_id')
-        check_value = str(DBotp.db_check_otp_verified(user_id))
+        check_value = str(DBotp.check_otp_verified(user_id))
         return check_value
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
@@ -135,14 +135,14 @@ class Index(object):
     @cherrypy.expose()
     def file_encrypt(self, file_id, file_name):
         user_id = str(cherrypy.session.get('user_id'))
-        return FileEncryptor.file_encryption(user_id, file_id, file_name)
+        return FileEncryptor.encryption(user_id, file_id, file_name)
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_decrypt(self, file_id, file_name):
         user_id = str(cherrypy.session.get('user_id'))
         file_name = file_name.strip('.encrypted')
-        return FileEncryptor.file_decryption(user_id, file_id, file_name)
+        return FileEncryptor.decryption(user_id, file_id, file_name)
 
     @cherrypy.expose()
     def file_update(self, file_id, file_description, path, file_name, is_encrypted):
@@ -157,7 +157,7 @@ class Index(object):
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_users(self):
-        users = DBusers.db_get_users()
+        users = DBusers.get_users()
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
         return users
 
@@ -165,27 +165,27 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_files(self):
         user_id = str(cherrypy.session.get('user_id'))
-        files = DBfiles.db_get_user_files(user_id)
+        files = DBfiles.get_user_files(user_id)
         return files
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_used_otps(self):
         user_id = str(cherrypy.session.get('user_id'))
-        used_otps = DBotp.db_get_used_otps(user_id)
+        used_otps = DBotp.get_used_otps(user_id)
         return used_otps
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_devices(self):
         user_id = str(cherrypy.session.get('user_id'))
-        devices = DBdevices.db_get_user_devices_by_user_id(user_id)
+        devices = DBdevices.get_devices_by_user_id(user_id)
         return devices
 
     @cherrypy.expose()
     def insert_user_device(self, device_id, device_name):
         user_id = str(cherrypy.session.get('user_id'))
-        db_connection_state = DBdevices.db_insert_user_devices(user_id, device_id, device_name)
+        db_connection_state = DBdevices.insert_user_device(user_id, device_id, device_name)
 
         if db_connection_state == 'success':
             return 'Successfully inserted device'
@@ -196,7 +196,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def authenticate_app(self, email, password, device_id, device_name):
         print(device_id)
-        user = DBusers.db_check_user(email, password)
+        user = DBusers.check_user(email, password)
         user_count = len(user)
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
 
@@ -204,10 +204,10 @@ class Index(object):
             cherrypy.session['user_id'] = user['id']
             cherrypy.session['2fa_status'] = 0
             user_id = str(user['id'])
-            user_settings = DBusers.db_get_user_settings(user_id)
+            user_settings = DBusers.get_user_settings(user_id)
 
             if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
-                devices = DBdevices.db_get_user_devices_by_user_id(user_id)
+                devices = DBdevices.get_devices_by_user_id(user_id)
                 print(str(devices))
 
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
@@ -217,7 +217,7 @@ class Index(object):
 
                     return response
                 else:
-                    DBdevices.db_insert_user_devices(user_id, device_id, device_name)
+                    DBdevices.insert_user_device(user_id, device_id, device_name)
                     response = {'status': 200, 'message': 'Device added'}
                     return response
             else:
@@ -229,9 +229,9 @@ class Index(object):
 
     @cherrypy.expose()
     def request_otp_app(self, device_id):
-        device = DBdevices.db_get_user_devices_by_device_id(device_id)
+        device = DBdevices.get_devices_by_device_id(device_id)
         user_id = str(device[0]['user_id'])
-        user_settings = DBusers.db_get_user_settings(user_id)
+        user_settings = DBusers.get_user_settings(user_id)
 
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_2fa(user_id)
@@ -247,6 +247,7 @@ class Index(object):
 
 
 if __name__ == '__main__':
+    os.chdir('../')
     conf = {
         '/': {
             'tools.sessions.on': True,

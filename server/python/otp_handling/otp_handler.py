@@ -14,13 +14,13 @@ class OtpHandler:
         otp_value = ''
         for x in range(8):
             otp_value += str(secrets.randbelow(9))
-        otp_used = DBotp.db_check_for_used_otp(user_id, otp_value)
+        otp_used = DBotp.check_for_used_otp(user_id, otp_value)
 
         if otp_used:
             OtpHandler.create_2fa(user_id)
             return
         else:
-            DBotp.db_insert_user_2fa(user_id, otp_value)
+            DBotp.insert_user_otp(user_id, otp_value)
             return otp_value
 
     @staticmethod

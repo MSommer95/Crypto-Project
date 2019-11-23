@@ -15,7 +15,7 @@ class DirHandler:
 
     # create_dirs Funktion nimmt die user_id entgegen und erstellt alle notwendigen Ordner für den User
     @staticmethod
-    def create_user_dir_structure(user_id):
+    def create_user_dirs(user_id):
         path = '../storage/users/'
         sub_dirs = [
             '/keys',
@@ -38,7 +38,7 @@ class DirHandler:
     # check_for_dirs Funktion nimmt eine user_id und überprüft, ob die notwendigen Ordner existieren / wenn nicht werden
     # die fehlenden Ordner erstellt
     @staticmethod
-    def check_user_dir_structure(user_id):
+    def check_user_dirs(user_id):
         base_path = '../storage/users/%s' % user_id
         paths = [
             '/files',
@@ -64,7 +64,7 @@ class DirHandler:
                 if not os.path.isdir(base_path + paths[x]):
                     DirHandler.create_dir(base_path + paths[x])
         else:
-            DirHandler.create_user_dir_structure(user_id)
+            DirHandler.create_user_dirs(user_id)
 
     @staticmethod
     def check_server_dirs():

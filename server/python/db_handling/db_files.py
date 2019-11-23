@@ -8,7 +8,7 @@ from server.python.db_handling.db_connector import DBconnector
 class DBfiles:
 
     @staticmethod
-    def db_insert_user_file(file_id, user_id, file_name, path, is_encrypted):
+    def insert_user_file(file_id, user_id, file_name, path, is_encrypted):
         db = DBconnector.create_db_connection()
         db_connection_state = 'pending'
         try:
@@ -25,7 +25,7 @@ class DBfiles:
             return db_connection_state
 
     @staticmethod
-    def db_get_user_files(user_id):
+    def get_user_files(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -41,7 +41,36 @@ class DBfiles:
         return result
 
     @staticmethod
-    def db_insert_file_key(user_id, file_id, key_path):
+    def get_user_file(file_id, user_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'SELECT * FROM user_data WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_id, user_id))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result
+
+    @staticmethod
+    def update_user_file(user_id, file_id, file_name, file_description, path):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_data SET file_name = %s, file_description = %s, path = %s WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_name, file_description, path, file_id, user_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def insert_file_key(user_id, file_id, key_path):
         db = DBconnector.create_db_connection()
         db_connection_state = 'pending'
         try:
@@ -58,41 +87,12 @@ class DBfiles:
             return db_connection_state
 
     @staticmethod
-    def update_user_file(user_id, file_id, file_name, file_description, path):
-        db = DBconnector.create_db_connection()
-        try:
-            with db.cursor() as cursor:
-                sql = 'UPDATE user_data SET file_name = %s, file_description = %s, path = %s WHERE id = %s AND user_id = %s'
-                cursor.execute(sql, (file_name, file_description, path, file_id, user_id))
-                db.commit()
-        except pymysql.MySQLError as e:
-            logging.error(e)
-        finally:
-            db.close()
-
-    @staticmethod
-    def db_get_file_key(key_id, user_id):
+    def get_file_key(key_id, user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_key WHERE file_id = %s AND user_id = %s'
                 cursor.execute(sql, (key_id, user_id))
-                db.commit()
-                result = cursor.fetchall()
-        except pymysql.MySQLError as e:
-            logging.error(e)
-        finally:
-            db.close()
-
-        return result
-
-    @staticmethod
-    def db_get_user_file(file_id, user_id):
-        db = DBconnector.create_db_connection()
-        try:
-            with db.cursor() as cursor:
-                sql = 'SELECT * FROM user_data WHERE id = %s AND user_id = %s'
-                cursor.execute(sql, (file_id, user_id))
                 db.commit()
                 result = cursor.fetchall()
         except pymysql.MySQLError as e:

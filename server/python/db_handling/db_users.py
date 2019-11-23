@@ -9,7 +9,7 @@ from server.python.db_handling.hash_handler import HashHandler
 class DBusers:
 
     @staticmethod
-    def db_get_users():
+    def get_users():
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -25,7 +25,7 @@ class DBusers:
         return results
 
     @staticmethod
-    def db_check_user(email, password):
+    def check_user(email, password):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -46,7 +46,7 @@ class DBusers:
             return []
 
     @staticmethod
-    def db_get_user_settings(user_id):
+    def get_user_settings(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -67,7 +67,7 @@ class DBusers:
         return settings
 
     @staticmethod
-    def db_insert_user(email, password):
+    def insert_user(email, password):
         db = DBconnector.create_db_connection()
         hashed_password = HashHandler.hash_password(password)
         try:

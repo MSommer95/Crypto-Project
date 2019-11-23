@@ -7,13 +7,32 @@ from server.python.db_handling.db_connector import DBconnector
 
 
 class DBotp:
+
     @staticmethod
-    def db_check_for_used_otp(user_id, hotp):
+    def insert_user_otp(user_id, otp):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                ts = int(time.time())
+                sql = 'DELETE FROM user_otp WHERE user_id = %s'
+                cursor.execute(sql, (user_id,))
+                sql = 'INSERT INTO user_otp (user_id, current_otp, timestamp, verified) VALUES (%s, %s, %s, %s)'
+                cursor.execute(sql, (user_id, otp, ts, 0))
+                sql = 'INSERT INTO user_otp_used (user_id, used_otp, timestamp) VALUES (%s, %s, %s)'
+                cursor.execute(sql, (user_id, otp, ts))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def check_for_used_otp(user_id, otp):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s'
-                cursor.execute(sql, (user_id, hotp))
+                cursor.execute(sql, (user_id, otp))
                 db.commit()
                 result = cursor.fetchall()
         except pymysql.MySQLError as e:
@@ -27,25 +46,7 @@ class DBotp:
             return False
 
     @staticmethod
-    def db_insert_user_2fa(user_id, hotp):
-        db = DBconnector.create_db_connection()
-        try:
-            with db.cursor() as cursor:
-                ts = int(time.time())
-                sql = 'DELETE FROM user_otp WHERE user_id = %s'
-                cursor.execute(sql, (user_id,))
-                sql = 'INSERT INTO user_otp (user_id, current_otp, timestamp, verified) VALUES (%s, %s, %s, %s)'
-                cursor.execute(sql, (user_id, hotp, ts, 0))
-                sql = 'INSERT INTO user_otp_used (user_id, used_otp, timestamp) VALUES (%s, %s, %s)'
-                cursor.execute(sql, (user_id, hotp, ts))
-                db.commit()
-        except pymysql.MySQLError as e:
-            logging.error(e)
-        finally:
-            db.close()
-
-    @staticmethod
-    def db_check_2fa(user_id, hotp):
+    def check_current_otp(user_id, hotp):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -71,7 +72,7 @@ class DBotp:
             return False
 
     @staticmethod
-    def db_update_otp_verified(user_id):
+    def update_otp_verified(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -84,7 +85,7 @@ class DBotp:
             db.close()
 
     @staticmethod
-    def db_check_otp_verified(user_id):
+    def check_otp_verified(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
@@ -100,7 +101,7 @@ class DBotp:
         return db_otp_verified
 
     @staticmethod
-    def db_get_used_otps(user_id):
+    def get_used_otps(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:

@@ -3,8 +3,25 @@ import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import locked from '../img/baseline_lock_black_18dp.png';
 import unlocked from '../img/baseline_lock_open_black_18dp.png';
 import downloadPng from '../img/baseline_cloud_download_black_18dp.png';
-import uploadloadPng from '../img/baseline_cloud_upload_black_18dp.png';
+import savePng from '../img/baseline_save_black_18dp.png';
+import deletePng from '../img/baseline_delete_forever_black_18dp.png';
 import * as servCon from './serverConnector';
+import * as gui from './gui';
+
+const saveIcon = (cell, formatterParams, onRendered) => {
+    const icon = new Image();
+    icon.src = savePng;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
+const deleteIcon = (cell, formatterParams, onRendered) => {
+    const icon = new Image();
+    icon.src = deletePng;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
 
 export function initDeviceTable() {
     const deviceTable = new Tabulator('#device-table', {
@@ -56,13 +73,6 @@ export function initFileTable() {
         icon.width = 32;
         return icon
     };
-    const uploadIcon = (cell, formatterParams, onRendered) => {
-        const icon = new Image();
-        icon.src = uploadloadPng;
-        icon.height = 32;
-        icon.width = 32;
-        return icon
-    };
 
     function downloadFile(e, cell) {
         const rowData = cell.getRow().getData();
@@ -71,8 +81,7 @@ export function initFileTable() {
         const method = 'post';
         servCon.requestFile(url, filepath, method);
     }
-
-    function uploadChanges(e, cell) {
+    function saveChanges(e, cell) {
         const rowData = cell.getRow().getData();
         const sendData = {
             file_id: rowData.id,
@@ -83,10 +92,9 @@ export function initFileTable() {
         };
         const url = '/file_update';
         servCon.postDBData(url, sendData, (cb) => {
-            console.log(cb)
+            gui.changeNotificationTextAndOpen(cb.responseText);
         });
     }
-
     function encryption(e, cell) {
         const rowData = cell.getRow().getData();
         const filename = rowData.file_name;
@@ -102,12 +110,21 @@ export function initFileTable() {
             url = '/file_encrypt';
         }
         servCon.postDBData(url, data, (cb) => {
-            console.log(cb.responseText);
-            if (cb.responseText.includes('worked')) {
-                filesTable.setData('/get_user_files');
-            } else if (cb.responseText.includes('wrong')) {
-                alert(cb.responseText)
-            }
+            gui.changeNotificationTextAndOpen(cb.responseText);
+            filesTable.setData('/get_user_files');
+        });
+    }
+    function deleteRow(e, cell) {
+        const rowData = cell.getRow().getData();
+        cell.getRow().delete();
+        const url = '/file_delete';
+        const data = {
+            file_id: rowData.id,
+            path: rowData.path,
+            is_encrypted: rowData.is_encrypted
+        };
+        servCon.postDBData(url, data, (cb) => {
+            gui.changeNotificationTextAndOpen(cb.responseText)
         });
     }
 
@@ -122,22 +139,33 @@ export function initFileTable() {
                 title: 'Encryption',
                 field: 'is_encrypted',
                 align: 'center',
+                width: 128,
                 formatter: encryptIcon,
                 cellClick: encryption
             },
             {
-                title: 'Download File',
+                title: 'Download',
                 field: 'downloadFile',
                 align: 'center',
+                width: 128,
                 formatter: downloadIcon,
                 cellClick: downloadFile
             },
             {
-                title: 'Save Changes',
+                title: 'Save',
                 field: 'saveChanges',
                 align: 'center',
-                formatter: uploadIcon,
-                cellClick: uploadChanges
+                width: 128,
+                formatter: saveIcon,
+                cellClick: saveChanges
+            },
+            {
+                title: 'Delete',
+                field: 'delete',
+                align: 'center',
+                width: 128,
+                formatter: deleteIcon,
+                cellClick: deleteRow
             }
         ],
     });

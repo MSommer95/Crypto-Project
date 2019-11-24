@@ -35,9 +35,9 @@ class FileEncryptor:
             DBfiles.insert_user_file(file_id_encrypt, user_id, encrypted_filename, encrypted_file_path, is_encrypted)
             DBfiles.insert_file_key(user_id, file_id_encrypt, key_file_path)
         except (RuntimeError, TypeError, NameError):
-            return 'Something went wrong'
+            return 'Something went wrong while encrypting the file'
         else:
-            return 'Everything worked'
+            return 'Successfully encrypted the file'
 
     @staticmethod
     def decryption(user_id, file_id, filename):
@@ -66,6 +66,6 @@ class FileEncryptor:
             is_encrypted = 0
             DBfiles.insert_user_file(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
         except (RuntimeError, TypeError, NameError):
-            return 'Something went wrong'
+            return 'Something went wrong while decrypting the file'
         else:
-            return 'Everything worked'
+            return 'Successfully decrypted the file'

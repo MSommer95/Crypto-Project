@@ -69,12 +69,14 @@ class DirHandler:
     @staticmethod
     def check_server_dirs():
         base_path = '../storage'
+        server_path = './server_handling'
 
         sub_paths = [
             '/api_key',
             '/email_key',
             '/users'
         ]
+        log_path = '/logs'
 
         if not os.path.isdir(base_path):
             DirHandler.create_dir(base_path)
@@ -84,3 +86,5 @@ class DirHandler:
             for path in sub_paths:
                 if not os.path.isdir(base_path + path):
                     DirHandler.create_dir(base_path + path)
+        if not os.path.isdir(server_path + log_path):
+            DirHandler.create_dir(server_path + log_path)

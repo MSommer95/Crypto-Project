@@ -87,12 +87,28 @@ class DBfiles:
             return db_connection_state
 
     @staticmethod
-    def get_file_key(key_id, user_id):
+    def delete_file(file_id, user_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'DELETE FROM user_data WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_id, user_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+            return 'Something went wrong'
+        else:
+            return 'Successful file deleted'
+        finally:
+            db.close()
+
+    @staticmethod
+    def get_file_key(file_id, user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_key WHERE file_id = %s AND user_id = %s'
-                cursor.execute(sql, (key_id, user_id))
+                cursor.execute(sql, (file_id, user_id))
                 db.commit()
                 result = cursor.fetchall()
         except pymysql.MySQLError as e:
@@ -101,3 +117,16 @@ class DBfiles:
             db.close()
 
         return result
+
+    @staticmethod
+    def update_file_key(key_id, user_id, file_id, key_path):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_key SET key_path = %s WHERE id = %s AND user_id = %s AND file_id = %s'
+                cursor.execute(sql, (key_path, key_id, user_id, file_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()

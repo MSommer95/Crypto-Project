@@ -30,12 +30,17 @@ export function chooseLogin(button) {
     }
 }
 
+export function changeNotificationTextAndOpen(text) {
+    $('#notification-text').text(text);
+    $('#notification-popup').modal();
+}
+
 $('.custom-file-input').on('change', function () {
     const fileName = $(this).val().split('\\').pop();
     $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
 });
 $('#otp-popup').on('shown.bs.modal', function () {
-    $('#confirm_otp').trigger('focus')
+    $('#confirm_otp').trigger('focus');
 });
 $('#device_nav-btn').on('click', function () {
     scrollToID($('#device-section'));

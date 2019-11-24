@@ -152,14 +152,12 @@ class Index(object):
         else:
             new_path = '/files/unencrypted/%s' % file_name
         DBfiles.update_user_file(user_id, file_id, file_name, file_description, new_path)
-        return FileHandler.change_file_name(user_id, file_name, path, is_encrypted)
+        return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted)
 
     @cherrypy.expose()
-    @cherrypy.tools.json_out()
-    def get_users(self):
-        users = DBusers.get_users()
-        cherrypy.serving.response.headers['Content-Type'] = 'application/json'
-        return users
+    def file_delete(self, file_id, path, is_encrypted):
+        user_id = str(cherrypy.session.get('user_id'))
+        return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
@@ -232,7 +230,6 @@ class Index(object):
         device = DBdevices.get_devices_by_device_id(device_id)
         user_id = str(device[0]['user_id'])
         user_settings = DBusers.get_user_settings(user_id)
-
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_2fa(user_id)
             return otp
@@ -252,7 +249,10 @@ if __name__ == '__main__':
         '/': {
             'tools.sessions.on': True,
             'tools.staticdir.root': os.path.abspath(os.getcwd()),
-            'tools.sessions.timeout': 20
+            'tools.sessions.timeout': 20,
+            'log.access_file': "./server_handling/logs/access.log",
+            'log.error_file': "./server_handling/logs/error.log",
+            'log.screen': False,
         },
         '/generator': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),

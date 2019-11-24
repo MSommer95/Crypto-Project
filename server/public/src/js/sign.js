@@ -56,7 +56,7 @@ $('#send_login-btn').on('click', () => {
 });
 
 $('#secure_password-generator').on('click', () => {
-    showElement($('#secure_password-popup'));
+    $('#secure_password-popup').modal();
     let password = generatePassword(true, true, true, true, 16);
     $('#secure_password-pwd').val(password);
     $('#create_password').val(password);

@@ -27,28 +27,6 @@ $('#reg-device-btn').on('click', () => {
     }
 });
 
-$('#decrypt-btn').on('click', () => {
-    let url = '/file_decrypt';
-    let data = {
-        file_id: 1573047199622,
-        filename: 'AR-Kickoff.pptx'
-    };
-    servCon.postDBData(url, data, () => {
-
-    });
-});
-
-$('#encrypt-btn').on('click', () => {
-    let url = '/file_encrypt';
-    let data = {
-        file_id: 1573047070495,
-        filename: 'AR-Kickoff.pptx'
-    };
-    servCon.postDBData(url, data, () => {
-
-    });
-});
-
 $('#logout-btn').on('click', function () {
     let url = '/logout_account';
     servCon.getData(url, (cb) => {

@@ -13,6 +13,7 @@ from server.python.db_handling.db_users import DBusers
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
 from server.python.otp_handling.otp_handler import OtpHandler
+from server.python.otp_handling.second_factor_handling import SecondFactorHandler
 from server.python.server_handling.dir_handler import DirHandler
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
@@ -189,6 +190,26 @@ class Index(object):
             return 'Successfully inserted device'
         elif db_connection_state == 'failed':
             return 'Failed to insert device'
+
+    @cherrypy.expose()
+    def delete_user_device(self, device_id):
+        user_id = str(cherrypy.session.get('user_id'))
+        DBdevices.delete_device(device_id, user_id)
+        deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
+        return deleted_message
+
+    @cherrypy.expose()
+    def activate_user_device(self, device_id):
+        user_id = str(cherrypy.session.get('user_id'))
+        DBdevices.deactivate_all_user_devices(user_id)
+        return SecondFactorHandler.activate_device(user_id, device_id)
+
+    @cherrypy.expose()
+    def deactivate_user_device(self, device_id):
+        user_id = str(cherrypy.session.get('user_id'))
+        deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
+        deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
+        return deactived_message + ' ' + deactivae_addition
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

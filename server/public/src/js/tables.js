@@ -3,33 +3,83 @@ import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import locked from '../img/baseline_lock_black_18dp.png';
 import unlocked from '../img/baseline_lock_open_black_18dp.png';
 import downloadPng from '../img/baseline_cloud_download_black_18dp.png';
-import savePng from '../img/baseline_save_black_18dp.png';
-import deletePng from '../img/baseline_delete_forever_black_18dp.png';
 import * as servCon from './serverConnector';
+import {postDBData} from './serverConnector';
 import * as gui from './gui';
 
-const saveIcon = (cell, formatterParams, onRendered) => {
-    const icon = new Image();
-    icon.src = savePng;
-    icon.height = 32;
-    icon.width = 32;
-    return icon
-};
-const deleteIcon = (cell, formatterParams, onRendered) => {
-    const icon = new Image();
-    icon.src = deletePng;
-    icon.height = 32;
-    icon.width = 32;
-    return icon
-};
-
 export function initDeviceTable() {
+    function setActive(cell) {
+        const cellValue = cell.getValue();
+        if (cellValue === false) {
+            if (confirm('Do you really want to deactivate the device? There must be at least one active device! (If there is none the second factor will be your Email)')) {
+                const rowData = cell.getRow().getData();
+                const url = '/deactivate_user_device';
+                const data = {
+                    device_id: rowData.id
+                };
+                postDBData(url, data, (cb) => {
+                    gui.changeNotificationTextAndOpen(cb.responseText);
+                    deviceTable.setData('/get_user_devices');
+                });
+            } else {
+                cell.setValue(cell.getOldValue());
+            }
+        } else if (cellValue === true) {
+            if (confirm('Do you really want to activate the device? There can only be one active device! (The other one will be deactivated)')) {
+                const rowData = cell.getRow().getData();
+                const url = '/activate_user_device';
+                const data = {
+                    device_id: rowData.id
+                };
+                postDBData(url, data, (cb) => {
+                    gui.changeNotificationTextAndOpen(cb.responseText);
+                    deviceTable.setData('/get_user_devices');
+                });
+            } else {
+                cell.setValue(cell.getOldValue());
+            }
+        }
+    }
+
+    function deleteDevice(e, cell) {
+        if (confirm('Do you really want to delete the device?')) {
+            const rowData = cell.getRow().getData();
+            const url = '/delete_user_device';
+            const data = {
+                device_id: rowData.id
+            };
+            cell.getRow().delete();
+            servCon.postDBData(url, data, (cb) => {
+                gui.changeNotificationTextAndOpen(cb.responseText)
+            });
+        }
+    }
+
     const deviceTable = new Tabulator('#device-table', {
         height: '100%',
         layout: "fitColumns",
         columns: [
             {title: 'DeviceID', field: 'device_id'},
             {title: 'Device Name', field: 'device_name'},
+            {
+                title: 'Active',
+                field: 'device_is_active',
+                width: 90,
+                align: "center",
+                formatter: "tickCross",
+                sorter: "boolean",
+                editor: true,
+                cellEdited: setActive
+            },
+            {
+                title: 'Delete',
+                field: 'delete',
+                align: 'center',
+                width: 128,
+                formatter: gui.deleteIcon,
+                cellClick: deleteDevice
+            }
+
         ],
     });
 
@@ -81,6 +131,7 @@ export function initFileTable() {
         const method = 'post';
         servCon.requestFile(url, filepath, method);
     }
+
     function saveChanges(e, cell) {
         const rowData = cell.getRow().getData();
         const sendData = {
@@ -95,6 +146,7 @@ export function initFileTable() {
             gui.changeNotificationTextAndOpen(cb.responseText);
         });
     }
+
     function encryption(e, cell) {
         const rowData = cell.getRow().getData();
         const filename = rowData.file_name;
@@ -114,18 +166,21 @@ export function initFileTable() {
             filesTable.setData('/get_user_files');
         });
     }
+
     function deleteRow(e, cell) {
-        const rowData = cell.getRow().getData();
-        cell.getRow().delete();
-        const url = '/file_delete';
-        const data = {
-            file_id: rowData.id,
-            path: rowData.path,
-            is_encrypted: rowData.is_encrypted
-        };
-        servCon.postDBData(url, data, (cb) => {
-            gui.changeNotificationTextAndOpen(cb.responseText)
-        });
+        if (confirm('Do you really want to delete the file?')) {
+            const rowData = cell.getRow().getData();
+            const url = '/file_delete';
+            const data = {
+                file_id: rowData.id,
+                path: rowData.path,
+                is_encrypted: rowData.is_encrypted
+            };
+            cell.getRow().delete();
+            servCon.postDBData(url, data, (cb) => {
+                gui.changeNotificationTextAndOpen(cb.responseText)
+            });
+        }
     }
 
     const filesTable = new Tabulator('#files-table', {
@@ -156,7 +211,7 @@ export function initFileTable() {
                 field: 'saveChanges',
                 align: 'center',
                 width: 128,
-                formatter: saveIcon,
+                formatter: gui.saveIcon,
                 cellClick: saveChanges
             },
             {
@@ -164,7 +219,7 @@ export function initFileTable() {
                 field: 'delete',
                 align: 'center',
                 width: 128,
-                formatter: deleteIcon,
+                formatter: gui.deleteIcon,
                 cellClick: deleteRow
             }
         ],

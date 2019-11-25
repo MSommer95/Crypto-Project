@@ -1,4 +1,21 @@
 import $ from 'jquery';
+import savePng from "../img/baseline_save_black_18dp.png";
+import deletePng from "../img/baseline_delete_forever_black_18dp.png";
+
+export const saveIcon = (cell, formatterParams, onRendered) => {
+    const icon = new Image();
+    icon.src = savePng;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
+export const deleteIcon = (cell, formatterParams, onRendered) => {
+    const icon = new Image();
+    icon.src = deletePng;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
 
 export function showElement(element) {
     $(element).removeClass('hidden');

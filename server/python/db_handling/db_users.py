@@ -79,7 +79,7 @@ class DBusers:
                 cursor.execute(sql, (email,))
                 db.commit()
                 result = cursor.fetchall()
-                sql = 'INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 1)'
+                sql = 'INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 1, 0)'
                 cursor.execute(sql, (result[0]['id'],))
                 db.commit()
                 sql = 'INSERT INTO user_setting (user_id, settings_id, setting_value) VALUES (%s, 2, 0)'
@@ -90,3 +90,16 @@ class DBusers:
         finally:
             db.close()
         return result[0]['id']
+
+    @staticmethod
+    def set_second_factor_option(user_id, settings_id, setting_value):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_setting SET setting_value = %s WHERE user_id = %s AND settings_id = %s'
+                cursor.execute(sql, (setting_value, user_id, settings_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()

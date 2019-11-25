@@ -55,3 +55,45 @@ class DBdevices:
         finally:
             db.close()
             return db_connection_state
+
+    @staticmethod
+    def set_active_user_device(user_id, device_id, activate_value):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_device SET device_is_active = %s WHERE user_id = %s AND id = %s'
+                cursor.execute(sql, (activate_value, user_id, device_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def deactivate_all_user_devices(user_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_device SET device_is_active = 0 WHERE user_id = %s'
+                cursor.execute(sql, (user_id,))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def delete_device(device_id, user_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'DELETE FROM user_device WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (device_id, user_id))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result

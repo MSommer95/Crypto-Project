@@ -98,18 +98,18 @@ class Index(object):
         if check_value:
             cherrypy.session['2fa_verified'] = 1
             DirHandler.check_user_dirs(user_id)
-            return 'Varification valid'
+            return 'Verification valid'
         else:
-            return 'Varification invalid'
+            return 'Verification invalid'
 
     @cherrypy.expose()
     def verify_otp_app(self, otp, user_id):
         check_value = DBotp.check_current_otp(user_id, otp)
         if check_value:
             DBotp.update_otp_verified(user_id)
-            return 'Varification valid'
+            return 'Verification valid'
         else:
-            return 'Varification invalid'
+            return 'Verification invalid'
 
     @cherrypy.expose()
     def check_otp_verified(self):
@@ -191,6 +191,7 @@ class Index(object):
         elif db_connection_state == 'failed':
             return 'Failed to insert device'
 
+    #  ToDo: filter for active device to allow login
     @cherrypy.expose()
     def delete_user_device(self, device_id):
         user_id = str(cherrypy.session.get('user_id'))
@@ -259,7 +260,7 @@ class Index(object):
     def request_qr(self):
         user_id = str(cherrypy.session.get('user_id'))
         otp = OtpHandler.create_2fa(user_id)
-        img_string = QRHandler.create_qr_image(otp)
+        img_string = QRHandler.create_qr_image(user_id, otp)
         cherrypy.response.headers['Content-Type'] = "image/png"
         return base64.b64encode(img_string)
 

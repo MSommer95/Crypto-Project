@@ -63,12 +63,12 @@ CREATE TABLE IF NOT EXISTS `user_data` (
   CONSTRAINT `FK_user_data_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_data: ~4 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_data: ~1 rows (ungefähr)
 /*!40000 ALTER TABLE `user_data` DISABLE KEYS */;
 INSERT INTO `user_data` (`id`, `user_id`, `file_name`, `file_description`, `path`, `is_encrypted`) VALUES
-	(1574463515557, 15, 'Renamed.pdf', 'Test Beschreibung LG', '/files/unencrypted/Renamed.pdf', 0),
-	(1574463518051, 15, 'AWS.pdf.encrypted', '', '/files/encrypted/AWS.pdf.encrypted', 1),
-	(1574464344534, 15, 'AWS.pdf', '', '/files/unencrypted/AWS.pdf', 0);
+	(1574464344534, 15, 'AWS.pdf', 'Changed Description', '/files/unencrypted/AWS.pdf', 0),
+	(1574632119148, 15, 'Test.pdf.encrypted', '', '/files/encrypted/Test.pdf.encrypted', 1),
+	(1574632157082, 15, 'Test.pdf', '', '/files/unencrypted/Test.pdf', 0);
 /*!40000 ALTER TABLE `user_data` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_device
@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `user_device` (
   `user_id` int(11) DEFAULT NULL,
   `device_id` varchar(258) DEFAULT NULL,
   `device_name` varchar(258) DEFAULT NULL,
+  `device_is_active` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK_user_device_users` (`user_id`),
   CONSTRAINT `FK_user_device_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
@@ -84,9 +85,8 @@ CREATE TABLE IF NOT EXISTS `user_device` (
 
 -- Exportiere Daten aus Tabelle project.user_device: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_device` DISABLE KEYS */;
-INSERT INTO `user_device` (`id`, `user_id`, `device_id`, `device_name`) VALUES
-	(1, 8, 'eZsXTXyZveo:APA91bHjZxX3KCS2FKW1r9-u5_RERs7j2mAp2BF714ClXG9jhQAtNpzUML-TjOWpeimLcTbQm83uUH7eY-rtN0LVS0Fd8oSKd0zIG-X252WfMk3_GDD9Pjjxi-ejo_t4tcuex65Nj9S9', 'max_android'),
-	(2, 15, 'fzS31eVR9dA:APA91bEY38-1mWq2YVhMUg_dc1pkAB2Mfmbc4UCtkoR64k9U3432PZWradMVl3IKgs3maBcVMR1IdXoFRJ_8euBkdg09gDnSaeXoI9KkVx54ws7JN3GASt0MmtZ9VofAMol3GRGoou3V', 'AOSP on IA Emulator');
+INSERT INTO `user_device` (`id`, `user_id`, `device_id`, `device_name`, `device_is_active`) VALUES
+	(1, 15, 'eZsXTXyZveo:APA91bHjZxX3KCS2FKW1r9-u5_RERs7j2mAp2BF714ClXG9jhQAtNpzUML-TjOWpeimLcTbQm83uUH7eY-rtN0LVS0Fd8oSKd0zIG-X252WfMk3_GDD9Pjjxi-ejo_t4tcuex65Nj9S9', 'max_android', 0);
 /*!40000 ALTER TABLE `user_device` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_key
@@ -100,12 +100,12 @@ CREATE TABLE IF NOT EXISTS `user_key` (
   KEY `FK_user_key_user_data` (`file_id`),
   CONSTRAINT `FK_user_key_user_data` FOREIGN KEY (`file_id`) REFERENCES `user_data` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_user_key_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
--- Exportiere Daten aus Tabelle project.user_key: ~4 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_key: ~1 rows (ungefähr)
 /*!40000 ALTER TABLE `user_key` DISABLE KEYS */;
 INSERT INTO `user_key` (`id`, `user_id`, `file_id`, `key_path`) VALUES
-	(18, 15, 1574463518051, '/keys/AWS.pdf.key');
+	(29, 15, 1574632119148, '/keys/Test.pdf.encrypted');
 /*!40000 ALTER TABLE `user_key` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp
@@ -118,13 +118,13 @@ CREATE TABLE IF NOT EXISTS `user_otp` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=259 DEFAULT CHARSET=utf8;
 
 -- Exportiere Daten aus Tabelle project.user_otp: ~2 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp` DISABLE KEYS */;
 INSERT INTO `user_otp` (`id`, `user_id`, `current_otp`, `timestamp`, `verified`) VALUES
 	(145, 8, '33562210', 1574173026, 0),
-	(204, 15, '50207057', 1574464341, 0);
+	(258, 15, '52345150', 1574693537, 0);
 /*!40000 ALTER TABLE `user_otp` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_otp_used
@@ -136,9 +136,9 @@ CREATE TABLE IF NOT EXISTS `user_otp_used` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `FK_user_otp_used_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
+) ENGINE=InnoDB AUTO_INCREMENT=259 DEFAULT CHARSET=utf8 COMMENT='used OTPs go in here';
 
--- Exportiere Daten aus Tabelle project.user_otp_used: ~186 rows (ungefähr)
+-- Exportiere Daten aus Tabelle project.user_otp_used: ~194 rows (ungefähr)
 /*!40000 ALTER TABLE `user_otp_used` DISABLE KEYS */;
 INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(1, 8, '74083486', 1571910485),
@@ -344,7 +344,61 @@ INSERT INTO `user_otp_used` (`id`, `user_id`, `used_otp`, `timestamp`) VALUES
 	(201, 15, '36358478', 1574463965),
 	(202, 15, '76801333', 1574464150),
 	(203, 15, '01450660', 1574464255),
-	(204, 15, '50207057', 1574464341);
+	(204, 15, '50207057', 1574464341),
+	(205, 15, '21301764', 1574511339),
+	(206, 15, '40242507', 1574512696),
+	(207, 15, '77500580', 1574521311),
+	(208, 15, '14725641', 1574521315),
+	(209, 15, '28556047', 1574521386),
+	(210, 15, '47830020', 1574521389),
+	(211, 15, '24830863', 1574522515),
+	(212, 15, '68662214', 1574522770),
+	(213, 15, '55212882', 1574524296),
+	(214, 15, '00570430', 1574524568),
+	(215, 15, '08142621', 1574526728),
+	(216, 15, '01217521', 1574526753),
+	(217, 15, '27075751', 1574526826),
+	(218, 15, '70044407', 1574526832),
+	(219, 15, '20484252', 1574527179),
+	(220, 15, '57048810', 1574630358),
+	(221, 15, '45153684', 1574630430),
+	(222, 15, '56754525', 1574630439),
+	(223, 15, '45787415', 1574630537),
+	(224, 15, '13304666', 1574630568),
+	(225, 15, '80316010', 1574630726),
+	(226, 15, '73828556', 1574631124),
+	(227, 15, '48231032', 1574631572),
+	(228, 15, '18441582', 1574631981),
+	(229, 15, '56211775', 1574631993),
+	(230, 15, '45235342', 1574632018),
+	(231, 15, '84470005', 1574632076),
+	(232, 15, '02501363', 1574686827),
+	(233, 15, '84620531', 1574687014),
+	(234, 15, '48861525', 1574687017),
+	(235, 15, '77783034', 1574687146),
+	(236, 15, '02317627', 1574687150),
+	(237, 15, '64208255', 1574687180),
+	(238, 15, '45301537', 1574691753),
+	(239, 15, '27411541', 1574691769),
+	(240, 15, '70611580', 1574691775),
+	(241, 15, '35463270', 1574691800),
+	(242, 15, '40558644', 1574691838),
+	(243, 15, '70863377', 1574691875),
+	(244, 15, '26250315', 1574692120),
+	(245, 15, '11274402', 1574692141),
+	(246, 15, '07742467', 1574692202),
+	(247, 15, '68218443', 1574692479),
+	(248, 15, '34385500', 1574692633),
+	(249, 15, '45858402', 1574692858),
+	(250, 15, '53873734', 1574692975),
+	(251, 15, '18112051', 1574692994),
+	(252, 15, '57501650', 1574692997),
+	(253, 15, '24151036', 1574693241),
+	(254, 15, '66666136', 1574693251),
+	(255, 15, '80118173', 1574693403),
+	(256, 15, '66312222', 1574693424),
+	(257, 15, '65377707', 1574693510),
+	(258, 15, '52345150', 1574693537);
 /*!40000 ALTER TABLE `user_otp_used` ENABLE KEYS */;
 
 -- Exportiere Struktur von Tabelle project.user_setting
@@ -364,7 +418,7 @@ INSERT INTO `user_setting` (`user_id`, `settings_id`, `setting_value`) VALUES
 	(6, 1, 1),
 	(8, 1, 0),
 	(8, 2, 1),
-	(15, 1, 0),
+	(15, 1, 1),
 	(15, 2, 0),
 	(16, 1, 0),
 	(16, 2, 0),

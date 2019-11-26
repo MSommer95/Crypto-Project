@@ -12,7 +12,7 @@ export function getData(url, cb) {
 }
 
 // Post Funktion für die Server-Datenbank Abfragen
-export function postDBData(url, data, cb) {
+export function postRequestWithData(url, data, cb) {
     $.ajax({
         type: 'POST',
         enctype: 'multipart/form-data',

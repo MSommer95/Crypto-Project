@@ -1,10 +1,6 @@
 import $ from 'jquery';
 import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
-import locked from '../img/baseline_lock_black_18dp.png';
-import unlocked from '../img/baseline_lock_open_black_18dp.png';
-import downloadPng from '../img/baseline_cloud_download_black_18dp.png';
 import * as servCon from './serverConnector';
-import {postDBData} from './serverConnector';
 import * as gui from './gui';
 
 export function initDeviceTable() {
@@ -17,7 +13,7 @@ export function initDeviceTable() {
                 const data = {
                     device_id: rowData.id
                 };
-                postDBData(url, data, (cb) => {
+                servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseText);
                     deviceTable.setData('/get_user_devices');
                 });
@@ -31,7 +27,7 @@ export function initDeviceTable() {
                 const data = {
                     device_id: rowData.id
                 };
-                postDBData(url, data, (cb) => {
+                servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseText);
                     deviceTable.setData('/get_user_devices');
                 });
@@ -49,7 +45,7 @@ export function initDeviceTable() {
                 device_id: rowData.id
             };
             cell.getRow().delete();
-            servCon.postDBData(url, data, (cb) => {
+            servCon.postRequestWithData(url, data, (cb) => {
                 gui.changeNotificationTextAndOpen(cb.responseText)
             });
         }
@@ -105,25 +101,6 @@ export function initOtpTable() {
 
 export function initFileTable() {
 
-    const encryptIcon = (cell, formatterParams, onRendered) => {
-        const icon = new Image();
-        icon.height = 32;
-        icon.width = 32;
-        if (cell.getRow().getData().is_encrypted) {
-            icon.src = locked;
-        } else {
-            icon.src = unlocked;
-        }
-        return icon
-    };
-    const downloadIcon = (cell, formatterParams, onRendered) => {
-        const icon = new Image();
-        icon.src = downloadPng;
-        icon.height = 32;
-        icon.width = 32;
-        return icon
-    };
-
     function downloadFile(e, cell) {
         const rowData = cell.getRow().getData();
         const filepath = rowData.path;
@@ -142,7 +119,7 @@ export function initFileTable() {
             is_encrypted: rowData.is_encrypted
         };
         const url = '/file_update';
-        servCon.postDBData(url, sendData, (cb) => {
+        servCon.postRequestWithData(url, sendData, (cb) => {
             gui.changeNotificationTextAndOpen(cb.responseText);
         });
     }
@@ -161,7 +138,7 @@ export function initFileTable() {
         } else {
             url = '/file_encrypt';
         }
-        servCon.postDBData(url, data, (cb) => {
+        servCon.postRequestWithData(url, data, (cb) => {
             gui.changeNotificationTextAndOpen(cb.responseText);
             filesTable.setData('/get_user_files');
         });
@@ -177,7 +154,7 @@ export function initFileTable() {
                 is_encrypted: rowData.is_encrypted
             };
             cell.getRow().delete();
-            servCon.postDBData(url, data, (cb) => {
+            servCon.postRequestWithData(url, data, (cb) => {
                 gui.changeNotificationTextAndOpen(cb.responseText)
             });
         }
@@ -195,7 +172,7 @@ export function initFileTable() {
                 field: 'is_encrypted',
                 align: 'center',
                 width: 128,
-                formatter: encryptIcon,
+                formatter: gui.encryptIcon,
                 cellClick: encryption
             },
             {
@@ -203,7 +180,7 @@ export function initFileTable() {
                 field: 'downloadFile',
                 align: 'center',
                 width: 128,
-                formatter: downloadIcon,
+                formatter: gui.downloadIcon,
                 cellClick: downloadFile
             },
             {

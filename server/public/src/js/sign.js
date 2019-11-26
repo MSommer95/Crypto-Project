@@ -24,7 +24,7 @@ $('#send_otp').on('click', () => {
         let data = {
             otp: otp
         };
-        servCon.postDBData(url, data, (cb) => {
+        servCon.postRequestWithData(url, data, (cb) => {
             console.log(cb.responseText);
 
             if (cb.responseText.includes('Verification valid')) {
@@ -43,7 +43,7 @@ $('#send_login-btn').on('click', () => {
         email: $('#login_email').val(),
         password: $('#login_password').val()
     };
-    servCon.postDBData(url, data, (cb) => {
+    servCon.postRequestWithData(url, data, (cb) => {
         if (cb.responseText.includes('HOTP')) {
             $('#otp-popup').modal();
             setTimeout(request_2fa_verified, 5000);

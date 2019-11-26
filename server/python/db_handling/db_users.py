@@ -9,12 +9,12 @@ from server.python.db_handling.hash_handler import HashHandler
 class DBusers:
 
     @staticmethod
-    def get_users():
+    def get_user(user_id):
         db = DBconnector.create_db_connection()
         try:
             with db.cursor() as cursor:
-                sql = 'SELECT * FROM users'
-                cursor.execute(sql)
+                sql = 'SELECT email FROM users WHERE id = %s'
+                cursor.execute(sql, (user_id,))
                 db.commit()
                 results = cursor.fetchall()
         except pymysql.MySQLError as e:
@@ -90,6 +90,39 @@ class DBusers:
         finally:
             db.close()
         return result[0]['id']
+
+    @staticmethod
+    def update_user_email(user_id, email):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE users SET email = %s WHERE id = %s'
+                cursor.execute(sql, (email, user_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+            return 'There was an error while updating the email-address \n'
+        else:
+            return 'Successfully updated email \n'
+        finally:
+            db.close()
+
+    @staticmethod
+    def update_user_password(user_id, password):
+        db = DBconnector.create_db_connection()
+        hashed_password = HashHandler.hash_password(password)
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE users SET password = %s WHERE id = %s'
+                cursor.execute(sql, (hashed_password, user_id))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+            return 'There was an error while updating the password'
+        else:
+            return 'Successfully updated password'
+        finally:
+            db.close()
 
     @staticmethod
     def set_second_factor_option(user_id, settings_id, setting_value):

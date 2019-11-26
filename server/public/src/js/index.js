@@ -2,6 +2,8 @@ import * as servCon from './serverConnector';
 import $ from 'jquery';
 import * as tables from './tables';
 import * as qrCode from './qrGenerator';
+import * as settHandle from "./settingsHandler";
+import * as secPass from "./passwordGenerator";
 import * as gui from './gui';
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,10 +11,12 @@ import '../css/custom.css';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 
+
 const deviceTable = tables.initDeviceTable();
 const otpTable = tables.initOtpTable();
 const fileTable = tables.initFileTable();
 const qrImage = qrCode.initDeviceQR();
+settHandle.initSettings();
 
 $('#reg-device-btn').on('click', () => {
     const registerDiv = $('#qr-wrapper');
@@ -25,6 +29,13 @@ $('#reg-device-btn').on('click', () => {
         registerDiv.toggle();
         registerBtn.html("Register new Device");
     }
+});
+
+$('#open-password-generator-btn').on('click', () => {
+    $('#secure_password-popup').modal();
+    let password = secPass.generatePassword(true, true, true, true, 16);
+    $('#secure_password-pwd').val(password);
+    $('#create_password').val(password);
 });
 
 $('#logout-btn').on('click', function () {

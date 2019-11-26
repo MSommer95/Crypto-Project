@@ -10,7 +10,7 @@ class SecondFactorHandler:
         for i in range(len(user_devices)):
             if int(user_devices[i]['device_is_active']):
                 return 'Active device found. No further action required.'
-            elif i == len(user_devices)-1:
+            elif i == len(user_devices) - 1:
                 return SecondFactorHandler.deactivate_device_as_second_factor(user_id)
 
     @staticmethod

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <title>Krypto-Projekt</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
 </head>
 
 <body>
@@ -16,13 +16,13 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto mr-auto">
             <li class="nav-item m-2">
-                <a href="#" class="nav-link" id="device_nav-btn">Devices</a>
+                <a class="nav-link" href="#" id="device_nav-btn">Devices</a>
             </li>
             <li class="nav-item m-2">
-                <a href="#" class="nav-link" id="otp_nav-btn">OTPs</a>
+                <a class="nav-link" href="#" id="otp_nav-btn">OTPs</a>
             </li>
             <li class="nav-item m-2">
-                <a href="#" class="nav-link" id="file_nav-btn">Files</a>
+                <a class="nav-link" href="#" id="file_nav-btn">Files</a>
             </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
@@ -30,10 +30,10 @@
                 <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
                    href="#"
                    id="navbarDropdown" role="button">
-                    Menü
+                    Menu
                 </a>
                 <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                    <a class="dropdown-item" href="#">User</a>
+                    <a class="dropdown-item" href="#" id="settings-btn">Settings</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
                 </div>
@@ -43,7 +43,7 @@
 </nav>
 <div class="bg-container">
     <div class="content">
-        <section id="device-section">
+        <section class="main" id="device-section">
             <div class="container mt-3">
                 <h2>Devices</h2>
                 <div id="device-table"></div>
@@ -51,7 +51,7 @@
                     <button class="btn btn-primary mt-2 mb-3" id="reg-device-btn">Register new Device</button>
                 </div>
                 <div id="qr-wrapper" style="display: none">
-                    <div class="card mx-auto mt-3 bg-light" id="device-registration-qr" >
+                    <div class="card mx-auto mt-3 bg-light" id="device-registration-qr">
                         <div class="card-body bg-light">
                             <p class="text-center mt-3"><b>Open Krypto2Factor App to Scan QR-Code</b></p>
                         </div>
@@ -59,15 +59,17 @@
                 </div>
             </div>
         </section>
-        <div class="dropdown-divider"></div>
-        <section id="otp-section">
+
+        <section class="main" id="otp-section">
+            <div class="main dropdown-divider"></div>
             <div class="container mt-3">
                 <h2>OTPs</h2>
                 <div id="otp-table"></div>
             </div>
         </section>
-        <div class="dropdown-divider"></div>
+
         <section id="file-section">
+            <div class="main dropdown-divider"></div>
             <div class="container mt-3" id="file-upload_container">
                 <h2>Files</h2>
                 <form action="/file_upload" enctype="multipart/form-data" id="visibleHome" method="post">
@@ -82,14 +84,97 @@
             </div>
             <div class="container mt-3">
                 <div class="button-row">
-                    <button id="files-table-btn-update" class="btn">Update</button>
-                    <button id="files-table-btn-save" class="btn">Save</button>
+                    <button class="btn" id="files-table-btn-update">Update</button>
+                    <button class="btn" id="files-table-btn-save">Save</button>
                 </div>
                 <div id="files-table"></div>
             </div>
         </section>
+
+        <section class="settings hidden" id="settings-section">
+            <div id="settings-wrapper">
+                <div class="card mx-auto mt-3 bg-light" id="settings-card">
+                    <div class="card-header">
+                        <h3>Settings</h3>
+                    </div>
+                    <div class="card-header settings-header">
+                        <h5>Account Info</h5>
+                    </div>
+                    <div class="card-body bg-light">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="text-normal" for="email-address">Email-address:</label>
+                            </div>
+                            <div class="col-md-7 ml-4">
+                                <input class="form-control" id="email-address" name="2-fa-status" type="text">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="text-normal" for="create_password">Password:</label>
+                            </div>
+                            <div class="col-md-7 ml-4">
+                                <input autocomplete="new-password" class="form-control" id="create_password"
+                                       type="password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <button class="btn btn-dark col-sm-4 ml-2" id="account_info-save-btn">Save</button>
+                            <button class="btn btn-dark col-sm-6 ml-auto mr-2" id="open-password-generator-btn">Password
+                                Generator
+                            </button>
+                        </div>
+                    </div>
+                    <div class="">
+                        <div class="card-footer card-header settings-header">
+                            <h5>2-Factor-Auth. Options</h5>
+                        </div>
+                        <div class="card-body bg-light" id="2-fa-options">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="text-normal" for="2-fa">Enable:</label>
+                                </div>
+                                <div class="col-md-4 ml-4">
+                                    <input id="2-fa" name="2-fa-status" type="checkbox">
+                                </div>
+                            </div>
+                            <br>
+                            <div id="2-fa-options-wrapper">
+                                <div class="row">
+                                    <div class="col-md-4 col-example radiolist">
+                                        <label class="text-normal --flex-item-margin" for="2-fa-email">Email:</label>
+                                    </div>
+                                    <div class="col-md-4 ml-4 col-example radiolist">
+                                        <input checked id="2-fa-email" name="2-fa-options" type="radio" value="1">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 col-example radiolist">
+                                        <label class="text-normal --flex-item-margin" for="2-fa-app">App:</label>
+                                    </div>
+                                    <div class="col-md-4 ml-4 col-example radiolist">
+                                        <input id="2-fa-app" name="2-fa-options" type="radio" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <button class="btn btn-dark col-sm-4 ml-2" id="settings-save-btn">Save</button>
+                            <button class="btn btn-dark col-sm-4 ml-auto mr-2" id="back-to-main-btn">Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-    <a id="back-to-top" href="#" class="btn btn-primary btn-lg back-to-top" role="button" title="Return to header" data-toggle="tooltip" data-placement="left"><img src="../img/baseline_keyboard_arrow_up_white_18dp.png" alt="Back to Top"></a>
+    <a class="btn btn-primary btn-lg back-to-top" data-placement="left" data-toggle="tooltip" href="#" id="back-to-top"
+       role="button" title="Return to header"><img alt="Back to Top"
+                                                   src="../img/baseline_keyboard_arrow_up_white_18dp.png"></a>
 
     <!-- Modal -->
     <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="notification-popup" role="dialog"
@@ -106,6 +191,98 @@
                     <p id="notification-text">Notification Text</p>
                 </div>
                 <div class="modal-footer modal-left">
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="secure_password-popup"
+         role="dialog"
+         tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">Secure Password Generator</h5>
+                    </div>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input class="form-control col-sm-10" id="secure_password-pwd" name="secure_password-pwd"
+                                   placeholder="Password"
+                                   type="text">
+                        </div>
+                        <div class="col-md-4 ml-auto">
+                            <button class="btn btn-dark col-sm-10" id="secure_password-copy" type="submit">Copy</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>Password Rank: <span id="password-rank"></span></p>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-4 col-example">
+                            <label class="text-normal --flex-item-margin" for="secure_password-length_slider">Password
+                                Length</label>
+                            <input class="slider" id="secure_password-length_slider" max="99" min="1" type="range"
+                                   value="16">
+                        </div>
+                        <div class="col-md-4 ml-auto col-example">
+                            <input class="col-sm-6" id="secure_password-length_input" max="99" min="1" type="number"
+                                   value="16">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-example">
+                            <label class="text-normal --flex-item-margin" for="secure_password-letters_lower">Lowercase
+                                Letters</label>
+                        </div>
+                        <div class="col-md-4 ml-auto col-example">
+                            <input checked id="secure_password-letters_lower"
+                                   name="secure_password-letters_lower" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-example">
+                            <label class="text-normal --flex-item-margin" for="secure_password-letters_upper">Uppercase
+                                Letters</label>
+                        </div>
+                        <div class="col-md-4 ml-auto col-example">
+                            <input checked id="secure_password-letters_upper"
+                                   name="secure_password-letters_upper" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-example">
+                            <label class="text-normal --flex-item-margin" for="secure_password-digits">Digits</label>
+                        </div>
+                        <div class="col-md-4 ml-auto col-example">
+                            <input checked id="secure_password-digits" name="secure_password-digits" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-example">
+                            <label class="text-normal --flex-item-margin" for="secure_password-special_chars">Special
+                                Characters</label>
+                        </div>
+                        <div class="col-md-4 ml-auto col-example">
+                            <input checked id="secure_password-special_chars"
+                                   name="secure_password-special_chars" type="checkbox">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer modal-left">
+                    <button class="btn btn-dark" id="secure_password-generate-btn" name="secure_password-generate-btn"
+                            type="submit">Generate
+                    </button>
                     <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
                 </div>
             </div>

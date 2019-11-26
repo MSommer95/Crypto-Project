@@ -62,6 +62,7 @@ class Index(object):
         user_count = len(user)
         if user_count > 0:
             cherrypy.session['user_id'] = user['id']
+            cherrypy.session['user_mail'] = user['email']
             cherrypy.session['2fa_verified'] = 0
             user_id = str(user['id'])
             user_settings = DBusers.get_user_settings(user_id)
@@ -211,6 +212,42 @@ class Index(object):
         deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
         deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
         return deactived_message + ' ' + deactivae_addition
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def get_user_settings(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        user_settings = DBusers.get_user_settings(user_id)
+        user = DBusers.get_user(user_id)
+        user_settings['email'] = user[0]['email']
+        return user_settings
+
+    @cherrypy.expose()
+    def update_account_info(self, email, password):
+        user_id = str(cherrypy.session.get('user_id'))
+        user_mail = cherrypy.session.get('user_mail')
+        email_change_status = ''
+        password_change_status = ''
+        if not user_mail == email:
+            email_change_status = DBusers.update_user_email(user_id, email)
+        if not password == '':
+            password_change_status = DBusers.update_user_password(user_id, password)
+        return email_change_status + password_change_status
+
+    @cherrypy.expose()
+    def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app):
+        user_id = str(cherrypy.session.get('user_id'))
+        if sec_fa_email == 'true' and sec_fa_app == 'true':
+            return 'Please dont try to check more then one 2FA option'
+        else:
+            if sec_fa == 'true':
+                DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
+                DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
+                return 'Successfully changed the second factor'
+            else:
+                DBusers.set_second_factor_option(user_id, 1, 0)
+                DBusers.set_second_factor_option(user_id, 2, 0)
+                return 'Successfully disabled second factor'
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()

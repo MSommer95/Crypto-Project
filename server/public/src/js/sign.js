@@ -1,4 +1,4 @@
-import {chooseLogin, showElement} from "./gui";
+import * as gui from "./gui";
 import * as servCon from './serverConnector';
 import {generatePassword} from "./passwordGenerator";
 import $ from 'jquery';
@@ -49,8 +49,8 @@ $('#send_login-btn').on('click', () => {
             setTimeout(request_2fa_verified, 5000);
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'
-        } else if (cb.responseText.includes('sign')) {
-            window.location.href = '/sign'
+        } else {
+            gui.changeNotificationTextAndOpen(cb.responseText);
         }
     });
 });
@@ -63,9 +63,9 @@ $('#secure_password-generator').on('click', () => {
 });
 
 $('#registrationButton').on('click', function () {
-    chooseLogin(this);
+    gui.chooseLogin(this);
 });
 
 $('#loginButton').on('click', function () {
-    chooseLogin(this);
+    gui.chooseLogin(this);
 });

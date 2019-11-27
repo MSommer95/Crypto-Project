@@ -15,6 +15,7 @@ from server.python.file_handling.file_handler import FileHandler
 from server.python.otp_handling.otp_handler import OtpHandler
 from server.python.otp_handling.second_factor_handling import SecondFactorHandler
 from server.python.server_handling.dir_handler import DirHandler
+from server.python.server_handling.login_log_handler import LLogHandler
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -59,34 +60,37 @@ class Index(object):
     # jeweiligen Session Variablen
     @cherrypy.expose()
     def login_account(self, email, password):
-        user = DBusers.check_user(email, password)
-        user_count = len(user)
-        if user_count > 0:
-            cherrypy.session['user_id'] = user['id']
-            cherrypy.session['user_mail'] = user['email']
-            cherrypy.session['2fa_verified'] = 0
-            user_id = str(user['id'])
-            user_settings = DBusers.get_user_settings(user_id)
-            DirHandler.check_user_dirs(user_id)
-            if user_settings['2FA-Mail'] == 1:
-                cherrypy.session['2fa_status'] = 1
-                otp = OtpHandler.create_2fa(user_id)
-                OtpHandler.send_otp_mail(otp, email)
-                return 'Please send us your HOTP'
-
-            elif user_settings['2FA-App'] == 1:
-                cherrypy.session['2fa_status'] = 1
-                otp = OtpHandler.create_2fa(user_id)
-                OtpHandler.send_otp_app(otp, user_id)
-                return 'Please send us your HOTP'
-
+        user_id = DBusers.get_user_id(email)[0]['id']
+        if user_id:
+            user_logs = LLogHandler.check_login_logs(user_id)
+            login_trys = LLogHandler.count_trys(user_id, user_logs, email)
+            if login_trys:
+                user = DBusers.check_user(email, password)
+                user_count = len(user)
+                if user_count > 0:
+                    cherrypy.session['user_id'] = user['id']
+                    cherrypy.session['user_mail'] = user['email']
+                    cherrypy.session['2fa_verified'] = 0
+                    user_id = str(user['id'])
+                    user_settings = DBusers.get_user_settings(user_id)
+                    DirHandler.check_user_dirs(user_id)
+                    if user_settings['2FA-Mail'] == 1:
+                        cherrypy.session['2fa_status'] = 1
+                        otp = OtpHandler.create_2fa(user_id)
+                        OtpHandler.send_otp_mail(otp, email)
+                        return 'Please send us your HOTP'
+                    elif user_settings['2FA-App'] == 1:
+                        cherrypy.session['2fa_status'] = 1
+                        otp = OtpHandler.create_2fa(user_id)
+                        OtpHandler.send_otp_app(otp, user_id)
+                        return 'Please send us your HOTP'
+                    else:
+                        cherrypy.session['2fa_status'] = 0
+                        return 'Send me to index'
+                else:
+                    return 'Wrong data. Try again.'
             else:
-                cherrypy.session['2fa_status'] = 0
-                return 'Send me to index'
-
-        else:
-            return 'Send me to sign'
-
+                return 'Too many Trys. Try again in a minute.'
     # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
     # erfolgreichen Login
     @cherrypy.expose()

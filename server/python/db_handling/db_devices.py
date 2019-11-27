@@ -56,6 +56,22 @@ class DBdevices:
         return result
 
     @staticmethod
+    def get_by_device_id(device_id):
+        db = DBconnector.create_db_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = 'SELECT * FROM user_device WHERE device_id = %s'
+                cursor.execute(sql, (device_id,))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result
+
+    @staticmethod
     def insert_user_device(user_id, device_id, device_name):
         db = DBconnector.create_db_connection()
         db_connection_state = 'pending'

@@ -11,11 +11,12 @@ import '../css/custom.css';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 
-
 const deviceTable = tables.initDeviceTable();
 const otpTable = tables.initOtpTable();
 const fileTable = tables.initFileTable();
 const qrImage = qrCode.initDeviceQR();
+let qrUpdateInterval;
+let intervalPaused = false;
 settHandle.initSettings();
 
 $('#reg-device-btn').on('click', () => {
@@ -25,9 +26,26 @@ $('#reg-device-btn').on('click', () => {
     if (registerDiv.css('display') === 'none') {
         registerDiv.toggle();
         registerBtn.html("Hide registration QR");
+
+        if(intervalPaused) {
+            intervalPaused = false;
+        }
+
+        if(!qrUpdateInterval) {
+            qrUpdateInterval = setInterval(() => {
+                if (intervalPaused)
+                    return;
+
+                qrCode.updateDeviceQR();
+            }, 60000);
+        }
     } else if (registerDiv.css('display') === 'block') {
         registerDiv.toggle();
         registerBtn.html("Register new Device");
+
+        if(qrUpdateInterval) {
+            intervalPaused = true;
+        }
     }
 });
 

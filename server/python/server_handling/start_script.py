@@ -183,8 +183,18 @@ class Index(object):
         return devices
 
     @cherrypy.expose()
-    def insert_user_device(self, device_id, device_name):
-        user_id = str(cherrypy.session.get('user_id'))
+    def insert_user_device(self, device_id, device_name, user_id):
+        if not user_id:
+            user_id = str(cherrypy.session.get('user_id'))
+
+        db_device_exists = DBdevices.get_by_device_id(device_id)
+
+        if len(db_device_exists) > 0:
+            if db_device_exists[0]['device_is_active']:
+                return 'Device already active'
+            else:
+                return 'Device already registered'
+
         db_connection_state = DBdevices.insert_user_device(user_id, device_id, device_name)
 
         if db_connection_state == 'success':
@@ -269,7 +279,7 @@ class Index(object):
 
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
                     cherrypy.session['2fa_status'] = 1
-                    response = {'status': 200, 'message': 'Success'}
+                    response = {'status': 200, 'message': 'Success', 'data': user_id}
                     print('response', str(response))
 
                     return response

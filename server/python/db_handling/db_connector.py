@@ -4,7 +4,7 @@ import pymysql.cursors
 class DBconnector:
 
     @staticmethod
-    def create_db_connection():
+    def connect():
         params = {'dbname': 'project',
                   'user': 'root',
                   'password': 'HMpXB44P',  # root

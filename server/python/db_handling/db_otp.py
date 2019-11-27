@@ -9,8 +9,8 @@ from server.python.db_handling.db_connector import DBconnector
 class DBotp:
 
     @staticmethod
-    def insert_user_otp(user_id, otp):
-        db = DBconnector.create_db_connection()
+    def insert(user_id, otp):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 ts = int(time.time())
@@ -27,8 +27,8 @@ class DBotp:
             db.close()
 
     @staticmethod
-    def check_for_used_otp(user_id, otp):
-        db = DBconnector.create_db_connection()
+    def check_used(user_id, otp):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_otp_used WHERE user_id = %s AND used_otp = %s'
@@ -46,8 +46,8 @@ class DBotp:
             return False
 
     @staticmethod
-    def check_current_otp(user_id, hotp):
-        db = DBconnector.create_db_connection()
+    def check_current(user_id, hotp):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT current_otp, timestamp, verified FROM user_otp WHERE user_id = %s'
@@ -72,8 +72,8 @@ class DBotp:
             return False
 
     @staticmethod
-    def update_otp_verified(user_id):
-        db = DBconnector.create_db_connection()
+    def update_verification(user_id):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE user_otp SET verified = 1 WHERE user_id = %s'
@@ -85,8 +85,8 @@ class DBotp:
             db.close()
 
     @staticmethod
-    def check_otp_verified(user_id):
-        db = DBconnector.create_db_connection()
+    def check_verification(user_id):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT verified FROM user_otp WHERE user_id = %s'
@@ -101,8 +101,8 @@ class DBotp:
         return db_otp_verified
 
     @staticmethod
-    def get_used_otps(user_id):
-        db = DBconnector.create_db_connection()
+    def get_used(user_id):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT used_otp, timestamp FROM user_otp_used WHERE user_id = %s'

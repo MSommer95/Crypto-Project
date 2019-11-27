@@ -10,7 +10,7 @@ class DBusers:
 
     @staticmethod
     def get_user(user_id):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT email FROM users WHERE id = %s'
@@ -26,7 +26,7 @@ class DBusers:
 
     @staticmethod
     def check_user(email, password):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT id, email, password FROM users WHERE email = %s'
@@ -47,7 +47,7 @@ class DBusers:
 
     @staticmethod
     def get_user_settings(user_id):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT t2.description, setting_value FROM user_setting as t1 JOIN settings as t2 ON ' \
@@ -68,7 +68,7 @@ class DBusers:
 
     @staticmethod
     def insert_user(email, password):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         hashed_password = HashHandler.hash_password(password)
         try:
             with db.cursor() as cursor:
@@ -92,8 +92,8 @@ class DBusers:
         return result[0]['id']
 
     @staticmethod
-    def update_user_email(user_id, email):
-        db = DBconnector.create_db_connection()
+    def update_email(user_id, email):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE users SET email = %s WHERE id = %s'
@@ -108,8 +108,8 @@ class DBusers:
             db.close()
 
     @staticmethod
-    def update_user_password(user_id, password):
-        db = DBconnector.create_db_connection()
+    def update_password(user_id, password):
+        db = DBconnector.connect()
         hashed_password = HashHandler.hash_password(password)
         try:
             with db.cursor() as cursor:
@@ -126,7 +126,7 @@ class DBusers:
 
     @staticmethod
     def set_second_factor_option(user_id, settings_id, setting_value):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE user_setting SET setting_value = %s WHERE user_id = %s AND settings_id = %s'

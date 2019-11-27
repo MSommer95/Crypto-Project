@@ -6,7 +6,7 @@ class SecondFactorHandler:
 
     @staticmethod
     def check_for_active_device(user_id):
-        user_devices = DBdevices.get_devices_by_user_id(user_id)
+        user_devices = DBdevices.get_by_user_id(user_id)
         for i in range(len(user_devices)):
             if int(user_devices[i]['device_is_active']):
                 return 'Active device found. No further action required.'
@@ -15,12 +15,14 @@ class SecondFactorHandler:
 
     @staticmethod
     def activate_device(user_id, device_id):
-        DBdevices.set_active_user_device(user_id, device_id, 1)
+        DBusers.set_second_factor_option(user_id, 1, 0)
+        DBusers.set_second_factor_option(user_id, 2, 1)
+        DBdevices.set_is_active(user_id, device_id, 1)
         return 'Device activated'
 
     @staticmethod
     def deactivate_device(user_id, device_id):
-        DBdevices.set_active_user_device(user_id, device_id, 0)
+        DBdevices.set_is_active(user_id, device_id, 0)
         return 'Device deactivated'
 
     @staticmethod

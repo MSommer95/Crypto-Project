@@ -8,8 +8,8 @@ from server.python.db_handling.db_connector import DBconnector
 class DBfiles:
 
     @staticmethod
-    def insert_user_file(file_id, user_id, file_name, path, is_encrypted):
-        db = DBconnector.create_db_connection()
+    def insert(file_id, user_id, file_name, path, is_encrypted):
+        db = DBconnector.connect()
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
@@ -25,8 +25,8 @@ class DBfiles:
             return db_connection_state
 
     @staticmethod
-    def get_user_files(user_id):
-        db = DBconnector.create_db_connection()
+    def get_files(user_id):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT id, file_name, file_description, path, is_encrypted FROM user_data WHERE user_id = %s'
@@ -41,8 +41,8 @@ class DBfiles:
         return result
 
     @staticmethod
-    def get_user_file(file_id, user_id):
-        db = DBconnector.create_db_connection()
+    def get_file(file_id, user_id):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_data WHERE id = %s AND user_id = %s'
@@ -57,8 +57,8 @@ class DBfiles:
         return result
 
     @staticmethod
-    def update_user_file(user_id, file_id, file_name, file_description, path):
-        db = DBconnector.create_db_connection()
+    def update_file(user_id, file_id, file_name, file_description, path):
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE user_data SET file_name = %s, file_description = %s, path = %s WHERE id = %s AND user_id = %s'
@@ -71,7 +71,7 @@ class DBfiles:
 
     @staticmethod
     def insert_file_key(user_id, file_id, key_path):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
@@ -88,7 +88,7 @@ class DBfiles:
 
     @staticmethod
     def delete_file(file_id, user_id):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'DELETE FROM user_data WHERE id = %s AND user_id = %s'
@@ -104,7 +104,7 @@ class DBfiles:
 
     @staticmethod
     def get_file_key(file_id, user_id):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_key WHERE file_id = %s AND user_id = %s'
@@ -120,7 +120,7 @@ class DBfiles:
 
     @staticmethod
     def update_file_key(key_id, user_id, file_id, key_path):
-        db = DBconnector.create_db_connection()
+        db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE user_key SET key_path = %s WHERE id = %s AND user_id = %s AND file_id = %s'

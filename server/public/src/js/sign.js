@@ -26,11 +26,10 @@ $('#send_otp').on('click', () => {
         };
         servCon.postRequestWithData(url, data, (cb) => {
             console.log(cb.responseText);
-
             if (cb.responseText.includes('Verification valid')) {
                 window.location.href = '/index';
             } else {
-                alert('You entered the wrong HOTP or the time expired, please login again');
+                gui.changeNotificationTextAndOpen('You entered the wrong OTP or the time expired, please login again.');
             }
         });
     }
@@ -44,8 +43,13 @@ $('#send_login-btn').on('click', () => {
         password: $('#login_password').val()
     };
     servCon.postRequestWithData(url, data, (cb) => {
-        if (cb.responseText.includes('HOTP')) {
+        if (cb.responseText.includes('OTP')) {
             $('#otp-popup').modal();
+            $('#request-new-otp-btn').on('click', () => {
+                const url = '/request_new_otp';
+                servCon.getData(url, (cb) => {
+                });
+            });
             setTimeout(request_2fa_verified, 5000);
         } else if (cb.responseText.includes('index')) {
             window.location.href = '/index'

@@ -11,26 +11,26 @@ from server.python.db_handling.db_otp import DBotp
 class OtpHandler:
 
     @staticmethod
-    def create_2fa(user_id):
+    def create_otp(user_id):
         otp_value = ''
         for x in range(8):
             otp_value += str(secrets.randbelow(9))
         otp_used = DBotp.check_used(user_id, otp_value)
 
         if otp_used:
-            OtpHandler.create_2fa(user_id)
+            OtpHandler.create_otp(user_id)
             return
         else:
             DBotp.insert(user_id, otp_value)
             return otp_value
 
     @staticmethod
-    def send_otp_mail(otp, email):
+    def send_otp_mail(email, otp):
         message = 'Your HOTP: %s' % otp
         EmailSender.send_mail(message, '2-Faktor-Auth', email)
 
     @staticmethod
-    def send_otp_app(otp, user_id):
+    def send_otp_app(user_id, otp):
         device = DBdevices.get_active_devices_by_user_id(user_id)
         device_id = device[0]['device_id']
         AppSender.send_otp_to_app(otp, user_id, device_id)

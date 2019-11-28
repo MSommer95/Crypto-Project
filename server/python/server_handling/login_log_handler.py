@@ -40,5 +40,3 @@ class LLogHandler:
             counter += 1
             DBlogs.update_login_log(user_id, counter)
             return True
-
-

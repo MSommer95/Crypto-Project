@@ -76,14 +76,16 @@ class Index(object):
                     DirHandler.check_user_dirs(user_id)
                     if user_settings['2FA-Mail'] == 1:
                         cherrypy.session['2fa_status'] = 1
-                        otp = OtpHandler.create_2fa(user_id)
-                        OtpHandler.send_otp_mail(otp, email)
-                        return 'Please send us your HOTP'
+                        cherrypy.session['otp_option'] = 1
+                        otp = OtpHandler.create_otp(user_id)
+                        OtpHandler.send_otp_mail(email, otp)
+                        return 'Please send us your OTP'
                     elif user_settings['2FA-App'] == 1:
                         cherrypy.session['2fa_status'] = 1
-                        otp = OtpHandler.create_2fa(user_id)
-                        OtpHandler.send_otp_app(otp, user_id)
-                        return 'Please send us your HOTP'
+                        cherrypy.session['otp_option'] = 2
+                        otp = OtpHandler.create_otp(user_id)
+                        OtpHandler.send_otp_app(user_id, otp)
+                        return 'Please send us your OTP'
                     else:
                         cherrypy.session['2fa_status'] = 0
                         return 'Send me to index'
@@ -341,15 +343,27 @@ class Index(object):
         user_settings = DBusers.get_user_settings(user_id)
 
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
-            otp = OtpHandler.create_2fa(user_id)
+            otp = OtpHandler.create_otp(user_id)
             return otp
+
+    @cherrypy.expose()
+    def request_new_otp(self):
+        user_id = str(cherrypy.session.get('user_id'))
+        user_mail = cherrypy.session.get('user_mail')
+        otp_option = cherrypy.session.get('otp_option')
+        otp = OtpHandler.create_otp(user_id)
+        if otp_option == 1:
+            OtpHandler.send_otp_mail(user_mail, otp)
+        elif otp_option == 2:
+            OtpHandler.send_otp_app(user_id, otp)
+        return 'New OTP send'
 
     # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
     # gescanned werden um Registrierung und Login zu vereinfachen
     @cherrypy.expose()
     def request_qr(self):
         user_id = str(cherrypy.session.get('user_id'))
-        otp = OtpHandler.create_2fa(user_id)
+        otp = OtpHandler.create_otp(user_id)
         img_string = QRHandler.create_qr_image(user_id, otp)
         cherrypy.response.headers['Content-Type'] = "image/png"
         return base64.b64encode(img_string)

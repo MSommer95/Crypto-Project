@@ -1,5 +1,9 @@
 import $ from 'jquery';
 
+function puncuateNumber(number) {
+    return number.toLocaleString()
+}
+
 function calculatePasswordRank(password, characters) {
 
     const passwordLength = password.length;
@@ -9,6 +13,7 @@ function calculatePasswordRank(password, characters) {
     const timeInDaysToCrack = complexity / attemptsPerSec / 3600 / 24;
     let passwordRank = 'High';
     const passwordRankPTag = $('#password-rank');
+    const passwordBruteForceDisplay = $('#brute-force-days');
     if (timeInDaysToCrack >= 1000000) {
         console.log(`High rank: ${timeInDaysToCrack}`);
         passwordRank = 'High';
@@ -22,6 +27,7 @@ function calculatePasswordRank(password, characters) {
         passwordRank = 'Low';
         passwordRankPTag.css('color', '#F90000');
     }
+    passwordBruteForceDisplay.text(puncuateNumber(timeInDaysToCrack));
     passwordRankPTag.text(`${passwordRank}`);
 }
 

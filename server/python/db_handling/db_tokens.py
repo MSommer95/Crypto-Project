@@ -53,12 +53,12 @@ class DBtokens:
         return results
 
     @staticmethod
-    def check(user_id, token):
+    def check(token):
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'SELECT token FROM user_tokens WHERE user_id = %s'
-                cursor.execute(sql, (user_id, ))
+                sql = 'SELECT * FROM user_tokens WHERE token = %s'
+                cursor.execute(sql, (token, ))
                 db.commit()
                 results = cursor.fetchall()
         except pymysql.MySQLError as e:
@@ -66,7 +66,7 @@ class DBtokens:
         finally:
             db.close()
 
-        if results[0]['token'] == token:
-            return True
+        if len(results) > 0 and results[0]['token'] == token:
+            return results[0]['user_id']
         else:
             return False

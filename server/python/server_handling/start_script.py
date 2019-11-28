@@ -380,9 +380,9 @@ class Index(object):
     # Authentifikationsmedium verliert
     @cherrypy.expose()
     def reset_settings_sec_fa(self, token):
-        user_id = str(cherrypy.session.get['user_id'])
+        user_id = DBtokens.check(token)
 
-        if DBtokens.check(user_id, token):
+        if user_id:
             DBusers.set_second_factor_option(user_id, 1, 0)
             DBusers.set_second_factor_option(user_id, 2, 0)
             return 'Successfully disabled second factor'

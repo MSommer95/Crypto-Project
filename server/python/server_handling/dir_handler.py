@@ -74,7 +74,8 @@ class DirHandler:
         sub_paths = [
             '/api_key',
             '/email_key',
-            '/users'
+            '/users',
+            'other'
         ]
         log_path = '/logs'
 

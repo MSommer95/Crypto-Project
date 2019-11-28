@@ -52,8 +52,9 @@ export function initDeviceTable() {
     }
 
     const deviceTable = new Tabulator('#device-table', {
-        height: '100%',
+        height: '256px',
         layout: "fitColumns",
+        placeholder:"No Data Available",
         columns: [
             {title: 'DeviceID', field: 'device_id'},
             {title: 'Device Name', field: 'device_name'},
@@ -88,6 +89,7 @@ export function initOtpTable() {
     const otpTable = new Tabulator('#otp-table', {
         height: '512px',
         layout: "fitColumns",
+        placeholder:"No Data Available",
         columns: [
             {title: 'OTP', field: 'used_otp'},
             {title: 'Date', field: 'timestamp', sorter: 'number'},
@@ -163,6 +165,7 @@ export function initFileTable() {
     const filesTable = new Tabulator('#files-table', {
         height: '512px',
         layout: "fitColumns",
+        placeholder:"No Data Available",
         columns: [
             {title: 'Preview', field: 'preview'},
             {title: 'Filename', field: 'file_name', editor: 'input'},

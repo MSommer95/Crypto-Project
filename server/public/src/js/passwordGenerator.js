@@ -1,16 +1,41 @@
 import $ from 'jquery';
+import * as servConn from "./serverConnector";
+
+let topPasswords = '';
+
+servConn.getData('/request_top_password', (cb) => {
+   topPasswords = cb.responseText;
+});
 
 function puncuateNumber(number) {
     return number.toLocaleString()
 }
 
-function calculatePasswordRank(password, characters) {
+function checkIfPasswordContainsChar(password, string) {
+    let contains = false;
+    for (let i = 0; i < string.length; i += 1) {
+        if (password.includes(string[i])) {
+            contains = true;
+            break;
+        }
+    }
+    return contains
+}
 
-    const passwordLength = password.length;
-    const numberOfCharacters = characters.length;
-    const complexity = Math.pow(numberOfCharacters, passwordLength);
-    const attemptsPerSec = 50000000000;
-    const timeInDaysToCrack = complexity / attemptsPerSec / 3600 / 24;
+function checkIfTopPasswordIsSubstring(password) {
+    const topPasswordList = topPasswords.split('\n');
+    const subString = topPasswordList.filter((subString) => (password.includes(subString)));
+    subString.sort(function(a, b) {
+        if (a.length >= b.length) {
+            return -1
+        } else {
+            return 1
+    }
+    });
+    return subString
+}
+
+function changeRankDisplay(timeInDaysToCrack) {
     let passwordRank = 'High';
     const passwordRankPTag = $('#password-rank');
     const passwordBruteForceDisplay = $('#brute-force-days');
@@ -31,6 +56,38 @@ function calculatePasswordRank(password, characters) {
     passwordRankPTag.text(`${passwordRank}`);
 }
 
+function calculatePasswordRank(password) {
+    const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const specialCharacters = '!§$%&*+#üäöÜÄÖ';
+    let numberOfCharacters = 0;
+    const subStringPassword = checkIfTopPasswordIsSubstring(password)[0];
+    const regEx = new RegExp(subStringPassword, 'g');
+    password = password.replace(regEx, '') ;
+    if (checkIfPasswordContainsChar(password, lowerCaseLetters)) {
+        numberOfCharacters += lowerCaseLetters.length;
+    }
+    if (checkIfPasswordContainsChar(password, upperCaseLetters)) {
+        numberOfCharacters += upperCaseLetters.length;
+    }
+    if (checkIfPasswordContainsChar(password, digits)) {
+        numberOfCharacters += digits.length;
+    }
+    if (checkIfPasswordContainsChar(password, specialCharacters)) {
+        numberOfCharacters += specialCharacters.length;
+    }
+    const passwordLength = password.length;
+    const complexity = Math.pow(numberOfCharacters, passwordLength);
+    const attemptsPerSec = 50000000000;
+    let timeInDaysToCrack = complexity / attemptsPerSec / 3600 / 24;
+
+    if (topPasswords.includes(password)) {
+        timeInDaysToCrack = 0;
+    }
+    changeRankDisplay(timeInDaysToCrack);
+}
+
 export function generatePassword(lower, upper, digit, special, length) {
     let combinedString = '';
     let password = '';
@@ -38,7 +95,6 @@ export function generatePassword(lower, upper, digit, special, length) {
     const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
     const specialCharacters = '!§$%&*+#üäöÜÄÖ';
-
     if (lower) {
         combinedString += lowerCaseLetters;
     }
@@ -51,15 +107,13 @@ export function generatePassword(lower, upper, digit, special, length) {
     if (special) {
         combinedString += specialCharacters;
     }
-
     let array = new Uint32Array(length);
     window.crypto.getRandomValues(array);
-
     for (let i = 0; i < array.length; i += 1) {
         const randomNum = array[i] % combinedString.length;
         password += combinedString.substring(randomNum, randomNum + 1);
     }
-    calculatePasswordRank(password, combinedString);
+    calculatePasswordRank(password);
     return password
 }
 
@@ -90,4 +144,10 @@ $('#secure_password-length_input').on('input', () => {
     let inputVal = $('#secure_password-length_input').val();
     $('#secure_password-length_slider').val(inputVal);
     console.log(`Change input Val: ${inputVal}`);
+});
+
+$('#secure_password-pwd').on('change', function() {
+    calculatePasswordRank(this.value);
+    $('#secure_password-length_slider').val(this.value.length);
+    $('#secure_password-length_input').val(this.value.length);
 });

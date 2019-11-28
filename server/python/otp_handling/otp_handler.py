@@ -22,7 +22,6 @@ class OtpHandler:
             OtpHandler.create_otp(user_id)
             return
         else:
-            DBotp.insert(user_id, otp_value)
             return otp_value
 
     # Funktion zum Versenden eines OTPs via Emailadresse

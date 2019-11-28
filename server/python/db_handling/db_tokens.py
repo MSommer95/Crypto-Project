@@ -1,5 +1,7 @@
-import pymysql
 import logging
+
+import pymysql
+
 from server.python.db_handling.db_connector import DBconnector
 
 
@@ -11,7 +13,7 @@ class DBtokens:
         try:
             with db.cursor() as cursor:
                 sql = 'DELETE FROM user_tokens WHERE user_id = %s'
-                cursor.execute(sql, (user_id, ))
+                cursor.execute(sql, (user_id,))
                 sql = 'INSERT INTO user_tokens (user_id, token) VALUES (%s, %s)'
                 cursor.execute(sql, (user_id, token))
                 db.commit()
@@ -58,7 +60,7 @@ class DBtokens:
         try:
             with db.cursor() as cursor:
                 sql = 'SELECT * FROM user_tokens WHERE token = %s'
-                cursor.execute(sql, (token, ))
+                cursor.execute(sql, (token,))
                 db.commit()
                 results = cursor.fetchall()
         except pymysql.MySQLError as e:

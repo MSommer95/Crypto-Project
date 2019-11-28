@@ -9,15 +9,15 @@ from server.python.comm_handling.qr_handler import QRHandler
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp
+from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
+from server.python.db_handling.hash_handler import HashHandler
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
 from server.python.otp_handling.otp_handler import OtpHandler
 from server.python.otp_handling.second_factor_handling import SecondFactorHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.login_log_handler import LLogHandler
-from server.python.db_handling.hash_handler import HashHandler
-from server.python.db_handling.db_tokens import DBtokens
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -81,12 +81,14 @@ class Index(object):
                         cherrypy.session['2fa_status'] = 1
                         cherrypy.session['otp_option'] = 1
                         otp = OtpHandler.create_otp(user_id)
+                        DBotp.insert(user_id, otp)
                         OtpHandler.send_otp_mail(email, otp)
                         return 'Please send us your OTP'
                     elif user_settings['2FA-App'] == 1:
                         cherrypy.session['2fa_status'] = 1
                         cherrypy.session['otp_option'] = 2
                         otp = OtpHandler.create_otp(user_id)
+                        DBotp.insert(user_id, otp)
                         OtpHandler.send_otp_app(user_id, otp)
                         return 'Please send us your OTP'
                     else:
@@ -438,6 +440,7 @@ class Index(object):
 
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_otp(user_id)
+            DBotp.insert(user_id, otp)
             return otp
 
     # Function um einen neuen OTP zu requesten
@@ -449,6 +452,7 @@ class Index(object):
             user_mail = check_session_value('user_mail')
             otp_option = check_session_value('otp_option')
             otp = OtpHandler.create_otp(user_id)
+            DBotp.insert(user_id, otp)
             if otp_option == 1:
                 OtpHandler.send_otp_mail(user_mail, otp)
             elif otp_option == 2:
@@ -468,6 +472,10 @@ class Index(object):
             return base64.b64encode(img_string)
         else:
             return 'Not logged in'
+
+    @cherrypy.expose()
+    def request_top_password(self):
+        return open('../storage/other/top500passwords')
 
 
 def check_session_value(value):

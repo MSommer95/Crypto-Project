@@ -22,27 +22,22 @@ settHandle.initSettings();
 $('#reg-device-btn').on('click', () => {
     const registerDiv = $('#qr-wrapper');
     const registerBtn = $('#reg-device-btn');
-
     if (registerDiv.css('display') === 'none') {
         registerDiv.toggle();
         registerBtn.html("Hide registration QR");
-
         if(intervalPaused) {
             intervalPaused = false;
         }
-
         if(!qrUpdateInterval) {
             qrUpdateInterval = setInterval(() => {
                 if (intervalPaused)
                     return;
-
                 qrCode.updateDeviceQR();
             }, 60000);
         }
     } else if (registerDiv.css('display') === 'block') {
         registerDiv.toggle();
         registerBtn.html("Register new Device");
-
         if(qrUpdateInterval) {
             intervalPaused = true;
         }

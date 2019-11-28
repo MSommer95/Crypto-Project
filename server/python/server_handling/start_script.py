@@ -26,21 +26,22 @@ class Index(object):
     # 2te Faktor schon bestätigt wurde
     @cherrypy.expose()
     def index(self):
-        if cherrypy.session.get('user_id') is None:
+        if not check_session_value('user_id'):
             return open('../public/dist/sign.html')
         else:
-            if cherrypy.session.get('2fa_status') == 1:
-                if cherrypy.session.get('2fa_verified') == 1:
+            if check_session_value('2fa_status') == 1:
+                if check_session_value('2fa_verified') == 1:
                     return open('../public/dist/index.html')
                 else:
-                    user_id = str(cherrypy.session.get('user_id'))
-                    verified = DBotp.check_verification(user_id)
-                    if verified:
-                        cherrypy.session['2fa_verified'] = verified
-                        return open('../public/dist/index.html')
-                    else:
-                        return open('../public/dist/sign.html')
-            elif cherrypy.session.get('2fa_status') == 0:
+                    user_id = str(check_session_value('user_id'))
+                    if user_id:
+                        verified = DBotp.check_verification(user_id)
+                        if verified:
+                            cherrypy.session['2fa_verified'] = verified
+                            return open('../public/dist/index.html')
+                        else:
+                            return open('../public/dist/sign.html')
+            elif check_session_value('2fa_status') == 0:
                 return open('../public/dist/index.html')
 
     # Sign redirect
@@ -113,14 +114,18 @@ class Index(object):
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
     def verify_otp(self, otp):
-        user_id = str(cherrypy.session.get('user_id'))
-        check_value = DBotp.check_current(user_id, otp)
-        if check_value:
-            cherrypy.session['2fa_verified'] = 1
-            DirHandler.check_user_dirs(user_id)
-            return 'Verification valid'
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            check_value = DBotp.check_current(user_id, otp)
+            if check_value:
+                cherrypy.session['2fa_verified'] = 1
+                DirHandler.check_user_dirs(user_id)
+                return 'Verification valid'
+            else:
+                return 'Verification invalid'
         else:
-            return 'Verification invalid'
+            return 'Not logged in'
 
     # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt udn
     # nicht älter als eine Minute
@@ -137,88 +142,129 @@ class Index(object):
     # älter als eine Minute
     @cherrypy.expose()
     def check_otp_verified(self):
-        user_id = cherrypy.session.get('user_id')
-        check_value = str(DBotp.check_verification(user_id))
-        return check_value
+        user_id = check_session_value('user_id')
+        if user_id:
+            check_value = str(DBotp.check_verification(user_id))
+            return check_value
+        else:
+            return 'Not logged in'
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
     def file_upload(self, file):
-        user_id = str(cherrypy.session.get('user_id'))
-        FileHandler.write_file(user_id, file)
-        return open('../public/dist/index.html')
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            FileHandler.write_file(user_id, file)
+            return open('../public/dist/index.html')
+        else:
+            return open('../public/dist/sign.html')
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
     @cherrypy.expose()
     def file_download(self, file_path):
-        user_id = str(cherrypy.session.get('user_id'))
-        user_path = '../storage/users/%s' % user_id
-        absolute_file_path = os.path.abspath(user_path + file_path)
-        return serve_file(absolute_file_path, disposition="attachment")
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            user_path = '../storage/users/%s' % user_id
+            absolute_file_path = os.path.abspath(user_path + file_path)
+            return serve_file(absolute_file_path, disposition="attachment")
+        else:
+            return open('../public/dist/sign.html')
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_encrypt(self, file_id, file_name):
-        user_id = str(cherrypy.session.get('user_id'))
-        return FileEncryptor.encryption(user_id, file_id, file_name)
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            return FileEncryptor.encryption(user_id, file_id, file_name)
+        else:
+            return 'Not logged in'
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_decrypt(self, file_id, file_name):
-        user_id = str(cherrypy.session.get('user_id'))
-        file_name = file_name.strip('.encrypted')
-        return FileEncryptor.decryption(user_id, file_id, file_name)
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            file_name = file_name.strip('.encrypted')
+            return FileEncryptor.decryption(user_id, file_id, file_name)
+        else:
+            return 'Not logged in'
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     def file_update(self, file_id, file_description, path, file_name, is_encrypted):
-        user_id = str(cherrypy.session.get('user_id'))
-        if int(is_encrypted):
-            new_path = '/files/encrypted/%s' % file_name
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            if int(is_encrypted):
+                new_path = '/files/encrypted/%s' % file_name
+            else:
+                new_path = '/files/unencrypted/%s' % file_name
+            DBfiles.update_file(user_id, file_id, file_name, file_description, new_path)
+            return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted)
         else:
-            new_path = '/files/unencrypted/%s' % file_name
-        DBfiles.update_file(user_id, file_id, file_name, file_description, new_path)
-        return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted)
+            return 'Not logged in'
 
     # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     def file_delete(self, file_id, path, is_encrypted):
-        user_id = str(cherrypy.session.get('user_id'))
-        return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
+        else:
+            return 'Not logged in'
 
     # Funktion zum Auslesen aller hochgeladenen Dateien des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_files(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        files = DBfiles.get_files(user_id)
-        return files
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            files = DBfiles.get_files(user_id)
+            return files
+        else:
+            return 'Not logged in'
 
     # Funktion zum Auslesen aller bereits genutzten OTP's des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_used_otps(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        used_otps = DBotp.get_used(user_id)
-        return used_otps
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            used_otps = DBotp.get_used(user_id)
+            return used_otps
+        else:
+            return 'Not logged in'
 
     # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_devices(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        devices = DBdevices.get_by_user_id(user_id)
-        return devices
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            devices = DBdevices.get_by_user_id(user_id)
+            return devices
+        else:
+            return 'Not logged in'
 
     # Funktion zum Hinzufügen eines neuen Nutzer-Devices, genutzt für Authentifikation per App als zweiten Faktor
     @cherrypy.expose()
     def insert_user_device(self, device_id, device_name, user_id):
         if not user_id:
-            user_id = str(cherrypy.session.get('user_id'))
-
+            user_id = check_session_value('user_id')
+            if user_id:
+                user_id = str(user_id)
+            else:
+                return 'Not logged in'
         device = DBdevices.get_by_device_id(device_id)
-
         if len(device) > 0:
             if device[0]['device_is_active']:
                 return 'Device already active'
@@ -235,65 +281,89 @@ class Index(object):
     # Funktion zum Löschen eines Nutzer-Devices
     @cherrypy.expose()
     def delete_user_device(self, device_id):
-        user_id = str(cherrypy.session.get('user_id'))
-        DBdevices.delete(device_id, user_id)
-        deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
-        return deleted_message
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            DBdevices.delete(device_id, user_id)
+            deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
+            return deleted_message
+        else:
+            return 'Not logged in'
 
     # Funktion zum Aktivieren eines bereits existenten Devices für die 2-Faktor-Authentifikation, es kann nur jeweils
     # ein Device gleichzeitig aktiver zweiter Faktor sein
     @cherrypy.expose()
     def activate_user_device(self, device_id):
-        user_id = str(cherrypy.session.get('user_id'))
-        DBdevices.deactivate_all(user_id)
-        return SecondFactorHandler.activate_device(user_id, device_id)
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            DBdevices.deactivate_all(user_id)
+            return SecondFactorHandler.activate_device(user_id, device_id)
+        else:
+            return 'Not logged in'
 
     # Funktion zum Deaktivieren eines aktiven 2-Faktor-Devices des Nutzers
     @cherrypy.expose()
     def deactivate_user_device(self, device_id):
-        user_id = str(cherrypy.session.get('user_id'))
-        deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
-        deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
-        return deactived_message + ' ' + deactivae_addition
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
+            deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
+            return deactived_message + ' ' + deactivae_addition
+        else:
+            return 'Not logged in'
 
     # Funktion zum Auslesen der gewählten 2-Faktor-Eistellungen des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_settings(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        user_settings = DBusers.get_user_settings(user_id)
-        user = DBusers.get_user(user_id)
-        user_settings['email'] = user[0]['email']
-        return user_settings
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            user_settings = DBusers.get_user_settings(user_id)
+            user = DBusers.get_user(user_id)
+            user_settings['email'] = user[0]['email']
+            return user_settings
+        else:
+            return 'Not logged in'
 
     # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
     def update_account_info(self, email, password):
-        user_id = str(cherrypy.session.get('user_id'))
-        user_mail = cherrypy.session.get('user_mail')
-        email_change_status = ''
-        password_change_status = ''
-        if not user_mail == email:
-            email_change_status = DBusers.update_email(user_id, email)
-        if not password == '':
-            password_change_status = DBusers.update_password(user_id, password)
-        return email_change_status + password_change_status
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            user_mail = check_session_value('user_mail')
+            email_change_status = ''
+            password_change_status = ''
+            if not user_mail == email:
+                email_change_status = DBusers.update_email(user_id, email)
+            if not password == '':
+                password_change_status = DBusers.update_password(user_id, password)
+            return email_change_status + password_change_status
+        else:
+            return 'Not logged in'
 
     # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers
     @cherrypy.expose()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app):
-        user_id = str(cherrypy.session.get('user_id'))
-        if sec_fa_email == 'true' and sec_fa_app == 'true':
-            return 'Please dont try to check more then one 2FA option'
-        else:
-            if sec_fa == 'true':
-                DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
-                DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
-                return 'Successfully changed the second factor'
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            if sec_fa_email == 'true' and sec_fa_app == 'true':
+                return 'Please dont try to check more then one 2FA option'
             else:
-                DBusers.set_second_factor_option(user_id, 1, 0)
-                DBusers.set_second_factor_option(user_id, 2, 0)
-                return 'Successfully disabled second factor'
+                if sec_fa == 'true':
+                    DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
+                    DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
+                    return 'Successfully changed the second factor'
+                else:
+                    DBusers.set_second_factor_option(user_id, 1, 0)
+                    DBusers.set_second_factor_option(user_id, 2, 0)
+                    return 'Successfully disabled second factor'
+        else:
+            return 'Not logged in'
 
     # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()
@@ -348,25 +418,38 @@ class Index(object):
 
     @cherrypy.expose()
     def request_new_otp(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        user_mail = cherrypy.session.get('user_mail')
-        otp_option = cherrypy.session.get('otp_option')
-        otp = OtpHandler.create_otp(user_id)
-        if otp_option == 1:
-            OtpHandler.send_otp_mail(user_mail, otp)
-        elif otp_option == 2:
-            OtpHandler.send_otp_app(user_id, otp)
-        return 'New OTP send'
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            user_mail = check_session_value('user_mail')
+            otp_option = check_session_value('otp_option')
+            otp = OtpHandler.create_otp(user_id)
+            if otp_option == 1:
+                OtpHandler.send_otp_mail(user_mail, otp)
+            elif otp_option == 2:
+                OtpHandler.send_otp_app(user_id, otp)
+            return 'New OTP send'
 
     # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
     # gescanned werden um Registrierung und Login zu vereinfachen
     @cherrypy.expose()
     def request_qr(self):
-        user_id = str(cherrypy.session.get('user_id'))
-        otp = OtpHandler.create_otp(user_id)
-        img_string = QRHandler.create_qr_image(user_id, otp)
-        cherrypy.response.headers['Content-Type'] = "image/png"
-        return base64.b64encode(img_string)
+        user_id = check_session_value('user_id')
+        if user_id:
+            user_id = str(user_id)
+            otp = OtpHandler.create_otp(user_id)
+            img_string = QRHandler.create_qr_image(user_id, otp)
+            cherrypy.response.headers['Content-Type'] = "image/png"
+            return base64.b64encode(img_string)
+        else:
+            return 'Not logged in'
+
+
+def check_session_value(value):
+    if cherrypy.session.get(value):
+        return cherrypy.session.get(value)
+    else:
+        return False
 
 
 if __name__ == '__main__':

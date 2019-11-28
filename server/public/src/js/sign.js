@@ -10,7 +10,9 @@ function request_2fa_verified() {
     servCon.getData('/check_otp_verified', (cb) => {
         if (cb.responseText === '0') {
             setTimeout(request_2fa_verified, 5000);
-
+        } else if(cb.responseText === 'Not logged in') {
+            gui.changeNotificationTextAndOpen('Not logged in');
+            window.location.href = '/sign';
         } else {
             window.location.href = '/index';
         }

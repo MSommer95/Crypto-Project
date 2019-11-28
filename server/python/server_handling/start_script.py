@@ -16,6 +16,8 @@ from server.python.otp_handling.otp_handler import OtpHandler
 from server.python.otp_handling.second_factor_handling import SecondFactorHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.login_log_handler import LLogHandler
+from server.python.db_handling.hash_handler import HashHandler
+from server.python.db_handling.db_tokens import DBtokens
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -94,6 +96,7 @@ class Index(object):
                     return 'Wrong data. Try again.'
             else:
                 return 'Too many Trys. Try again in a minute.'
+
     # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
     # erfolgreichen Login
     @cherrypy.expose()
@@ -345,7 +348,8 @@ class Index(object):
         else:
             return 'Not logged in'
 
-    # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers
+    # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers, bei Aktivierung der 2-Faktor Authentifikation
+    # wird ein einmaliges Token zum Zurücksetzen der Einlstellungen generiert und in der Datenbank gespeichert
     @cherrypy.expose()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app):
         user_id = check_session_value('user_id')
@@ -355,15 +359,35 @@ class Index(object):
                 return 'Please dont try to check more then one 2FA option'
             else:
                 if sec_fa == 'true':
+                    if sec_fa_app == 'true':
+                        devices = DBdevices.get_by_user_id(user_id)
+                        if len(devices) == 0:
+                            return 'Kein Gerät zur Authentifikation vorhanden!'
+
                     DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
                     DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
-                    return 'Successfully changed the second factor'
+                    token = HashHandler.create_token(user_id)
+                    return 'Successfully changed the second factor, use token: "' + token + '" to reset your ' \
+                                                                                            '2FA settings '
                 else:
                     DBusers.set_second_factor_option(user_id, 1, 0)
                     DBusers.set_second_factor_option(user_id, 2, 0)
                     return 'Successfully disabled second factor'
         else:
             return 'Not logged in'
+
+    # Funktion zum zurücksetzen der 2-Faktor Authentifizierung mittels Token, falls Nutzer Zugang zum
+    # Authentifikationsmedium verliert
+    @cherrypy.expose()
+    def reset_settings_sec_fa(self, token):
+        user_id = str(cherrypy.session.get['user_id'])
+
+        if DBtokens.check(user_id, token):
+            DBusers.set_second_factor_option(user_id, 1, 0)
+            DBusers.set_second_factor_option(user_id, 2, 0)
+            return 'Successfully disabled second factor'
+        else:
+            return 'Token mismatch, unauthorized'
 
     # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()

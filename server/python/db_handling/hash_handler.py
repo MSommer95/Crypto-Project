@@ -1,6 +1,9 @@
 import binascii
 import hashlib
 import os
+import random
+import string
+from server.python.db_handling.db_tokens import DBtokens
 
 
 class HashHandler:
@@ -12,6 +15,18 @@ class HashHandler:
                                        salt, 100000)
         pwd_hash = binascii.hexlify(pwd_hash)
         return (salt + pwd_hash).decode('ascii')
+
+    @staticmethod
+    def create_token(user_id):
+        token = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=12))
+        tokens = DBtokens.all()
+
+        if token in tokens:
+            HashHandler.create_token(user_id)
+            return
+        else:
+            DBtokens.insert(user_id, token)
+            return token
 
     @staticmethod
     def verify_password(stored_password, provided_password):

@@ -7,6 +7,7 @@ from server.python.db_handling.db_files import DBfiles
 
 class FileEncryptor:
 
+    # Funktion zum Verschlüsseln einer Datei
     @staticmethod
     def encryption(user_id, file_id, filename):
         try:
@@ -39,6 +40,7 @@ class FileEncryptor:
         else:
             return 'Successfully encrypted the file'
 
+    # Funktion zum Entschlüsseln einer Datei
     @staticmethod
     def decryption(user_id, file_id, filename):
         try:

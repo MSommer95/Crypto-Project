@@ -3,6 +3,7 @@ from pyfcm import FCMNotification
 
 class AppSender:
 
+    # Funktion zum erstellen einer Push Nachricht für die 2FA App
     @staticmethod
     def send_otp_to_app(otp, user_id, device_id):
         api_key_path = '../storage/api_key/api_key'

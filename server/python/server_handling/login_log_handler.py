@@ -7,6 +7,7 @@ from server.python.db_handling.db_logs import DBlogs
 
 class LLogHandler:
 
+    # Funktion zur Überprüfung der Login Versuche
     @staticmethod
     def check_login_logs(user_id):
         log = DBlogs.get_login_log(user_id)
@@ -15,6 +16,7 @@ class LLogHandler:
             log = DBlogs.get_login_log(user_id)
         return LLogHandler.check_timestamp(user_id, log)
 
+    # Funktion zur Überprüfung des letzten Login Versuchs
     @staticmethod
     def check_timestamp(user_id, log):
         current_timestamp = int(time.time())
@@ -27,6 +29,7 @@ class LLogHandler:
         else:
             return log
 
+    # Funktion zum Zählen der Login Versuche
     @staticmethod
     def count_trys(user_id, log, email):
         counter = log[0]['counter']

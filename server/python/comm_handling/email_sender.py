@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 
 # create message object instance
 class EmailSender:
+
     @staticmethod
     def send_mail(message, subject, email):
         msg = MIMEMultipart()

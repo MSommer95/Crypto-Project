@@ -10,6 +10,7 @@ from server.python.db_handling.db_otp import DBotp
 
 class OtpHandler:
 
+    # Funktion zum Erstellen eines 8-Stelligen OTP
     @staticmethod
     def create_otp(user_id):
         otp_value = ''
@@ -24,11 +25,13 @@ class OtpHandler:
             DBotp.insert(user_id, otp_value)
             return otp_value
 
+    # Funktion zum Versenden eines OTPs via Emailadresse
     @staticmethod
     def send_otp_mail(email, otp):
         message = 'Your HOTP: %s' % otp
         EmailSender.send_mail(message, '2-Faktor-Auth', email)
 
+    # Funktion zum Versenden eines OTPs via Push Nachricht
     @staticmethod
     def send_otp_app(user_id, otp):
         device = DBdevices.get_active_devices_by_user_id(user_id)

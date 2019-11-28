@@ -416,6 +416,7 @@ class Index(object):
             otp = OtpHandler.create_otp(user_id)
             return otp
 
+    # Function um einen neuen OTP zu requesten
     @cherrypy.expose()
     def request_new_otp(self):
         user_id = check_session_value('user_id')

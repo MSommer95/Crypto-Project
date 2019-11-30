@@ -31,6 +31,7 @@ class Index(object):
         if check_for_auth(user_id):
             return open('../public/dist/index.html')
         else:
+            cherrypy.response.status = 401
             return open('../public/dist/sign.html')
 
     # Sign redirect
@@ -82,8 +83,10 @@ class Index(object):
                         cherrypy.session['2fa_status'] = 0
                         return 'Send me to index'
                 else:
+                    cherrypy.response.status = 403
                     return 'Wrong data. Try again.'
             else:
+                cherrypy.response.status = 418 #429
                 return 'Too many Trys. Try again in a minute.'
 
     # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
@@ -115,9 +118,10 @@ class Index(object):
                 DirHandler.check_user_dirs(user_id)
                 return 'Verification valid'
             else:
+                cherrypy.response.status = 403
                 return 'Verification invalid'
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt udn
     # nicht älter als eine Minute
@@ -142,7 +146,7 @@ class Index(object):
             cherrypy.session['2fa_verified'] = 1
             return check_value
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
@@ -176,7 +180,7 @@ class Index(object):
             user_id = str(user_id)
             return FileEncryptor.encryption(user_id, file_id, file_name)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
@@ -187,7 +191,7 @@ class Index(object):
             file_name = file_name.strip('.encrypted')
             return FileEncryptor.decryption(user_id, file_id, file_name)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
@@ -202,7 +206,7 @@ class Index(object):
             DBfiles.update_file(user_id, file_id, file_name, file_description, new_path)
             return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
@@ -212,7 +216,7 @@ class Index(object):
             user_id = str(user_id)
             return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Auslesen aller hochgeladenen Dateien des Nutzers
     @cherrypy.expose()
@@ -224,7 +228,7 @@ class Index(object):
             files = DBfiles.get_files(user_id)
             return files
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Auslesen aller bereits genutzten OTP's des Nutzers
     @cherrypy.expose()
@@ -236,7 +240,7 @@ class Index(object):
             used_otps = DBotp.get_used(user_id)
             return used_otps
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
@@ -248,7 +252,7 @@ class Index(object):
             devices = DBdevices.get_by_user_id(user_id)
             return devices
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Hinzufügen eines neuen Nutzer-Devices, genutzt für Authentifikation per App als zweiten Faktor
     @cherrypy.expose()
@@ -258,7 +262,7 @@ class Index(object):
             if check_for_auth(user_id):
                 user_id = str(user_id)
             else:
-                return 'unauthorized'
+                return unauthorized_response()
         device = DBdevices.get_by_device_id(device_id)
         if len(device) > 0:
             if device[0]['device_is_active']:
@@ -283,7 +287,7 @@ class Index(object):
             deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
             return deleted_message
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Aktivieren eines bereits existenten Devices für die 2-Faktor-Authentifikation, es kann nur jeweils
     # ein Device gleichzeitig aktiver zweiter Faktor sein
@@ -295,7 +299,7 @@ class Index(object):
             DBdevices.deactivate_all(user_id)
             return SecondFactorHandler.activate_device(user_id, device_id)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Deaktivieren eines aktiven 2-Faktor-Devices des Nutzers
     @cherrypy.expose()
@@ -307,7 +311,7 @@ class Index(object):
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
             return deactived_message + ' ' + deactivae_addition
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Auslesen der gewählten 2-Faktor-Eistellungen des Nutzers
     @cherrypy.expose()
@@ -321,7 +325,7 @@ class Index(object):
             user_settings['email'] = user[0]['email']
             return user_settings
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
@@ -338,7 +342,7 @@ class Index(object):
                 password_change_status = DBusers.update_password(user_id, password)
             return email_change_status + password_change_status
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers, bei Aktivierung der 2-Faktor Authentifikation
     # wird ein einmaliges Token zum Zurücksetzen der Einlstellungen generiert und in der Datenbank gespeichert
@@ -365,7 +369,7 @@ class Index(object):
                     DBusers.set_second_factor_option(user_id, 2, 0)
                     return 'Successfully disabled second factor'
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum zurücksetzen der 2-Faktor Authentifizierung mittels Token, falls Nutzer Zugang zum
     # Authentifikationsmedium verliert
@@ -378,9 +382,10 @@ class Index(object):
                 DBusers.set_second_factor_option(user_id, 2, 0)
                 return 'Successfully disabled second factor. Please login again.'
             else:
-                return 'Token mismatch, unauthorized'
+                cherrypy.response.status = 403
+                return 'Token mismatch'
         else:
-            'unauthorized'
+            return unauthorized_response()
 
     # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()
@@ -462,7 +467,7 @@ class Index(object):
             cherrypy.response.headers['Content-Type'] = "image/png"
             return base64.b64encode(img_string)
         else:
-            return 'unauthorized'
+            return unauthorized_response()
 
     @cherrypy.expose()
     def request_top_password(self):
@@ -483,13 +488,29 @@ def check_for_auth(user_id):
         return user_id
 
 
+def unauthorized_response():
+    cherrypy.response.status = 401
+    return 'Access denied: Unauthorized'
+
+
 if __name__ == '__main__':
     os.chdir('../')
+
+    @cherrypy.tools.register('before_finalize', priority=60)
+    def secureheaders():
+        headers = cherrypy.response.headers
+        headers['X-Frame-Options'] = 'DENY'
+        headers['X-XSS-Protection'] = '1; mode=block'
+        #headers['Content-Security-Policy'] = "default-src 'self';"
+
     conf = {
         '/': {
+            'tools.secureheaders.on': True,
             'tools.sessions.on': True,
-            'tools.staticdir.root': os.path.abspath(os.getcwd()),
             'tools.sessions.timeout': 20,
+            #TODO: Only if HTTPS is activated 'tools.sessions.secure': True,
+            'tools.sessions.httponly': True,
+            'tools.staticdir.root': os.path.abspath(os.getcwd()),
             'log.access_file': "./server_handling/logs/access.log",
             'log.error_file': "./server_handling/logs/error.log",
             'log.screen': False,

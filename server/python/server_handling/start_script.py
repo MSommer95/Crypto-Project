@@ -86,7 +86,7 @@ class Index(object):
                     cherrypy.response.status = 403
                     return 'Wrong data. Try again.'
             else:
-                cherrypy.response.status = 418 #429
+                cherrypy.response.status = 418  # 429
                 return 'Too many Trys. Try again in a minute.'
 
     # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
@@ -140,11 +140,12 @@ class Index(object):
     def check_otp_verified(self):
         user_id = check_session_value('user_id')
         # TODO: Potenzielle Schwachstelle wenn Eve password und email kennt und login versucht und Bob den
-        #   login + otp eingibt und damit die varification auf 1 setzt
+        #   otp via app bestätigt und damit die varification auf 1 setzt
         if user_id:
-            check_value = str(DBotp.check_verification(user_id))
-            cherrypy.session['2fa_verified'] = 1
-            return check_value
+            check_value = DBotp.check_verification(user_id)
+            if check_value:
+                cherrypy.session['2fa_verified'] = 1
+            return str(check_value)
         else:
             return unauthorized_response()
 
@@ -496,19 +497,21 @@ def unauthorized_response():
 if __name__ == '__main__':
     os.chdir('../')
 
+
     @cherrypy.tools.register('before_finalize', priority=60)
     def secureheaders():
         headers = cherrypy.response.headers
         headers['X-Frame-Options'] = 'DENY'
         headers['X-XSS-Protection'] = '1; mode=block'
-        #headers['Content-Security-Policy'] = "default-src 'self';"
+        # headers['Content-Security-Policy'] = "default-src 'self';"
+
 
     conf = {
         '/': {
             'tools.secureheaders.on': True,
             'tools.sessions.on': True,
             'tools.sessions.timeout': 20,
-            #TODO: Only if HTTPS is activated 'tools.sessions.secure': True,
+            # TODO: Only if HTTPS is activated 'tools.sessions.secure': True,
             'tools.sessions.httponly': True,
             'tools.staticdir.root': os.path.abspath(os.getcwd()),
             'log.access_file': "./server_handling/logs/access.log",

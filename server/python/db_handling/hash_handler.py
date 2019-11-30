@@ -20,14 +20,20 @@ class HashHandler:
     @staticmethod
     def create_token(user_id):
         token = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=12))
+        hashed_token = HashHandler.hash_password(token)
         tokens = DBtokens.all()
 
-        if token in tokens:
+        if hashed_token in tokens:
             HashHandler.create_token(user_id)
             return
         else:
-            DBtokens.insert(user_id, token)
+            DBtokens.insert(user_id, hashed_token)
             return token
+
+    @staticmethod
+    def check_token(user_id, token):
+        db_token = DBtokens.get(user_id)[0]['token']
+        return HashHandler.verify_password(db_token, token)
 
     @staticmethod
     def verify_password(stored_password, provided_password):

@@ -165,14 +165,14 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- otp-popup -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="otp-popup" role="dialog"
      tabindex="-1">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Please insert your OTP</h5>
-                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                <button id="otp-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -182,12 +182,36 @@
             <div class="modal-footer modal-left">
                 <button class="btn btn-primary" id="send_otp" type="button">Confirm</button>
                 <button class="btn btn-dark ml-auto mr-auto" id="request-new-otp-btn">Send again</button>
+                <div class="row">
+                    <a class="ml-1" href="#" id="reset-settings-btn">Reset your 2FA here</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- settings-reset-popup -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="settings-reset-popup" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please insert your reset-code</h5>
+                <button id="reset-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="confirm_reset-code" name="reset-input" placeholder="01234567" type="password">
+            </div>
+            <div class="modal-footer modal-left">
+                <button class="btn btn-primary" id="send_reset-code" type="button">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- notification-popup -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="notification-popup" role="dialog"
      tabindex="-1">
     <div class="modal-dialog modal-sm" role="document">

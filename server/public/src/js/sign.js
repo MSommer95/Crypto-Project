@@ -68,6 +68,19 @@ $('#secure_password-generator').on('click', () => {
     $('#create_password').val(password);
 });
 
+$('#send_reset-code').on('click', function () {
+    const url = '/reset_settings_sec_fa';
+    const data = {
+        token: $('#confirm_reset-code').val()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        gui.changeNotificationTextAndOpen(cb.responseText);
+        if (cb.responseText === 'unauthorized') {
+            $('#reset-close').click();
+        }
+    });
+});
+
 $('#registrationButton').on('click', function () {
     gui.chooseLogin(this);
 });

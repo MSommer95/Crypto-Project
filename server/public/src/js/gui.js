@@ -129,6 +129,10 @@ $('#settings-btn').on('click', function () {
 $('#back-to-main-btn').on('click', function () {
    toggleSetteings(this);
 });
+$('#reset-settings-btn').on('click', function () {
+    $('#otp-close').click();
+    $('#settings-reset-popup').modal();
+});
 $('#2-fa').on('change', function () {
    if (this.checked) {
        disableGrayOverlay($('#2-fa-options-wrapper'));

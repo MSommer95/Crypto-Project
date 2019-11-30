@@ -27,23 +27,11 @@ class Index(object):
     # 2te Faktor schon bestätigt wurde
     @cherrypy.expose()
     def index(self):
-        if not check_session_value('user_id'):
-            return open('../public/dist/sign.html')
+        user_id = check_session_value('user_id')
+        if check_for_auth(user_id):
+            return open('../public/dist/index.html')
         else:
-            if check_session_value('2fa_status') == 1:
-                if check_session_value('2fa_verified') == 1:
-                    return open('../public/dist/index.html')
-                else:
-                    user_id = str(check_session_value('user_id'))
-                    if user_id:
-                        verified = DBotp.check_verification(user_id)
-                        if verified:
-                            cherrypy.session['2fa_verified'] = verified
-                            return open('../public/dist/index.html')
-                        else:
-                            return open('../public/dist/sign.html')
-            elif check_session_value('2fa_status') == 0:
-                return open('../public/dist/index.html')
+            return open('../public/dist/sign.html')
 
     # Sign redirect
     @cherrypy.expose()
@@ -147,8 +135,11 @@ class Index(object):
     @cherrypy.expose()
     def check_otp_verified(self):
         user_id = check_session_value('user_id')
+        # TODO: Potenzielle Schwachstelle wenn Eve password und email kennt und login versucht und Bob den
+        #   login + otp eingibt und damit die varification auf 1 setzt
         if user_id:
             check_value = str(DBotp.check_verification(user_id))
+            cherrypy.session['2fa_verified'] = 1
             return check_value
         else:
             return 'unauthorized'
@@ -158,7 +149,7 @@ class Index(object):
     @cherrypy.expose()
     def file_upload(self, file):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             FileHandler.write_file(user_id, file)
             return open('../public/dist/index.html')
@@ -169,7 +160,7 @@ class Index(object):
     @cherrypy.expose()
     def file_download(self, file_path):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             user_path = '../storage/users/%s' % user_id
             absolute_file_path = os.path.abspath(user_path + file_path)
@@ -181,7 +172,7 @@ class Index(object):
     @cherrypy.expose()
     def file_encrypt(self, file_id, file_name):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             return FileEncryptor.encryption(user_id, file_id, file_name)
         else:
@@ -191,7 +182,7 @@ class Index(object):
     @cherrypy.expose()
     def file_decrypt(self, file_id, file_name):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             file_name = file_name.strip('.encrypted')
             return FileEncryptor.decryption(user_id, file_id, file_name)
@@ -202,7 +193,7 @@ class Index(object):
     @cherrypy.expose()
     def file_update(self, file_id, file_description, path, file_name, is_encrypted):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             if int(is_encrypted):
                 new_path = '/files/encrypted/%s' % file_name
@@ -217,7 +208,7 @@ class Index(object):
     @cherrypy.expose()
     def file_delete(self, file_id, path, is_encrypted):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
         else:
@@ -228,7 +219,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_files(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             files = DBfiles.get_files(user_id)
             return files
@@ -240,7 +231,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_used_otps(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             used_otps = DBotp.get_used(user_id)
             return used_otps
@@ -252,7 +243,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_devices(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             devices = DBdevices.get_by_user_id(user_id)
             return devices
@@ -264,7 +255,7 @@ class Index(object):
     def insert_user_device(self, device_id, device_name, user_id):
         if not user_id:
             user_id = check_session_value('user_id')
-            if user_id:
+            if check_for_auth(user_id):
                 user_id = str(user_id)
             else:
                 return 'unauthorized'
@@ -286,7 +277,7 @@ class Index(object):
     @cherrypy.expose()
     def delete_user_device(self, device_id):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             DBdevices.delete(device_id, user_id)
             deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
@@ -299,7 +290,7 @@ class Index(object):
     @cherrypy.expose()
     def activate_user_device(self, device_id):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             DBdevices.deactivate_all(user_id)
             return SecondFactorHandler.activate_device(user_id, device_id)
@@ -310,7 +301,7 @@ class Index(object):
     @cherrypy.expose()
     def deactivate_user_device(self, device_id):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
@@ -323,7 +314,7 @@ class Index(object):
     @cherrypy.tools.json_out()
     def get_user_settings(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             user_settings = DBusers.get_user_settings(user_id)
             user = DBusers.get_user(user_id)
@@ -336,7 +327,7 @@ class Index(object):
     @cherrypy.expose()
     def update_account_info(self, email, password):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             user_mail = check_session_value('user_mail')
             email_change_status = ''
@@ -354,7 +345,7 @@ class Index(object):
     @cherrypy.expose()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             if sec_fa_email == 'true' and sec_fa_app == 'true':
                 return 'Please dont try to check more then one 2FA option'
@@ -447,7 +438,7 @@ class Index(object):
     @cherrypy.expose()
     def request_new_otp(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             user_mail = check_session_value('user_mail')
             otp_option = check_session_value('otp_option')
@@ -464,7 +455,7 @@ class Index(object):
     @cherrypy.expose()
     def request_qr(self):
         user_id = check_session_value('user_id')
-        if user_id:
+        if check_for_auth(user_id):
             user_id = str(user_id)
             otp = OtpHandler.create_otp(user_id)
             img_string = QRHandler.create_qr_image(user_id, otp)
@@ -483,6 +474,13 @@ def check_session_value(value):
         return cherrypy.session.get(value)
     else:
         return False
+
+
+def check_for_auth(user_id):
+    if check_session_value('2fa_status'):
+        return check_session_value('2fa_verified')
+    else:
+        return user_id
 
 
 if __name__ == '__main__':

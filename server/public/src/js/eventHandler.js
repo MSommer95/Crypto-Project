@@ -1,5 +1,9 @@
-import * as gui from "./gui";
 import $ from "jquery";
+import * as gui from "./gui";
+import * as passGen from "./passwordGenerator";
+import * as settHandler from "./settingsHandler";
+import * as qrGen from "./qrGenerator";
+import * as loginHandler from "./loginHandler";
 
 
 export function onMouseClick(event) {
@@ -32,6 +36,42 @@ export function onMouseClick(event) {
         case 'device_nav-btn':
             gui.scrollToElement($('#device-section'));
             break;
+        case 'secure_password-copy':
+            passGen.copyPassword();
+            break;
+        case 'secure_password-generate-btn':
+            passGen.initiatePasswordGen();
+            break;
+        case 'registrationButton':
+            gui.switchLoginCreate(event.target);
+            break;
+        case 'loginButton':
+            gui.switchLoginCreate(event.target);
+            break;
+        case 'account_info-save-btn':
+            settHandler.saveAccInfo();
+            break;
+        case 'settings-save-btn':
+            settHandler.saveSettings();
+            break;
+        case 'open-password-generator-btn':
+            passGen.openPassGen();
+            break;
+        case 'reg-device-btn':
+            qrGen.toggleQRGen();
+            break;
+        case 'send_login-btn':
+            loginHandler.login();
+            break;
+        case 'logout-btn':
+            loginHandler.logout();
+            break;
+        case 'send_otp':
+            loginHandler.sendOTP();
+            break;
+        case 'send_reset-code':
+            loginHandler.sendResetCode();
+            break;
         default:
             break;
     }
@@ -44,6 +84,22 @@ export function onStateChange(event) {
             break;
         case '2-fa':
             gui.secfacStateChange(event.target);
+            break;
+        case 'secure_password-pwd':
+            passGen.passInputchange(event.target);
+            break;
+        default:
+            break;
+    }
+}
+
+export function onInput(event) {
+    switch (event.target.id) {
+        case 'secure_password-length_slider':
+            passGen.changeRangeInputVal();
+            break;
+        case 'secure_password-length_input':
+            passGen.changeRangeSliderVal();
             break;
         default:
             break;

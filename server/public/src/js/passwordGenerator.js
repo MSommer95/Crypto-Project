@@ -117,7 +117,7 @@ export function generatePassword(lower, upper, digit, special, length) {
     return password
 }
 
-$('#secure_password-generate-btn').on('click', () => {
+export function initiatePasswordGen() {
     const lowerCase = $('#secure_password-letters_lower').prop('checked');
     const upperCase = $('#secure_password-letters_upper').prop('checked');
     const digits = $('#secure_password-digits').prop('checked');
@@ -126,28 +126,33 @@ $('#secure_password-generate-btn').on('click', () => {
     const password = generatePassword(lowerCase, upperCase, digits, special, length);
     $('#secure_password-pwd').val(password);
     $('#create_password').val(password);
-});
+}
 
-$('#secure_password-copy').on('click', () => {
+export function copyPassword() {
     let password = $('#secure_password-pwd');
     password.select();
     document.execCommand('copy');
-});
+}
 
-$('#secure_password-length_slider').on('input', () => {
+export function changeRangeInputVal() {
     let rangeVal = $('#secure_password-length_slider').val();
     $('#secure_password-length_input').val(rangeVal);
-    console.log(`Change range Val: ${rangeVal}`);
-});
+}
 
-$('#secure_password-length_input').on('input', () => {
+export function changeRangeSliderVal() {
     let inputVal = $('#secure_password-length_input').val();
     $('#secure_password-length_slider').val(inputVal);
-    console.log(`Change input Val: ${inputVal}`);
-});
+}
 
-$('#secure_password-pwd').on('change', function() {
-    calculatePasswordRank(this.value);
-    $('#secure_password-length_slider').val(this.value.length);
-    $('#secure_password-length_input').val(this.value.length);
-});
+export function passInputchange(input) {
+    calculatePasswordRank(input.value);
+    $('#secure_password-length_slider').val(input.value.length);
+    $('#secure_password-length_input').val(input.value.length);
+}
+
+export function openPassGen() {
+    $('#secure_password-popup').modal();
+    let password = generatePassword(true, true, true, true, 16);
+    $('#secure_password-pwd').val(password);
+    $('#create_password').val(password);
+}

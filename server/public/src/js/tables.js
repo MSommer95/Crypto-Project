@@ -207,8 +207,5 @@ export function initFileTable() {
 
     filesTable.setData('/get_user_files');
 
-    $('#files-table-btn-save').on('click', () => {
-    });
-
     return filesTable
 }

@@ -141,3 +141,4 @@ $(window).scroll(function () {
 
 document.addEventListener('click', eventHandler.onMouseClick, false);
 document.addEventListener('change', eventHandler.onStateChange, false);
+document.addEventListener('input', eventHandler.onInput, false);

@@ -21,7 +21,7 @@ export function initSettings() {
     });
 }
 
-$('#account_info-save-btn').on('click', () => {
+export function saveAccInfo() {
     if (confirm('Do you want to save your account-info?')) {
         const url = '/update_account_info';
         const email = $('#email-address').val();
@@ -38,9 +38,9 @@ $('#account_info-save-btn').on('click', () => {
             }
         });
     }
-});
+}
 
-$('#settings-save-btn').on('click', () => {
+export function saveSettings() {
     if (confirm('Do you want to save your settings?')) {
         const url = '/update_settings_sec_fa';
         const sec_fa = $('#2-fa').prop('checked');
@@ -55,4 +55,4 @@ $('#settings-save-btn').on('click', () => {
             gui.changeNotificationTextAndOpen(cb.responseText);
         });
     }
-});
+}

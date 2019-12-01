@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import * as eventHandler from './eventHandler';
 import savePng from "../img/baseline_save_black_18dp.png";
 import deletePng from "../img/baseline_delete_forever_black_18dp.png";
 import locked from "../img/baseline_lock_black_18dp.png";
@@ -47,6 +48,18 @@ export function hideElement(element) {
     $(element).addClass('hidden');
 }
 
+// scroll body to 0px on click
+export function scrollToTop() {
+    $('body,html').animate({
+        scrollTop: 0
+    }, 800);
+    return false;
+}
+
+export function scrollToElement(element) {
+    $('html, body').animate({scrollTop: element.offset().top}, 1000);
+}
+
 export function enableGrayOverlay(element) {
     $(element).addClass('disabled-div');
     $('#2-fa-email').attr('disabled', true);
@@ -59,15 +72,9 @@ export function disableGrayOverlay(element) {
     $('#2-fa-app').attr('disabled', false);
 }
 
-export function scrollToElement(element) {
-    $('html, body').animate({scrollTop: element.offset().top}, 1000);
-}
-
-export function chooseLogin(button) {
-
+export function switchLoginCreate(button) {
     const registrationDiv = $('#registration-section');
     const loginDiv = $('#login-section');
-
     // Anzeigen/ausblenden der entsprechenden Container
     switch (button.id) {
         case 'registrationButton':
@@ -86,7 +93,7 @@ export function changeNotificationTextAndOpen(text) {
     $('#notification-popup').modal();
 }
 
-export function toggleSetteings(element) {
+export function toggleSettings(element) {
     const deviceElement = $('#device-section');
     const otpElement = $('#otp-section');
     const fileElement = $('#file-section');
@@ -114,25 +121,6 @@ $('.custom-file-input').on('change', function () {
 $('#otp-popup').on('shown.bs.modal', function () {
     $('#confirm_otp').trigger('focus');
 });
-$('#device_nav-btn').on('click', function () {
-    scrollToElement($('#device-section'));
-});
-$('#otp_nav-btn').on('click', function () {
-    scrollToElement($('#otp-section'));
-});
-$('#file_nav-btn').on('click', function () {
-    scrollToElement($('#file-section'));
-});
-$('#settings-btn').on('click', function () {
-   toggleSetteings(this);
-});
-$('#back-to-main-btn').on('click', function () {
-   toggleSetteings(this);
-});
-$('#reset-settings-btn').on('click', function () {
-    $('#otp-close').click();
-    $('#settings-reset-popup').modal();
-});
 $('#2-fa').on('change', function () {
    if (this.checked) {
        disableGrayOverlay($('#2-fa-options-wrapper'));
@@ -147,12 +135,5 @@ $(window).scroll(function () {
         $('#back-to-top').fadeOut();
     }
 });
-// scroll body to 0px on click
-$('#back-to-top').on('click', () => {
-    $('body,html').animate({
-        scrollTop: 0
-    }, 800);
-    return false;
-});
 
-
+document.addEventListener('click', eventHandler.onMouseClick, false);

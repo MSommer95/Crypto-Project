@@ -505,7 +505,6 @@ if __name__ == '__main__':
         headers['X-XSS-Protection'] = '1; mode=block'
         # headers['Content-Security-Policy'] = "default-src 'self';"
 
-
     conf = {
         '/': {
             'tools.secureheaders.on': True,

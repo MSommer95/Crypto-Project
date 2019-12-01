@@ -82,9 +82,9 @@ $('#send_reset-code').on('click', function () {
 });
 
 $('#registrationButton').on('click', function () {
-    gui.chooseLogin(this);
+    gui.switchLoginCreate(this);
 });
 
 $('#loginButton').on('click', function () {
-    gui.chooseLogin(this);
+    gui.switchLoginCreate(this);
 });

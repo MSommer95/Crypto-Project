@@ -36,3 +36,16 @@ export function onMouseClick(event) {
             break;
     }
 }
+
+export function onStateChange(event) {
+    switch (event.target.id) {
+        case 'file-upload-input':
+            gui.filenameExtract(event.target);
+            break;
+        case '2-fa':
+            gui.secfacStateChange(event.target);
+            break;
+        default:
+            break;
+    }
+}

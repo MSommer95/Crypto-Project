@@ -76,3 +76,60 @@ export function sendResetCode() {
         }
     });
 }
+
+export function openPasswordResetPopup() {
+    $('#password-reset-popup').modal();
+}
+
+export function requestPasswordReset() {
+    const url = '/request_password_reset';
+    if ($('#input_password-reset-email').val() !== '') {
+        const data = {
+          email: $('#input_password-reset-email').val()
+        };
+        servCon.postRequestWithData(url, data, (cb) => {
+            gui.changeNotificationTextAndOpen(cb.responseText)
+        });
+    } else {
+        gui.changeNotificationTextAndOpen('Please insert your Email Address')
+    }
+}
+
+export function sendPasswordResetCode() {
+    const url = '/password_reset';
+    if ($('#input_password-reset-email').val() !== '') {
+        const token = $('#input_password-reset-code').val();
+        const email = $('#input_password-reset-email').val();
+        const data = {
+            token: token,
+            email: email
+        };
+        servCon.postRequestWithData(url, data, (cb) => {
+            if (cb.responseText === 'valid token') {
+                $('#password-reset-close').click();
+                $('#new-password-popup').modal();
+                $('#new-password-email-input').val(email);
+                $('#new-password-token-input').val(token);
+            }
+        });
+    } else {
+        gui.changeNotificationTextAndOpen('Please insert your Email Address')
+    }
+}
+
+export function sendNewPassword() {
+    const url = '/new_password';
+    const data = {
+        password: $('#new-password-input').val(),
+        token: $('#new-password-token-input').val(),
+        email: $('#new-password-email-input').val()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        if (cb.responseText === 'Successfully updated password') {
+            gui.changeNotificationTextAndOpen(cb.responseText);
+        } else {
+            $('#new-password-close').click();
+            gui.changeNotificationTextAndOpen(cb.responseText);
+        }
+    });
+}

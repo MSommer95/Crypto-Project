@@ -29,6 +29,7 @@
                     <input class="form-control" id="login_password" placeholder="Password" type="password">
                 </div>
                 <button class="btn btn-dark" id="send_login-btn">Login</button>
+                <p class="mt-1">Lost your password? <a class="ml-1" href="#" id="reset-password-link">Reset it.</a></p>
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-center links">
@@ -211,6 +212,54 @@
     </div>
 </div>
 
+<!-- password-reset-popup -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="password-reset-popup" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please insert your reset-code</h5>
+                <button id="password-reset-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="input_password-reset-email" name="reset-input" placeholder="Email@mail.de" type="email">
+                <input id="input_password-reset-code" name="reset-input" placeholder="01234567" type="password">
+            </div>
+            <div class="modal-footer modal-left">
+                <button class="btn btn-primary" id="send_password-reset-code" type="button">Confirm</button>
+                <button class="btn btn-primary" id="request_password-reset-code" type="button">Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- new-password-popup -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="new-password-popup" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please choose a new password</h5>
+                <button id="new-password-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="new-password-input"></label>
+                <input id="new-password-input" name="new-password-input" placeholder="01234567" type="password">
+                <input class="hidden" id="new-password-email-input" name="new-password-input" placeholder="Email@mail.de" type="email">
+                <input class="hidden" id="new-password-token-input" name="new-password-input" placeholder="01234567" type="password">
+            </div>
+            <div class="modal-footer modal-left">
+                <button class="btn btn-primary mr-auto" id="send_new-password" type="button">Confirm</button>
+                <button class="btn btn-primary ml-auto" id="open_new-password-passgen" type="button">Password Generator</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- notification-popup -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="notification-popup" role="dialog"
      tabindex="-1">
@@ -231,6 +280,8 @@
         </div>
     </div>
 </div>
+
+
 
 </body>
 </html>

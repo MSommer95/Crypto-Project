@@ -72,6 +72,21 @@ export function onMouseClick(event) {
         case 'send_reset-code':
             loginHandler.sendResetCode();
             break;
+        case 'reset-password-link':
+            loginHandler.openPasswordResetPopup();
+            break;
+        case 'request_password-reset-code':
+            loginHandler.requestPasswordReset();
+            break;
+        case 'open_new-password-passgen':
+            passGen.openPassGen();
+            break;
+        case 'send_password-reset-code':
+            loginHandler.sendPasswordResetCode();
+            break;
+        case 'send_new-password':
+            loginHandler.sendNewPassword();
+            break;
         default:
             break;
     }

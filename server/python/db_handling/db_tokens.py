@@ -8,14 +8,15 @@ from server.python.db_handling.db_connector import DBconnector
 class DBtokens:
 
     @staticmethod
-    def insert(user_id, token):
+    def insert(user_id, token, reset_case):
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'DELETE FROM user_tokens WHERE user_id = %s'
-                cursor.execute(sql, (user_id,))
-                sql = 'INSERT INTO user_tokens (user_id, token) VALUES (%s, %s)'
-                cursor.execute(sql, (user_id, token))
+                if reset_case == 1:
+                    sql = 'DELETE FROM user_tokens WHERE user_id = %s AND reset_case = %s'
+                    cursor.execute(sql, (user_id, reset_case))
+                sql = 'INSERT INTO user_tokens (user_id, token, reset_case) VALUES (%s, %s, %s)'
+                cursor.execute(sql, (user_id, token, reset_case))
                 db.commit()
         except pymysql.MySQLError as e:
             logging.error(e)
@@ -23,12 +24,12 @@ class DBtokens:
             db.close()
 
     @staticmethod
-    def get(user_id):
+    def get(user_id, reset_case):
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'SELECT token FROM user_tokens WHERE user_id = %s'
-                cursor.execute(sql, (user_id,))
+                sql = 'SELECT token FROM user_tokens WHERE user_id = %s AND reset_case = %s'
+                cursor.execute(sql, (user_id, reset_case))
                 db.commit()
                 results = cursor.fetchall()
         except pymysql.MySQLError as e:
@@ -72,3 +73,16 @@ class DBtokens:
             return results[0]['user_id']
         else:
             return False
+
+    @staticmethod
+    def delete(user_id, reset_case):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'DELETE FROM user_tokens WHERE user_id = %s AND reset_case = %s'
+                cursor.execute(sql, (user_id, reset_case))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()

@@ -18,21 +18,21 @@ class HashHandler:
         return (salt + pwd_hash).decode('ascii')
 
     @staticmethod
-    def create_token(user_id):
+    def create_token(user_id, reset_case):
         token = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=12))
         hashed_token = HashHandler.hash_password(token)
         tokens = DBtokens.all()
 
         if hashed_token in tokens:
-            HashHandler.create_token(user_id)
+            HashHandler.create_token(user_id, reset_case)
             return
         else:
-            DBtokens.insert(user_id, hashed_token)
+            DBtokens.insert(user_id, hashed_token, reset_case)
             return token
 
     @staticmethod
-    def check_token(user_id, token):
-        db_token = DBtokens.get(user_id)[0]['token']
+    def check_token(user_id, token, reset_case):
+        db_token = DBtokens.get(user_id, reset_case)[0]['token']
         return HashHandler.verify_password(db_token, token)
 
     @staticmethod

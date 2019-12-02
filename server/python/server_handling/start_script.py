@@ -5,10 +5,12 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
 
+from server.python.comm_handling.email_sender import EmailSender
 from server.python.comm_handling.qr_handler import QRHandler
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp
+from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
 from server.python.db_handling.hash_handler import HashHandler
 from server.python.file_handling.file_encryptor import FileEncryptor
@@ -363,7 +365,7 @@ class Index(object):
 
                     DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
                     DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
-                    token = HashHandler.create_token(user_id)
+                    token = HashHandler.create_token(user_id, 1)
                     return 'Successfully changed the second factor, use token: "%s" to reset your 2FA settings ' % token
                 else:
                     DBusers.set_second_factor_option(user_id, 1, 0)
@@ -378,13 +380,52 @@ class Index(object):
     def reset_settings_sec_fa(self, token):
         user_id = check_session_value('user_id')
         if user_id:
-            if HashHandler.check_token(user_id, token):
+            if HashHandler.check_token(user_id, token, 1):
                 DBusers.set_second_factor_option(user_id, 1, 0)
                 DBusers.set_second_factor_option(user_id, 2, 0)
                 return 'Successfully disabled second factor. Please login again.'
             else:
                 cherrypy.response.status = 403
                 return 'Token mismatch'
+        else:
+            return unauthorized_response()
+
+    @cherrypy.expose()
+    def request_password_reset(self, email):
+        user_id = DBusers.get_user_id(email)[0]['id']
+        if user_id:
+            DBtokens.delete(user_id, 2)
+            token = HashHandler.create_token(user_id, 2)
+            subject = 'Password Reset Token'
+            message = 'Here is your reset token: %s' % token
+            EmailSender.send_mail(message, subject, email)
+            return 'Token send to Email-address'
+        else:
+            return unauthorized_response()
+
+    @cherrypy.expose()
+    def password_reset(self, token, email):
+        user_id = DBusers.get_user_id(email)[0]['id']
+        if user_id:
+            if HashHandler.check_token(user_id, token, 2):
+                return 'valid token'
+            else:
+                return 'Wrong Token'
+        else:
+            return unauthorized_response()
+
+    @cherrypy.expose()
+    def new_password(self, password, token, email):
+        user_id = DBusers.get_user_id(email)[0]['id']
+        if user_id:
+            if HashHandler.check_token(user_id, token, 2):
+                if len(DBusers.check_user(email, password)) == 0:
+                    DBtokens.delete(user_id, 2)
+                    return DBusers.update_password(user_id, password)
+                else:
+                    return 'Do not use your old password!'
+            else:
+                return unauthorized_response()
         else:
             return unauthorized_response()
 

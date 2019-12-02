@@ -195,7 +195,35 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Device Register Popup -->
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="device-register-text-popup" role="dialog"
+         tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">No active Device found</h5>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="device-register-text" class="text-center">Do you want to register one now?</p>
+                    <div class="card mx-auto mt-3 bg-light" id="device-registration-popup-qr">
+                        <div class="card-body bg-light">
+                            <p class="text-center mt-3"><b>Open Krypto2Factor App to Scan QR-Code</b></p>
+                        </div>
+                    </div>
+                    <br>
+                    <p class="text-center">Remember to activate the device and the 2FA option afterwards!</p>
+                </div>
+                <div class="modal-footer modal-left">
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
     <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="notification-popup" role="dialog"
          tabindex="-1">
         <div class="modal-dialog modal-sm" role="document">
@@ -216,7 +244,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Password Generator -->
     <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="secure_password-popup"
          role="dialog"
          tabindex="-1">

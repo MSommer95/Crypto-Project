@@ -7,6 +7,8 @@ class SecondFactorHandler:
     @staticmethod
     def check_for_active_device(user_id):
         user_devices = DBdevices.get_by_user_id(user_id)
+        if not len(user_devices):
+            return ''
         for i in range(len(user_devices)):
             if int(user_devices[i]['device_is_active']):
                 return 'Active device found. No further action required.'

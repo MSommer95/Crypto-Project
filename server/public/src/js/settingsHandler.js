@@ -52,7 +52,11 @@ export function saveSettings() {
             sec_fa_app: sec_fa_app
         };
         servCon.postRequestWithData(url, data, (cb) => {
-            gui.changeNotificationTextAndOpen(cb.responseText);
+            if (cb.responseText.includes('No active device found!')) {
+                $('#device-register-text-popup').modal();
+            } else {
+                gui.changeNotificationTextAndOpen(cb.responseText);
+            }
         });
     }
 }

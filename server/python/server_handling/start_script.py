@@ -359,7 +359,7 @@ class Index(object):
                     if sec_fa_app == 'true':
                         devices = DBdevices.get_by_user_id(user_id)
                         if len(devices) == 0:
-                            return 'No active device found! Please register one first and active it'
+                            return 'No active device found! Do you want to register one?'
 
                     DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
                     DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))

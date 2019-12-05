@@ -562,7 +562,6 @@ def unauthorized_response():
 
 if __name__ == '__main__':
     os.chdir('../')
-    HashHandler.new_server_salt()
     @cherrypy.tools.register('before_finalize', priority=60)
     def secureheaders():
         headers = cherrypy.response.headers
@@ -592,4 +591,5 @@ if __name__ == '__main__':
         }
     }
     DirHandler.check_server_dirs()
+    HashHandler.new_server_salt()
     cherrypy.quickstart(Index(), '/', conf)

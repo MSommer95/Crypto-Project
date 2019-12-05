@@ -75,7 +75,8 @@ class DirHandler:
             '/api_key',
             '/email_key',
             '/users',
-            'other'
+            '/other',
+            '/salt'
         ]
         log_path = '/logs'
 

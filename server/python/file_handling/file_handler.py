@@ -46,9 +46,9 @@ class FileHandler:
         try:
             user_path = '../storage/users/%s' % user_id
             os.remove(user_path + path)
-            DBfiles.delete_file(file_id, user_id)
             if int(is_encrypted):
                 FileHandler.delete_key(user_id, file_id, user_path)
+            DBfiles.delete_file(file_id, user_id)
         except OSError:
             return 'Something went wrong while deleting the file'
         else:

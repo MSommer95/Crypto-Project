@@ -3,7 +3,7 @@ import logging
 import pymysql
 
 from server.python.db_handling.db_connector import DBconnector
-from server.python.db_handling.hash_handler import HashHandler
+from server.python.auth_handling.hash_handler import HashHandler
 
 
 class DBusers:

@@ -1,10 +1,14 @@
 import $ from "jquery";
 import * as servCon from "./serverConnector";
 import * as gui from "./gui";
+import {getTokenFromField} from "./authHandler";
 
 export function initSettings() {
     const url = '/get_user_settings';
-    servCon.getData(url, (cb) => {
+    const data = {
+      auth_token: getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
         const jsonCB = JSON.parse(cb.responseText);
         const email = jsonCB['email'];
         const emailOption = jsonCB['2FA-Mail'];
@@ -28,7 +32,8 @@ export function saveAccInfo() {
         const password = $('#create_password').val();
         const data = {
             email: email,
-            password: password
+            password: password,
+            auth_token: getTokenFromField()
         };
         servCon.postRequestWithData(url, data, (cb) => {
             if (cb.responseText === '') {
@@ -49,7 +54,8 @@ export function saveSettings() {
         const data = {
             sec_fa: sec_fa,
             sec_fa_email: sec_fa_email,
-            sec_fa_app: sec_fa_app
+            sec_fa_app: sec_fa_app,
+            auth_token: getTokenFromField()
         };
         servCon.postRequestWithData(url, data, (cb) => {
             if (cb.responseText.includes('No active device found!')) {

@@ -1,5 +1,6 @@
 import $ from "jquery";
 import * as servCon from "./serverConnector";
+import * as authHandler from "./authHandler";
 
 
 let qrUpdateInterval;
@@ -7,7 +8,10 @@ let intervalPaused = false;
 
 export function initDeviceQR() {
     const url = '/request_qr';
-    servCon.getData(url, (cb) => {
+    const data = {
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
         const imgData = cb.responseText;
         const img = $('<img class="mx-auto mb-5" id="qr-img-container" width="50%"/>');
         const imgPop = $('<img class="mx-auto mb-5" id="qr-img-container-popup" width="50%"/>');
@@ -20,7 +24,10 @@ export function initDeviceQR() {
 
 export function updateDeviceQR() {
     const url = '/request_qr';
-    servCon.getData(url, (cb) => {
+    const data = {
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
        const img = $('#qr-img-container');
        const imgPop = $('#qr-img-container-popup');
        const imgData = cb.responseText;

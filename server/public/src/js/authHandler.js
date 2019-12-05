@@ -2,10 +2,16 @@ import $ from "jquery";
 import * as servCon from "./serverConnector";
 import * as gui from "./gui";
 
-function request_2fa_verified() {
-    servCon.getData('/check_otp_verified', (cb) => {
+let authToken = '';
+
+function request_2fa_verified(token) {
+    const url = '/check_otp_verified';
+    const data = {
+      auth_token: token
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
         if (cb.responseText === '0') {
-            setTimeout(request_2fa_verified, 5000);
+            setTimeout(request_2fa_verified, 5000, token);
         } else if(cb.responseText === 'Not logged in') {
             gui.changeNotificationTextAndOpen('Not logged in');
             window.location.href = '/sign';
@@ -22,18 +28,22 @@ export function login() {
         password: $('#login_password').val()
     };
     servCon.postRequestWithData(url, data, (cb) => {
-        if (cb.responseText.includes('OTP')) {
+        if (cb.responseJSON.message.includes('OTP')) {
+            authToken = cb.responseJSON.token;
             $('#otp-popup').modal();
             $('#request-new-otp-btn').on('click', () => {
                 const url = '/request_new_otp';
-                servCon.getData(url, (cb) => {
+                const data = {
+                    auth_token: authToken
+                };
+                servCon.postRequestWithData(url, data, (cb) => {
                 });
             });
-            setTimeout(request_2fa_verified, 5000);
-        } else if (cb.responseText.includes('index')) {
+            setTimeout(request_2fa_verified, 5000, authToken);
+        } else if (cb.responseJSON.message.includes('index')) {
             window.location.href = '/index'
         } else {
-            gui.changeNotificationTextAndOpen(cb.responseText);
+            gui.changeNotificationTextAndOpen(cb.responseJSON.message);
         }
     });
 }
@@ -51,7 +61,8 @@ export function sendOTP() {
     if (otp != null) {
         let url = '/verify_otp';
         let data = {
-            otp: otp
+            otp: otp,
+            auth_token: authToken
         };
         servCon.postRequestWithData(url, data, (cb) => {
             console.log(cb.responseText);
@@ -132,4 +143,16 @@ export function sendNewPassword() {
             gui.changeNotificationTextAndOpen(cb.responseText);
         }
     });
+}
+
+export async function getTokenFromServer() {
+    const response = await fetch('/get_auth_token');
+    await response.text().then(function (text) {
+        $('#hidden-token').val(text)
+    });
+
+}
+
+export function getTokenFromField() {
+    return $('#hidden-token').val();
 }

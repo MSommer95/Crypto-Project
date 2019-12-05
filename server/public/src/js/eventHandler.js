@@ -3,7 +3,7 @@ import * as gui from "./gui";
 import * as passGen from "./passwordGenerator";
 import * as settHandler from "./settingsHandler";
 import * as qrGen from "./qrGenerator";
-import * as loginHandler from "./loginHandler";
+import * as authHandler from "./authHandler";
 
 
 export function onMouseClick(event) {
@@ -61,31 +61,31 @@ export function onMouseClick(event) {
             qrGen.toggleQRGen();
             break;
         case 'send_login-btn':
-            loginHandler.login();
+            authHandler.login();
             break;
         case 'logout-btn':
-            loginHandler.logout();
+            authHandler.logout();
             break;
         case 'send_otp':
-            loginHandler.sendOTP();
+            authHandler.sendOTP();
             break;
         case 'send_reset-code':
-            loginHandler.sendResetCode();
+            authHandler.sendResetCode();
             break;
         case 'reset-password-link':
-            loginHandler.openPasswordResetPopup();
+            authHandler.openPasswordResetPopup();
             break;
         case 'request_password-reset-code':
-            loginHandler.requestPasswordReset();
+            authHandler.requestPasswordReset();
             break;
         case 'open_new-password-passgen':
             passGen.openPassGen();
             break;
         case 'send_password-reset-code':
-            loginHandler.sendPasswordResetCode();
+            authHandler.sendPasswordResetCode();
             break;
         case 'send_new-password':
-            loginHandler.sendNewPassword();
+            authHandler.sendNewPassword();
             break;
         default:
             break;

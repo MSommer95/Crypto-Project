@@ -2,6 +2,7 @@ import $ from 'jquery';
 import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import * as servCon from './serverConnector';
 import * as gui from './gui';
+import {getTokenFromField} from "./authHandler";
 
 export function initDeviceTable() {
     function setActive(cell) {
@@ -11,11 +12,12 @@ export function initDeviceTable() {
                 const rowData = cell.getRow().getData();
                 const url = '/deactivate_user_device';
                 const data = {
-                    device_id: rowData.id
+                    device_id: rowData.id,
+                    auth_token: getTokenFromField()
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseText);
-                    deviceTable.setData('/get_user_devices');
+                    deviceTable.setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
                 });
             } else {
                 cell.setValue(cell.getOldValue());
@@ -25,11 +27,12 @@ export function initDeviceTable() {
                 const rowData = cell.getRow().getData();
                 const url = '/activate_user_device';
                 const data = {
-                    device_id: rowData.id
+                    device_id: rowData.id,
+                    auth_token: getTokenFromField()
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseText);
-                    deviceTable.setData('/get_user_devices');
+                    deviceTable.setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
                 });
             } else {
                 cell.setValue(cell.getOldValue());
@@ -42,7 +45,8 @@ export function initDeviceTable() {
             const rowData = cell.getRow().getData();
             const url = '/delete_user_device';
             const data = {
-                device_id: rowData.id
+                device_id: rowData.id,
+                auth_token: getTokenFromField()
             };
             cell.getRow().delete();
             servCon.postRequestWithData(url, data, (cb) => {
@@ -80,7 +84,7 @@ export function initDeviceTable() {
         ],
     });
 
-    deviceTable.setData('/get_user_devices');
+    deviceTable.setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
 
     return deviceTable
 }
@@ -96,7 +100,7 @@ export function initOtpTable() {
         ],
     });
 
-    otpTable.setData('/get_user_used_otps');
+    otpTable.setData('/get_user_used_otps', {auth_token: getTokenFromField()}, 'POST');
 
     return otpTable
 }
@@ -113,15 +117,16 @@ export function initFileTable() {
 
     function saveChanges(e, cell) {
         const rowData = cell.getRow().getData();
-        const sendData = {
+        const data = {
             file_id: rowData.id,
             file_description: rowData.file_description,
             path: rowData.path,
             file_name: rowData.file_name,
-            is_encrypted: rowData.is_encrypted
+            is_encrypted: rowData.is_encrypted,
+            auth_token: getTokenFromField()
         };
         const url = '/file_update';
-        servCon.postRequestWithData(url, sendData, (cb) => {
+        servCon.postRequestWithData(url, data, (cb) => {
             gui.changeNotificationTextAndOpen(cb.responseText);
         });
     }
@@ -132,7 +137,8 @@ export function initFileTable() {
         const fileID = rowData.id;
         const data = {
             file_id: fileID,
-            file_name: filename
+            file_name: filename,
+            auth_token: getTokenFromField()
         };
         let url = '';
         if (rowData.is_encrypted) {
@@ -153,7 +159,8 @@ export function initFileTable() {
             const data = {
                 file_id: rowData.id,
                 path: rowData.path,
-                is_encrypted: rowData.is_encrypted
+                is_encrypted: rowData.is_encrypted,
+                auth_token: getTokenFromField()
             };
             cell.getRow().delete();
             servCon.postRequestWithData(url, data, (cb) => {
@@ -205,7 +212,7 @@ export function initFileTable() {
         ],
     });
 
-    filesTable.setData('/get_user_files');
+    filesTable.setData('/get_user_files', {auth_token: getTokenFromField()}, 'POST');
 
     return filesTable
 }

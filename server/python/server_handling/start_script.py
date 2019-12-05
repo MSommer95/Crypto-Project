@@ -5,20 +5,21 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
 
-from server.python.comm_handling.email_sender import EmailSender
+from server.python.auth_handling.hash_handler import HashHandler
+from server.python.auth_handling.login_handler import LoginHandler
+from server.python.auth_handling.otp_handler import OtpHandler
+from server.python.auth_handling.second_factor_handling import SecondFactorHandler
 from server.python.comm_handling.qr_handler import QRHandler
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp
 from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
-from server.python.auth_handling.hash_handler import HashHandler
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
-from server.python.auth_handling.otp_handler import OtpHandler
-from server.python.auth_handling.second_factor_handling import SecondFactorHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.login_log_handler import LLogHandler
+from server.python.user_handling.settings_handler import SettingsHandler
 
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
@@ -58,43 +59,9 @@ class Index(object):
         user_id = DBusers.get_user_id(email)[0]['id']
         if user_id:
             user_logs = LLogHandler.check_login_logs(user_id)
-            login_trys = LLogHandler.count_trys(user_id, user_logs, email)
-            if login_trys:
+            if LLogHandler.count_tries(user_id, user_logs, email):
                 user = DBusers.check_user(email, password)
-                user_count = len(user)
-                if user_count > 0:
-                    auth_token = HashHandler.create_auth_token(user_id, cherrypy.request.headers)
-                    cherrypy.session['user_id'] = user['id']
-                    cherrypy.session['user_mail'] = user['email']
-                    cherrypy.session['2fa_verified'] = 0
-                    cherrypy.session['auth_token'] = auth_token
-                    user_id = str(user['id'])
-                    user_settings = DBusers.get_user_settings(user_id)
-                    DirHandler.check_user_dirs(user_id)
-                    if user_settings['2FA-Mail'] == 1:
-                        cherrypy.session['2fa_status'] = 1
-                        cherrypy.session['otp_option'] = 1
-                        otp = OtpHandler.create_otp(user_id)
-                        DBotp.insert(user_id, otp)
-                        OtpHandler.send_otp_mail(email, otp)
-                        response = {'token': auth_token, 'message': 'Please send us your OTP'}
-                        return response
-                    elif user_settings['2FA-App'] == 1:
-                        cherrypy.session['2fa_status'] = 1
-                        cherrypy.session['otp_option'] = 2
-                        otp = OtpHandler.create_otp(user_id)
-                        DBotp.insert(user_id, otp)
-                        OtpHandler.send_otp_app(user_id, otp)
-                        response = {'token': auth_token, 'message': 'Please send us your OTP'}
-                        return response
-                    else:
-                        cherrypy.session['2fa_status'] = 0
-                        response = {'token': auth_token, 'message': 'Send me to index'}
-                        return response
-                else:
-                    cherrypy.response.status = 403
-                    response = {'message': 'Wrong Data. Please try again.'}
-                    return response
+                return LoginHandler.prepare_login(user, user_id, email)
             else:
                 cherrypy.response.status = 418  # 429
                 response = {'message': 'Too many tries.'}
@@ -108,7 +75,6 @@ class Index(object):
         if len(device) > 0:
             if device[0]['device_is_active']:
                 return 'Login successful'
-
         return 'Device unauthorized, please register and activate this device'
 
     # Funktion zum Ausloggen des Nutzers, beendet die derzeitige Session und entfernt damit verbundenene Session-Daten
@@ -125,8 +91,7 @@ class Index(object):
             user_id = str(user_id)
             check_value = DBotp.check_current(user_id, otp)
             if check_value:
-                cherrypy.session['2fa_verified'] = 1
-                DirHandler.check_user_dirs(user_id)
+                LoginHandler.verify_login(user_id)
                 return 'Verification valid'
             else:
                 cherrypy.response.status = 403
@@ -134,7 +99,7 @@ class Index(object):
         else:
             return unauthorized_response()
 
-    # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt udn
+    # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt und
     # nicht älter als eine Minute
     @cherrypy.expose()
     def verify_otp_app(self, otp, user_id):
@@ -150,13 +115,11 @@ class Index(object):
     @cherrypy.expose()
     def check_otp_verified(self, auth_token):
         user_id = check_session_value('user_id')
-        # TODO: Potenzielle Schwachstelle wenn Eve password und email kennt und login versucht und Bob den
-        #   otp via app bestätigt und damit die varification auf 1 setzt
         if user_id:
             if HashHandler.check_auth_token(user_id, auth_token):
                 check_value = DBotp.check_verification(user_id)
                 if check_value:
-                    cherrypy.session['2fa_verified'] = 1
+                    LoginHandler.verify_login(user_id)
                 return str(check_value)
             else:
                 return unauthorized_response()
@@ -173,6 +136,7 @@ class Index(object):
             FileHandler.write_file(user_id, file)
             return open('../public/dist/index.html')
         else:
+            unauthorized_response()
             return open('../public/dist/sign.html')
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
@@ -185,6 +149,7 @@ class Index(object):
             absolute_file_path = os.path.abspath(user_path + file_path)
             return serve_file(absolute_file_path, disposition="attachment")
         else:
+            unauthorized_response()
             return open('../public/dist/sign.html')
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
@@ -214,12 +179,7 @@ class Index(object):
         user_id = check_session_value('user_id')
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
-            if int(is_encrypted):
-                new_path = '/files/encrypted/%s' % file_name
-            else:
-                new_path = '/files/unencrypted/%s' % file_name
-            DBfiles.update_file(user_id, file_id, file_name, file_description, new_path)
-            return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted)
+            return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted, file_description)
         else:
             return unauthorized_response()
 
@@ -324,7 +284,7 @@ class Index(object):
             user_id = str(user_id)
             deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
-            return deactived_message + ' ' + deactivae_addition
+            return '%s %s' % (deactived_message, deactivae_addition)
         else:
             return unauthorized_response()
 
@@ -335,10 +295,7 @@ class Index(object):
         user_id = check_session_value('user_id')
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
-            user_settings = DBusers.get_user_settings(user_id)
-            user = DBusers.get_user(user_id)
-            user_settings['email'] = user[0]['email']
-            return user_settings
+            return SettingsHandler.prepare_user_settings(user_id)
         else:
             return unauthorized_response()
 
@@ -349,13 +306,7 @@ class Index(object):
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
             user_mail = check_session_value('user_mail')
-            email_change_status = ''
-            password_change_status = ''
-            if not user_mail == email:
-                email_change_status = DBusers.update_email(user_id, email)
-            if not password == '':
-                password_change_status = DBusers.update_password(user_id, password)
-            return email_change_status + password_change_status
+            return SettingsHandler.update_account_info(user_id, user_mail, email, password)
         else:
             return unauthorized_response()
 
@@ -366,23 +317,7 @@ class Index(object):
         user_id = check_session_value('user_id')
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
-            if sec_fa_email == 'true' and sec_fa_app == 'true':
-                return 'Please dont try to check more then one 2FA option'
-            else:
-                if sec_fa == 'true':
-                    if sec_fa_app == 'true':
-                        devices = DBdevices.get_by_user_id(user_id)
-                        if len(devices) == 0:
-                            return 'No active device found! Do you want to register one?'
-
-                    DBusers.set_second_factor_option(user_id, 1, int(sec_fa_email == 'true'))
-                    DBusers.set_second_factor_option(user_id, 2, int(sec_fa_app == 'true'))
-                    token = HashHandler.create_token(user_id, 1)
-                    return 'Successfully changed the second factor, use token: "%s" to reset your 2FA settings ' % token
-                else:
-                    DBusers.set_second_factor_option(user_id, 1, 0)
-                    DBusers.set_second_factor_option(user_id, 2, 0)
-                    return 'Successfully disabled second factor'
+            return SettingsHandler.check_second_factor_options(sec_fa, sec_fa_email, sec_fa_app, user_id)
         else:
             return unauthorized_response()
 
@@ -393,8 +328,7 @@ class Index(object):
         user_id = check_session_value('user_id')
         if user_id:
             if HashHandler.check_token(user_id, token, 1):
-                DBusers.set_second_factor_option(user_id, 1, 0)
-                DBusers.set_second_factor_option(user_id, 2, 0)
+                SecondFactorHandler.deactivate_both_second_factor_options(user_id)
                 return 'Successfully disabled second factor. Please login again.'
             else:
                 cherrypy.response.status = 403
@@ -406,12 +340,7 @@ class Index(object):
     def request_password_reset(self, email):
         user_id = DBusers.get_user_id(email)[0]['id']
         if user_id:
-            DBtokens.delete(user_id, 2)
-            token = HashHandler.create_token(user_id, 2)
-            subject = 'Password Reset Token'
-            message = 'Here is your reset token: %s' % token
-            EmailSender.send_mail(message, subject, email)
-            return 'Token send to Email-address'
+            return LoginHandler.send_reset_token(user_id, email)
         else:
             return unauthorized_response()
 
@@ -449,22 +378,18 @@ class Index(object):
         user = DBusers.check_user(email, password)
         user_count = len(user)
         cherrypy.serving.response.headers['Content-Type'] = 'application/json'
-
         if user_count > 0:
             cherrypy.session['user_id'] = user['id']
             cherrypy.session['2fa_status'] = 0
             user_id = str(user['id'])
             user_settings = DBusers.get_user_settings(user_id)
-
             if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
                 devices = DBdevices.get_by_user_id(user_id)
                 print(str(devices))
-
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
                     cherrypy.session['2fa_status'] = 1
                     response = {'status': 200, 'message': 'Success'}
                     print('response', str(response))
-
                     return response
                 else:
                     DBdevices.insert(user_id, device_id, device_name)
@@ -481,13 +406,10 @@ class Index(object):
     @cherrypy.expose()
     def request_otp_app(self, device_id):
         device = DBdevices.get_by_device_id(device_id)
-
         if len(device) == 0:
             return
-
         user_id = str(device[0]['user_id'])
         user_settings = DBusers.get_user_settings(user_id)
-
         if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_otp(user_id)
             DBotp.insert(user_id, otp)
@@ -501,13 +423,7 @@ class Index(object):
             user_id = str(user_id)
             user_mail = check_session_value('user_mail')
             otp_option = check_session_value('otp_option')
-            otp = OtpHandler.create_otp(user_id)
-            DBotp.insert(user_id, otp)
-            if otp_option == 1:
-                OtpHandler.send_otp_mail(user_mail, otp)
-            elif otp_option == 2:
-                OtpHandler.send_otp_app(user_id, otp)
-            return 'New OTP send'
+            return OtpHandler.prepare_otp_send(user_id, otp_option, user_mail)
 
     # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
     # gescanned werden um Registrierung und Login zu vereinfachen
@@ -562,15 +478,19 @@ def unauthorized_response():
 
 if __name__ == '__main__':
     os.chdir('../')
+
+
     @cherrypy.tools.register('before_finalize', priority=60)
-    def secureheaders():
+    def secure_headers():
         headers = cherrypy.response.headers
         headers['X-Frame-Options'] = 'DENY'
         headers['X-XSS-Protection'] = '1; mode=block'
         # headers['Content-Security-Policy'] = "default-src 'self';"
+
+
     conf = {
         '/': {
-            'tools.secureheaders.on': True,
+            'tools.secure_headers.on': True,
             'tools.sessions.on': True,
             'tools.sessions.timeout': 20,
             # TODO: Only if HTTPS is activated 'tools.sessions.secure': True,

@@ -26,7 +26,7 @@ class FileHandler:
         DBfiles.insert(file_id, user_id, file.filename, path, is_encrypted)
 
     @staticmethod
-    def change_file_name(user_id, file_id, new_file_name, old_path, is_encrypted):
+    def change_file_name(user_id, file_id, new_file_name, old_path, is_encrypted, file_description):
         try:
             user_path = '../storage/users/%s' % user_id
             if int(is_encrypted):
@@ -34,7 +34,7 @@ class FileHandler:
                 FileHandler.change_key_name(user_id, file_id, new_file_name, user_path)
             else:
                 new_path = '/files/unencrypted/%s' % new_file_name
-
+            DBfiles.update_file(user_id, file_id, new_file_name, file_description, new_path)
             os.rename(user_path + old_path, user_path + new_path)
         except OSError:
             return 'Something went wrong while changing the file'

@@ -1,9 +1,9 @@
 import binascii
 import hashlib
 import os
-import time
 import secrets
 import string
+import time
 
 from server.python.db_handling.db_tokens import DBtokens
 

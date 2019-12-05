@@ -17,8 +17,6 @@ class SecondFactorHandler:
 
     @staticmethod
     def activate_device(user_id, device_id):
-        DBusers.set_second_factor_option(user_id, 1, 0)
-        DBusers.set_second_factor_option(user_id, 2, 1)
         DBdevices.set_is_active(user_id, device_id, 1)
         return 'Device activated'
 
@@ -26,6 +24,12 @@ class SecondFactorHandler:
     def deactivate_device(user_id, device_id):
         DBdevices.set_is_active(user_id, device_id, 0)
         return 'Device deactivated'
+
+    @staticmethod
+    def activate_device_as_second_factor(user_id):
+        DBusers.set_second_factor_option(user_id, 1, 0)
+        DBusers.set_second_factor_option(user_id, 2, 1)
+        return 'Device as second factor activated'
 
     @staticmethod
     def deactivate_device_as_second_factor(user_id):
@@ -44,3 +48,9 @@ class SecondFactorHandler:
     def deactivate_email_as_second_factor(user_id):
         DBusers.set_second_factor_option(user_id, 1, 0)
         return 'Email as second factor deactivated (You are now not secured by a second factor)'
+
+    @staticmethod
+    def deactivate_both_second_factor_options(user_id):
+        DBusers.set_second_factor_option(user_id, 1, 0)
+        DBusers.set_second_factor_option(user_id, 2, 0)
+        return 'Successfully disabled second factor'

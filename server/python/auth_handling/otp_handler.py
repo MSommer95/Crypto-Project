@@ -36,3 +36,13 @@ class OtpHandler:
         device = DBdevices.get_active_devices_by_user_id(user_id)
         device_id = device[0]['device_id']
         AppSender.send_otp_to_app(otp, user_id, device_id)
+
+    @staticmethod
+    def prepare_otp_send(user_id, otp_option, user_mail):
+        otp = OtpHandler.create_otp(user_id)
+        DBotp.insert(user_id, otp)
+        if otp_option == 1:
+            OtpHandler.send_otp_mail(user_mail, otp)
+        elif otp_option == 2:
+            OtpHandler.send_otp_app(user_id, otp)
+        return 'New OTP send'

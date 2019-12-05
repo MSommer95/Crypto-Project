@@ -31,7 +31,7 @@ class LLogHandler:
 
     # Funktion zum Zählen der Login Versuche
     @staticmethod
-    def count_trys(user_id, log, email):
+    def count_tries(user_id, log, email):
         counter = log[0]['counter']
         if counter > 5:
             warning_date = datetime.fromtimestamp(log[0]['timestamp'])

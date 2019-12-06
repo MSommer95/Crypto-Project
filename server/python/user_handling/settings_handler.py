@@ -14,13 +14,19 @@ class SettingsHandler:
         return user_settings
 
     @staticmethod
-    def update_account_info(user_id, user_mail, email, password):
+    def update_account_info(user_id, user_mail, email, password, old_password):
         email_change_status = ''
         password_change_status = ''
         if not user_mail == email:
             email_change_status = DBusers.update_email(user_id, email)
         if not password == '':
-            password_change_status = DBusers.update_password(user_id, password)
+            if SettingsHandler.varify_old_password(user_id, old_password):
+                if not password == old_password:
+                    password_change_status = DBusers.update_password(user_id, password)
+                else:
+                    password_change_status = 'Please dont use your old password'
+            else:
+                password_change_status = 'Old password was wrong.'
         return email_change_status + password_change_status
 
     @staticmethod
@@ -45,3 +51,8 @@ class SettingsHandler:
                 return SettingsHandler.change_second_factor_options(sec_fa_email, sec_fa_app, user_id)
             else:
                 return SecondFactorHandler.deactivate_both_second_factor_options(user_id)
+
+    @staticmethod
+    def varify_old_password(user_id, old_password):
+        db_old_password = DBusers.get_password(user_id)[0]['password']
+        return HashHandler.verify_password(db_old_password, old_password)

@@ -27,6 +27,7 @@
   "dependencies": {
     "bootstrap": "^4.4.1",
     "jqeury": "0.0.1-security",
+    "serialize-javascript": "^2.1.1",
     "tabulator": "^0.2.40",
     "tabulator-tables": "^4.5.1"
   }

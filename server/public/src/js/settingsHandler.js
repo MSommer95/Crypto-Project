@@ -30,9 +30,11 @@ export function saveAccInfo() {
         const url = '/update_account_info';
         const email = $('#email-address').val();
         const password = $('#create_password').val();
+        const oldPassword = $('#old_password').val();
         const data = {
             email: email,
             password: password,
+            old_password: oldPassword,
             auth_token: getTokenFromField()
         };
         servCon.postRequestWithData(url, data, (cb) => {

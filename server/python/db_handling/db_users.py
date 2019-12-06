@@ -41,6 +41,22 @@ class DBusers:
         return results
 
     @staticmethod
+    def get_password(user_id):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'SELECT password FROM users WHERE id = %s'
+                cursor.execute(sql, (user_id,))
+                db.commit()
+                results = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return results
+
+    @staticmethod
     def check_user(email, password):
         db = DBconnector.connect()
         try:

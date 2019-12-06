@@ -100,6 +100,16 @@
                         <br>
                         <div class="row">
                             <div class="col-md-4">
+                                <label class="text-normal" for="old_password">Old Password:</label>
+                            </div>
+                            <div class="col-md-7 ml-4">
+                                <input autocomplete="new-password" class="form-control" id="old_password"
+                                       type="password">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-4">
                                 <label class="text-normal" for="create_password">Password:</label>
                             </div>
                             <div class="col-md-7 ml-4">
@@ -278,7 +288,8 @@
                                    type="text">
                         </div>
                         <div class="col-md-4 ml-auto">
-                            <button class="btn btn-dark col-sm-10" data-container="body" data-content="Password copied to clipboard"
+                            <button class="btn btn-dark col-sm-10" data-container="body"
+                                    data-content="Password copied to clipboard"
                                     data-placement="right" data-toggle="popover" id="secure_password-copy"
                                     type="submit">Copy
                             </button>

@@ -18,6 +18,7 @@ from server.python.db_handling.db_users import DBusers
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
 from server.python.server_handling.dir_handler import DirHandler
+from server.python.server_handling.log_handler import LogHandler
 from server.python.server_handling.login_log_handler import LLogHandler
 from server.python.user_handling.settings_handler import SettingsHandler
 
@@ -301,12 +302,12 @@ class Index(object):
 
     # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
-    def update_account_info(self, email, password, auth_token):
+    def update_account_info(self, email, password, old_password, auth_token):
         user_id = check_session_value('user_id')
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
             user_mail = check_session_value('user_mail')
-            return SettingsHandler.update_account_info(user_id, user_mail, email, password)
+            return SettingsHandler.update_account_info(user_id, user_mail, email, password, old_password)
         else:
             return unauthorized_response()
 
@@ -478,7 +479,7 @@ def unauthorized_response():
 
 if __name__ == '__main__':
     os.chdir('../')
-
+    # LogHandler.get_access_log('access')
 
     @cherrypy.tools.register('before_finalize', priority=60)
     def secure_headers():

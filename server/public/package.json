@@ -14,20 +14,20 @@
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.0.5",
-    "css-loader": "^3.2.0",
-    "file-loader": "^4.2.0",
+    "css-loader": "^3.2.1",
+    "file-loader": "^4.3.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
     "jquery": "^3.4.1",
     "popper.js": "^1.16.0",
-    "style-loader": "^1.0.0",
+    "style-loader": "^1.0.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^4.4.1",
     "jqeury": "0.0.1-security",
     "tabulator": "^0.2.40",
-    "tabulator-tables": "^4.4.3"
+    "tabulator-tables": "^4.5.1"
   }
 }

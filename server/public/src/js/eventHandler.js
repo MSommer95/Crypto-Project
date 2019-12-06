@@ -1,9 +1,9 @@
-import $ from "jquery";
-import * as gui from "./gui";
-import * as passGen from "./passwordGenerator";
-import * as settHandler from "./settingsHandler";
-import * as qrGen from "./qrGenerator";
-import * as authHandler from "./authHandler";
+import $ from 'jquery';
+import * as gui from './gui';
+import * as passGen from './passwordGenerator';
+import * as settHandler from './settingsHandler';
+import * as qrGen from './qrGenerator';
+import * as authHandler from './authHandler';
 
 
 export function onMouseClick(event) {

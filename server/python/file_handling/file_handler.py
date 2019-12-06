@@ -7,7 +7,7 @@ from server.python.db_handling.db_files import DBfiles
 class FileHandler:
 
     @staticmethod
-    def write_file(user_id, file):
+    def write_file(user_id, file, file_description):
         file_id = int(round(time.time() * 1000))
         user_path = '../storage/users/%s' % user_id
         print(type(file))
@@ -23,7 +23,7 @@ class FileHandler:
                 size += len(data)
 
         is_encrypted = 0
-        DBfiles.insert(file_id, user_id, file.filename, path, is_encrypted)
+        DBfiles.insert(file_id, user_id, file.filename, file_description, path, is_encrypted)
 
     @staticmethod
     def change_file_name(user_id, file_id, new_file_name, old_path, is_encrypted, file_description):

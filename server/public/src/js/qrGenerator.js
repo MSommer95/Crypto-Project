@@ -1,6 +1,6 @@
-import $ from "jquery";
-import * as servCon from "./serverConnector";
-import * as authHandler from "./authHandler";
+import $ from 'jquery';
+import * as servCon from './serverConnector';
+import * as authHandler from './authHandler';
 
 
 let qrUpdateInterval;
@@ -42,7 +42,7 @@ export function toggleQRGen() {
     const registerBtn = $('#reg-device-btn');
     if (registerDiv.css('display') === 'none') {
         registerDiv.toggle();
-        registerBtn.html("Hide registration QR");
+        registerBtn.html('Hide registration QR');
         if(intervalPaused) {
             intervalPaused = false;
         }
@@ -55,7 +55,7 @@ export function toggleQRGen() {
         }
     } else if (registerDiv.css('display') === 'block') {
         registerDiv.toggle();
-        registerBtn.html("Register new Device");
+        registerBtn.html('Register new Device');
         if(qrUpdateInterval) {
             intervalPaused = true;
         }

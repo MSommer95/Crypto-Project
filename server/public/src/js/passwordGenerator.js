@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import * as servConn from "./serverConnector";
+import * as servConn from './serverConnector';
 
 let topPasswords = '';
 
@@ -60,7 +60,7 @@ function calculatePasswordRank(password) {
     const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
     const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
-    const specialCharacters = '!§$%&*+#üäöÜÄÖ';
+    const specialCharacters = '!§$%&*+#ü"äöÜÄÖ';
     let numberOfCharacters = 0;
     const subStringPassword = checkIfTopPasswordIsSubstring(password)[0];
     const regEx = new RegExp(subStringPassword, 'g');
@@ -94,7 +94,7 @@ export function generatePassword(lower, upper, digit, special, length) {
     const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
     const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
-    const specialCharacters = '!§$%&*+#üäöÜÄÖ';
+    const specialCharacters = '!§$%&*+#ü"äöÜÄÖ';
     if (lower) {
         combinedString += lowerCaseLetters;
     }

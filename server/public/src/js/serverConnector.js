@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import * as authHandler from "./authHandler";
+import * as authHandler from './authHandler';
 
 // Get Funktion für die Server(-Datenbank) Abfragen
 export function getData(url, cb) {

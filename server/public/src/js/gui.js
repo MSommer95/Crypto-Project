@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import * as eventHandler from './eventHandler';
-import savePng from "../img/baseline_save_black_18dp.png";
-import deletePng from "../img/baseline_delete_forever_black_18dp.png";
-import locked from "../img/baseline_lock_black_18dp.png";
-import unlocked from "../img/baseline_lock_open_black_18dp.png";
-import downloadPng from "../img/baseline_cloud_download_black_18dp.png";
+import savePng from '../img/baseline_save_black_18dp.png';
+import deletePng from '../img/baseline_delete_forever_black_18dp.png';
+import locked from '../img/baseline_lock_black_18dp.png';
+import unlocked from '../img/baseline_lock_open_black_18dp.png';
+import downloadPng from '../img/baseline_cloud_download_black_18dp.png';
 
 export const saveIcon = (cell, formatterParams, onRendered) => {
     const icon = new Image();
@@ -127,6 +127,10 @@ export function secfacStateChange(checkbox) {
    }
 }
 
+export function activatePopovers() {
+    $('[data-toggle="popover"]').popover();
+}
+
 $('#otp-popup').on('shown.bs.modal', function () {
     $('#confirm_otp').trigger('focus');
 });
@@ -138,6 +142,14 @@ $(window).scroll(function () {
         $('#back-to-top').fadeOut();
     }
 });
+
+$('#secure_password-copy').on('shown.bs.popover', function() {
+    setTimeout(function() {
+        $('#secure_password-copy').popover('hide');
+    }, 2000);
+});
+
+
 
 document.addEventListener('click', eventHandler.onMouseClick, false);
 document.addEventListener('change', eventHandler.onStateChange, false);

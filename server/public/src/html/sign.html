@@ -47,19 +47,22 @@
                 <h3>Create Account</h3>
             </div>
             <div class="card-body">
-                <form action="/create_account" autocomplete="off" enctype="multipart/form-data" method="post" id="create_account-form">
+                <form action="/create_account" autocomplete="off" enctype="multipart/form-data" id="create_account-form"
+                      method="post">
                     <div class="form-group">
                         <label for="ceate_email">Email address</label>
                         <input aria-describedby="emailHelp" autocomplete="new-password" class="form-control"
-                               id="ceate_email" placeholder="Enter email" type="email" name="email">
+                               id="ceate_email" name="email" placeholder="Enter email" type="email">
                     </div>
                     <div class="form-group">
                         <label for="create_password">Password</label>
                         <input autocomplete="new-password" class="form-control" id="create_password"
-                               placeholder="Password" type="password" name="password">
+                               name="password" placeholder="Password" type="password">
                     </div>
                 </form>
-                <button class="btn btn-dark" type="submit" form="create_account-form" id="send-create_account-btn">Create</button>
+                <button class="btn btn-dark" form="create_account-form" id="send-create_account-btn" type="submit">
+                    Create
+                </button>
                 <button class="btn btn-dark ml-auto" data-target="#secure_password-popup" data-toggle="modal"
                         id="open-password-generator-btn" type="button">Password Generator
                 </button>
@@ -74,7 +77,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Password Generator -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="secure_password-popup" role="dialog"
      tabindex="-1">
     <div class="modal-dialog" role="document">
@@ -95,7 +98,10 @@
                                type="text">
                     </div>
                     <div class="col-md-4 ml-auto">
-                        <button class="btn btn-dark col-sm-10" id="secure_password-copy" type="submit">Copy</button>
+                        <button class="btn btn-dark col-sm-10" data-container="body" data-content="Password copied to clipboard"
+                                data-placement="right" data-toggle="popover" id="secure_password-copy"
+                                type="submit">Copy
+                        </button>
                     </div>
                 </div>
                 <div class="row">
@@ -173,7 +179,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Please insert your OTP</h5>
-                <button id="otp-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                <button aria-label="Close" class="close" data-dismiss="modal" id="otp-close" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -198,7 +204,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Please insert your reset-code</h5>
-                <button id="reset-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                <button aria-label="Close" class="close" data-dismiss="modal" id="reset-close" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -219,7 +225,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Please insert your reset-code</h5>
-                <button id="password-reset-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                <button aria-label="Close" class="close" data-dismiss="modal" id="password-reset-close" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -242,19 +248,23 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Please choose a new password</h5>
-                <button id="new-password-close" aria-label="Close" class="close" data-dismiss="modal" type="button">
+                <button aria-label="Close" class="close" data-dismiss="modal" id="new-password-close" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <label for="new-password-input"></label>
                 <input id="new-password-input" name="new-password-input" placeholder="01234567" type="password">
-                <input class="hidden" id="new-password-email-input" name="new-password-input" placeholder="Email@mail.de" type="email">
-                <input class="hidden" id="new-password-token-input" name="new-password-input" placeholder="01234567" type="password">
+                <input class="hidden" id="new-password-email-input" name="new-password-input"
+                       placeholder="Email@mail.de" type="email">
+                <input class="hidden" id="new-password-token-input" name="new-password-input" placeholder="01234567"
+                       type="password">
             </div>
             <div class="modal-footer modal-left">
                 <button class="btn btn-primary mr-auto" id="send_new-password" type="button">Confirm</button>
-                <button class="btn btn-primary ml-auto" id="open_new-password-passgen" type="button">Password Generator</button>
+                <button class="btn btn-primary ml-auto" id="open_new-password-passgen" type="button">Password
+                    Generator
+                </button>
             </div>
         </div>
     </div>

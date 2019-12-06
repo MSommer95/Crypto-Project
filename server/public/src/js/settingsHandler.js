@@ -1,7 +1,7 @@
-import $ from "jquery";
-import * as servCon from "./serverConnector";
-import * as gui from "./gui";
-import {getTokenFromField} from "./authHandler";
+import $ from 'jquery';
+import * as servCon from './serverConnector';
+import * as gui from './gui';
+import {getTokenFromField} from './authHandler';
 
 export function initSettings() {
     const url = '/get_user_settings';

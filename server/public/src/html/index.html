@@ -168,11 +168,12 @@
     <!-- Upload File popup -->
     <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="upload-file-popup" role="dialog"
          tabindex="-1">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">File Upload</h4>
-                    <button aria-label="Close" class="close" data-dismiss="modal" type="button" id="upload-file-close-btn">
+                    <button aria-label="Close" class="close" data-dismiss="modal" id="upload-file-close-btn"
+                            type="button">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -180,22 +181,34 @@
                     <form action="/file_upload" enctype="multipart/form-data" id="upload-file-form" method="post">
                         <div class="custom-file mb-3">
                             <div class="row">
+                                <label class="custom-file-label" for="file-upload-input" id="file-upload-label">Choose
+                                    file</label>
                                 <input class="custom-file-input" id="file-upload-input" name="file" type="file">
-                                <label class="custom-file-label" for="file-upload-input" id="file-upload-label">Choose file</label>
                                 <input class="hidden" id="hidden-token" name="auth_token">
+                            </div>
+                            <div class="row mt-5">
+                                <div class="col-md-4 mr-auto">
+                                    <label class="" for="file-description">File Description:</label>
+                                </div>
+                                <div class="col-md-7 ml-auto">
+                                    <input class="form-control" id="file-description" name="file_description"
+                                           type="text">
+                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer modal-left">
-                    <button class="btn btn-primary" type="submit" form="upload-file-form" id="upload-file-btn">Upload</button>
+                <div class="modal-footer modal-left mt-3">
+                    <button class="btn btn-primary" form="upload-file-form" id="upload-file-btn" type="submit">Upload
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Device Register Popup -->
-    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="device-register-text-popup" role="dialog"
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="device-register-text-popup"
+         role="dialog"
          tabindex="-1">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -206,7 +219,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p id="device-register-text" class="text-center">Do you want to register one now?</p>
+                    <p class="text-center" id="device-register-text">Do you want to register one now?</p>
                     <div class="card mx-auto mt-3 bg-light" id="device-registration-popup-qr">
                         <div class="card-body bg-light">
                             <p class="text-center mt-3"><b>Open Krypto2Factor App to Scan QR-Code</b></p>
@@ -265,7 +278,10 @@
                                    type="text">
                         </div>
                         <div class="col-md-4 ml-auto">
-                            <button class="btn btn-dark col-sm-10" id="secure_password-copy" type="submit">Copy</button>
+                            <button class="btn btn-dark col-sm-10" data-container="body" data-content="Password copied to clipboard"
+                                    data-placement="right" data-toggle="popover" id="secure_password-copy"
+                                    type="submit">Copy
+                            </button>
                         </div>
                     </div>
                     <div class="row">

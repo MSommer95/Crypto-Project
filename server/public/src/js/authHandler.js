@@ -1,6 +1,6 @@
-import $ from "jquery";
-import * as servCon from "./serverConnector";
-import * as gui from "./gui";
+import $ from 'jquery';
+import * as servCon from './serverConnector';
+import * as gui from './gui';
 
 let authToken = '';
 

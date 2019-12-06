@@ -129,11 +129,11 @@ class Index(object):
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
-    def file_upload(self, file, auth_token):
+    def file_upload(self, file, file_description, auth_token):
         user_id = check_session_value('user_id')
         if check_for_auth(user_id) and check_auth_token(auth_token):
             user_id = str(user_id)
-            FileHandler.write_file(user_id, file)
+            FileHandler.write_file(user_id, file, file_description)
             return open('../public/dist/index.html')
         else:
             unauthorized_response()
@@ -489,21 +489,22 @@ if __name__ == '__main__':
 
 
     conf = {
+        'global': {
+            'server.socket_port': 8000,
+            'server.ssl_module': 'builtin',
+            'server.ssl_certificate': '../storage/ca/cert.pem',
+            'server.ssl_private_key': '../storage/ca/privkey.pem'
+        },
         '/': {
             'tools.secure_headers.on': True,
             'tools.sessions.on': True,
             'tools.sessions.timeout': 20,
-            # TODO: Only if HTTPS is activated 'tools.sessions.secure': True,
+            'tools.sessions.secure': True,
             'tools.sessions.httponly': True,
             'tools.staticdir.root': os.path.abspath(os.getcwd()),
             'log.access_file': "./server_handling/logs/access.log",
             'log.error_file': "./server_handling/logs/error.log",
             'log.screen': False,
-        },
-        '/generator': {
-            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-            'tools.response_headers.on': True,
-            'tools.response_headers.headers': [('Content-Type', 'text/plain')],
         },
         '/static': {
             'tools.staticdir.on': True,

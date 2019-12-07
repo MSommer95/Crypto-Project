@@ -147,10 +147,13 @@ export function sendNewPassword() {
 
 export async function getTokenFromServer() {
     const response = await fetch('/get_auth_token');
-    await response.text().then(function (text) {
-        $('#hidden-token').val(text)
-    });
-
+    if (response.status === 401) {
+        window.location.href = '/sign';
+    } else {
+        await response.text().then(function (text) {
+            $('#hidden-token').val(text)
+        });
+    }
 }
 
 export function getTokenFromField() {

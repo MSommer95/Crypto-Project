@@ -32,8 +32,8 @@ class Index(object):
     # 2te Faktor schon bestätigt wurde
     @cherrypy.expose()
     def index(self):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id):
             return open('../public/dist/index.html')
         else:
             cherrypy.response.status = 401
@@ -81,14 +81,14 @@ class Index(object):
     # Funktion zum Ausloggen des Nutzers, beendet die derzeitige Session und entfernt damit verbundenene Session-Daten
     @cherrypy.expose()
     def logout_account(self):
-        cherrypy.session.delete()
+        cherrypy.lib.sessions.expire()
         return 'You are logged out'
 
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
     def verify_otp(self, otp, auth_token):
-        user_id = check_session_value('user_id')
-        if user_id and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if user_id and self.check_auth_token(auth_token):
             user_id = str(user_id)
             check_value = DBotp.check_current(user_id, otp)
             if check_value:
@@ -98,7 +98,7 @@ class Index(object):
                 cherrypy.response.status = 403
                 return 'Verification invalid'
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt und
     # nicht älter als eine Minute
@@ -115,7 +115,7 @@ class Index(object):
     # älter als eine Minute
     @cherrypy.expose()
     def check_otp_verified(self, auth_token):
-        user_id = check_session_value('user_id')
+        user_id = self.check_session_value('user_id')
         if user_id:
             if HashHandler.check_auth_token(user_id, auth_token):
                 check_value = DBotp.check_verification(user_id)
@@ -123,122 +123,122 @@ class Index(object):
                     LoginHandler.verify_login(user_id)
                 return str(check_value)
             else:
-                return unauthorized_response()
+                return self.unauthorized_response()
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
     def file_upload(self, file, file_description, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             FileHandler.write_file(user_id, file, file_description)
             return open('../public/dist/index.html')
         else:
-            unauthorized_response()
+            self.unauthorized_response()
             return open('../public/dist/sign.html')
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
     @cherrypy.expose()
     def file_download(self, file_path, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             user_path = '../storage/users/%s' % user_id
             absolute_file_path = os.path.abspath(user_path + file_path)
             return serve_file(absolute_file_path, disposition="attachment")
         else:
-            unauthorized_response()
+            self.unauthorized_response()
             return open('../public/dist/sign.html')
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_encrypt(self, file_id, file_name, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             return FileEncryptor.encryption(user_id, file_id, file_name)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     def file_decrypt(self, file_id, file_name, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             file_name = file_name.strip('.encrypted')
             return FileEncryptor.decryption(user_id, file_id, file_name)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     def file_update(self, file_id, file_description, path, file_name, is_encrypted, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted, file_description)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     def file_delete(self, file_id, path, is_encrypted, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Auslesen aller hochgeladenen Dateien des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_files(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             files = DBfiles.get_files(user_id)
             return files
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Auslesen aller bereits genutzten OTP's des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_used_otps(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             used_otps = DBotp.get_used(user_id)
             return used_otps
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_devices(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             devices = DBdevices.get_by_user_id(user_id)
             return devices
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Hinzufügen eines neuen Nutzer-Devices, genutzt für Authentifikation per App als zweiten Faktor
     @cherrypy.expose()
     def insert_user_device(self, device_id, device_name, user_id):
         if not user_id:
-            user_id = check_session_value('user_id')
-            if check_for_auth(user_id):
+            user_id = self.check_session_value('user_id')
+            if self.check_for_auth(user_id):
                 user_id = str(user_id)
             else:
-                return unauthorized_response()
+                return self.unauthorized_response()
         device = DBdevices.get_by_device_id(device_id)
         if len(device) > 0:
             if device[0]['device_is_active']:
@@ -256,77 +256,77 @@ class Index(object):
     # Funktion zum Löschen eines Nutzer-Devices
     @cherrypy.expose()
     def delete_user_device(self, device_id, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             DBdevices.delete(device_id, user_id)
             deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
             return deleted_message
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Aktivieren eines bereits existenten Devices für die 2-Faktor-Authentifikation, es kann nur jeweils
     # ein Device gleichzeitig aktiver zweiter Faktor sein
     @cherrypy.expose()
     def activate_user_device(self, device_id, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             DBdevices.deactivate_all(user_id)
             return SecondFactorHandler.activate_device(user_id, device_id)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Deaktivieren eines aktiven 2-Faktor-Devices des Nutzers
     @cherrypy.expose()
     def deactivate_user_device(self, device_id, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
             return '%s %s' % (deactived_message, deactivae_addition)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Auslesen der gewählten 2-Faktor-Eistellungen des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_settings(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             return SettingsHandler.prepare_user_settings(user_id)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
     def update_account_info(self, email, password, old_password, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
-            user_mail = check_session_value('user_mail')
+            user_mail = self.check_session_value('user_mail')
             return SettingsHandler.update_account_info(user_id, user_mail, email, password, old_password)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers, bei Aktivierung der 2-Faktor Authentifikation
     # wird ein einmaliges Token zum Zurücksetzen der Einlstellungen generiert und in der Datenbank gespeichert
     @cherrypy.expose()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             return SettingsHandler.check_second_factor_options(sec_fa, sec_fa_email, sec_fa_app, user_id)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum zurücksetzen der 2-Faktor Authentifizierung mittels Token, falls Nutzer Zugang zum
     # Authentifikationsmedium verliert
     @cherrypy.expose()
     def reset_settings_sec_fa(self, token):
-        user_id = check_session_value('user_id')
+        user_id = self.check_session_value('user_id')
         if user_id:
             if HashHandler.check_token(user_id, token, 1):
                 SecondFactorHandler.deactivate_both_second_factor_options(user_id)
@@ -335,7 +335,7 @@ class Index(object):
                 cherrypy.response.status = 403
                 return 'Token mismatch'
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     @cherrypy.expose()
     def request_password_reset(self, email):
@@ -343,7 +343,7 @@ class Index(object):
         if user_id:
             return LoginHandler.send_reset_token(user_id, email)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     @cherrypy.expose()
     def password_reset(self, token, email):
@@ -354,7 +354,7 @@ class Index(object):
             else:
                 return 'Wrong Token'
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     @cherrypy.expose()
     def new_password(self, password, token, email):
@@ -367,9 +367,9 @@ class Index(object):
                 else:
                     return 'Do not use your old password!'
             else:
-                return unauthorized_response()
+                return self.unauthorized_response()
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()
@@ -419,26 +419,26 @@ class Index(object):
     # Function um einen neuen OTP zu requesten
     @cherrypy.expose()
     def request_new_otp(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
-            user_mail = check_session_value('user_mail')
-            otp_option = check_session_value('otp_option')
+            user_mail = self.check_session_value('user_mail')
+            otp_option = self.check_session_value('otp_option')
             return OtpHandler.prepare_otp_send(user_id, otp_option, user_mail)
 
     # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
     # gescanned werden um Registrierung und Login zu vereinfachen
     @cherrypy.expose()
     def request_qr(self, auth_token):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id) and check_auth_token(auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             otp = OtpHandler.create_otp(user_id)
             img_string = QRHandler.create_qr_image(user_id, otp)
             cherrypy.response.headers['Content-Type'] = "image/png"
             return base64.b64encode(img_string)
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
     @cherrypy.expose()
     def request_top_password(self):
@@ -446,35 +446,35 @@ class Index(object):
 
     @cherrypy.expose()
     def get_auth_token(self):
-        user_id = check_session_value('user_id')
-        if check_for_auth(user_id):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(DBtokens.get_auth_token(user_id)[0]['token']):
             return DBtokens.get_auth_token(user_id)[0]['token']
         else:
-            return unauthorized_response()
+            return self.unauthorized_response()
 
+    @staticmethod
+    def unauthorized_response():
+        cherrypy.lib.sessions.expire()
+        cherrypy.response.status = 401
+        return 'Access denied: Unauthorized'
 
-def check_session_value(value):
-    if cherrypy.session.get(value):
-        return cherrypy.session.get(value)
-    else:
-        return False
+    @staticmethod
+    def check_session_value(value):
+        if cherrypy.session.get(value):
+            return cherrypy.session.get(value)
+        else:
+            return False
 
+    @staticmethod
+    def check_for_auth(user_id):
+        if Index.check_session_value('2fa_status'):
+            return Index.check_session_value('2fa_verified')
+        else:
+            return user_id
 
-def check_for_auth(user_id):
-    if check_session_value('2fa_status'):
-        return check_session_value('2fa_verified')
-    else:
-        return user_id
-
-
-def check_auth_token(auth_token):
-    return auth_token == check_session_value('auth_token')
-
-
-def unauthorized_response():
-    cherrypy.session.delete()
-    cherrypy.response.status = 401
-    return 'Access denied: Unauthorized'
+    @staticmethod
+    def check_auth_token(auth_token):
+        return auth_token == Index.check_session_value('auth_token')
 
 
 if __name__ == '__main__':

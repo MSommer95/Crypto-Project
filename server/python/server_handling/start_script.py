@@ -452,6 +452,14 @@ class Index(object):
         else:
             return self.unauthorized_response()
 
+    @cherrypy.expose()
+    def hash_message(self, hash_function, message, auth_token):
+        user_id = self.check_session_value('user_id')
+        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
+            return HashHandler.choose_hash_function(hash_function, message)
+        else:
+            return self.unauthorized_response()
+
     @staticmethod
     def unauthorized_response():
         cherrypy.lib.sessions.expire()

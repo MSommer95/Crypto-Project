@@ -4,6 +4,7 @@ import * as passGen from './passwordGenerator';
 import * as settHandler from './settingsHandler';
 import * as qrGen from './qrGenerator';
 import * as authHandler from './authHandler';
+import * as hashHandler from "./hashHandler";
 
 
 export function onMouseClick(event) {
@@ -86,6 +87,9 @@ export function onMouseClick(event) {
             break;
         case 'send_new-password':
             authHandler.sendNewPassword();
+            break;
+        case 'send-message-btn':
+            hashHandler.requestHashing();
             break;
         default:
             break;

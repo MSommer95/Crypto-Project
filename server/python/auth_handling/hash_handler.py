@@ -81,3 +81,42 @@ class HashHandler:
                                        100000)
         pwd_hash = binascii.hexlify(pwd_hash).decode('ascii')
         return pwd_hash == stored_password
+
+    @staticmethod
+    def hash_message_md5(message):
+        md5_hash = hashlib.md5(message.encode())
+        return md5_hash.hexdigest()
+
+    @staticmethod
+    def hash_message_sha1(message):
+        sha1_hash = hashlib.sha1(message.encode())
+        return sha1_hash.hexdigest()
+
+    @staticmethod
+    def hash_message_blake2(message):
+        blake2_hash = hashlib.blake2b(message.encode())
+        return blake2_hash.hexdigest()
+
+    @staticmethod
+    def hash_message_sha256(message):
+        sha256_hash = hashlib.sha256(message.encode())
+        return sha256_hash.hexdigest()
+
+    @staticmethod
+    def hash_message_sha3(message):
+        sha3_hash = hashlib.sha3_512(message.encode())
+        return sha3_hash.hexdigest()
+
+    @staticmethod
+    def choose_hash_function(function, message):
+        if function == 'md5':
+            return HashHandler.hash_message_md5(message)
+        elif function == 'sha1':
+            return HashHandler.hash_message_sha1(message)
+        elif function == 'blake2(b)':
+            return HashHandler.hash_message_blake2(message)
+        elif function == 'sha256':
+            return HashHandler.hash_message_sha256(message)
+        elif function == 'sha3(512)':
+            return HashHandler.hash_message_sha3(message)
+

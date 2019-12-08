@@ -78,3 +78,21 @@ a {
 .settings-header {
     background: #e7e7e7;
 }
+
+section {
+    margin: 15px 15px;
+}
+
+.section-title {
+    text-align: center;
+
+}
+
+.section-title-wrapper {
+    padding: 15px 0 15px 0;
+    background: #C0C0C0;
+}
+
+* {
+    font-family: Roboto, sans-serif;
+}

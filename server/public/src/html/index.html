@@ -16,6 +16,9 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto mr-auto">
             <li class="nav-item m-2">
+                <a class="nav-link" href="#" id="hash_nav-btn">Hashing</a>
+            </li>
+            <li class="nav-item m-2">
                 <a class="nav-link" href="#" id="device_nav-btn">Devices</a>
             </li>
             <li class="nav-item m-2">
@@ -43,9 +46,42 @@
 </nav>
 <div class="bg-container">
     <div class="content">
+        <section id="hash-message-section">
+            <div class="card m-auto">
+                <div class="card-header">
+                    <h2 class="section-title">Message Hashing</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="hash-function">Hash Function: </label>
+                        <select class="form-control" id="hash-function">
+                          <option>md5</option>
+                          <option>sha1</option>
+                          <option>blake2(b)</option>
+                          <option>sha256</option>
+                          <option>sha3(512)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hash-message">Message: </label>
+                        <textarea class="form-control" id="hash-message" placeholder="my message...." rows="4" cols="50"></textarea>
+                    </div>
+                    <button class="btn btn-dark" id="send-message-btn">Hash</button>
+                </div>
+                <div class="card-footer">
+                    <div class="form-group">
+                        <label for="hashed-message">Hashed Message: </label>
+                        <textarea class="form-control" id="hashed-message" placeholder="d9f87vd7" rows="4" cols="50" disabled></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="main" id="device-section">
+            <div class="card-header card-footer">
+                <h2 class="section-title">Devices</h2>
+            </div>
             <div class="container mt-3">
-                <h2>Devices</h2>
                 <div id="device-table"></div>
                 <div class="text-center">
                     <button class="btn btn-primary mt-2 mb-3" id="reg-device-btn">Register new Device</button>
@@ -61,17 +97,19 @@
         </section>
 
         <section class="main" id="otp-section">
-            <div class="main dropdown-divider"></div>
+            <div class="card-header card-footer">
+                <h2 class="section-title">OTPs</h2>
+            </div>
             <div class="container mt-3">
-                <h2>OTPs</h2>
                 <div id="otp-table"></div>
             </div>
         </section>
 
         <section id="file-section">
-            <div class="main dropdown-divider"></div>
+            <div class="card-header card-footer">
+                <h2 class="section-title">Files</h2>
+            </div>
             <div class="container mt-3">
-                <h2>Files</h2>
                 <div class="button-row">
                     <button class="btn btn-dark" id="files-table-btn-upload">Upload</button>
                 </div>
@@ -165,36 +203,6 @@
                             <button class="btn btn-dark col-sm-4 ml-2" id="settings-save-btn">Save</button>
                             <button class="btn btn-dark col-sm-4 ml-auto mr-2" id="back-to-main-btn">Back</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="hash-message-section">
-            <div class="card m-auto">
-                <div class="card-header">
-                    <h3>Message Hashing</h3>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="hash-function">Hash Function: </label>
-                        <select class="form-control" id="hash-function">
-                          <option>md5</option>
-                          <option>sha1</option>
-                          <option>blake2(b)</option>
-                          <option>sha256</option>
-                          <option>sha3(512)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="hash-message">Message: </label>
-                        <textarea class="form-control" id="hash-message" placeholder="my message...." rows="4" cols="50"></textarea>
-                    </div>
-                    <button class="btn btn-dark" id="send-message-btn">Hash</button>
-                </div>
-                <div class="card-footer">
-                    <div class="form-group">
-                        <label for="hashed-message">Hashed Message: </label>
-                        <textarea class="form-control" id="hashed-message" placeholder="d9f87vd7" rows="4" cols="50" disabled></textarea>
                     </div>
                 </div>
             </div>

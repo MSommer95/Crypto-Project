@@ -37,6 +37,9 @@ export function onMouseClick(event) {
         case 'device_nav-btn':
             gui.scrollToElement($('#device-section'));
             break;
+        case 'hash_nav-btn':
+            gui.scrollToElement($('#hash-message-section'));
+            break;
         case 'secure_password-copy':
             passGen.copyPassword();
             break;

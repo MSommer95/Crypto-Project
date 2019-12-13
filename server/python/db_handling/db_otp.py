@@ -111,6 +111,22 @@ class DBotp:
                 result = cursor.fetchall()
         except pymysql.MySQLError as e:
             logging.error(e)
+        else:
+            if len(result) >= 10000:
+                DBotp.delete_all_from_user(user_id)
+            return result
         finally:
             db.close()
-        return result
+
+    @staticmethod
+    def delete_all_from_user(user_id):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'DELETE FROM user_otp_used WHERE user_id = %s LIMIT 9900'
+                cursor.execute(sql, (user_id, ))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()

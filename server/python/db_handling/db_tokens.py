@@ -24,14 +24,14 @@ class DBtokens:
             db.close()
 
     @staticmethod
-    def insert_auth_token(user_id, token):
+    def insert_auth_token(user_id, token, session_id):
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
                 sql = 'DELETE FROM auth_tokens WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
-                sql = 'INSERT INTO auth_tokens (user_id, token) VALUES (%s, %s)'
-                cursor.execute(sql, (user_id, token))
+                sql = 'INSERT INTO auth_tokens (user_id, token, session_id) VALUES (%s, %s, %s)'
+                cursor.execute(sql, (user_id, token, session_id))
                 db.commit()
         except pymysql.MySQLError as e:
             logging.error(e)
@@ -58,7 +58,7 @@ class DBtokens:
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'SELECT token FROM auth_tokens WHERE user_id = %s'
+                sql = 'SELECT token, session_id FROM auth_tokens WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 results = cursor.fetchall()

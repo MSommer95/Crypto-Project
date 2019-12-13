@@ -58,14 +58,11 @@ class DBotp:
             logging.error(e)
         finally:
             db.close()
-
         ts = int(time.time())
         db_otp = result[0]['current_otp']
         db_time = result[0]['timestamp']
         db_otp_verified = result[0]['verified']
-
         past_time = ts - db_time
-
         if db_otp == hotp and past_time < 60 and not db_otp_verified:
             return True
         else:
@@ -124,7 +121,7 @@ class DBotp:
         try:
             with db.cursor() as cursor:
                 sql = 'DELETE FROM user_otp_used WHERE user_id = %s LIMIT 9900'
-                cursor.execute(sql, (user_id, ))
+                cursor.execute(sql, (user_id,))
                 db.commit()
         except pymysql.MySQLError as e:
             logging.error(e)

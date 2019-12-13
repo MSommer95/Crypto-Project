@@ -60,6 +60,7 @@ export function initDeviceTable() {
         layout: 'fitColumns',
         placeholder: 'No Data Available',
         tooltips:true,
+        persistence: true,
         columns: [
             {title: 'DeviceID', field: 'device_id'},
             {title: 'Device Name', field: 'device_name'},
@@ -96,6 +97,7 @@ export function initOtpTable() {
         layout: 'fitColumns',
         placeholder: 'No Data Available',
         tooltips: true,
+        persistence: true,
         columns: [
             {title: 'OTP', field: 'used_otp'},
             {title: 'Date', field: 'timestamp', sorter: 'number'},
@@ -176,6 +178,7 @@ export function initFileTable() {
         layout: 'fitColumns',
         placeholder: 'No Data Available',
         tooltips: true,
+        persistence: true,
         columns: [
             {title: 'Preview', field: 'preview'},
             {title: 'Filename', field: 'file_name', editor: 'input'},

@@ -34,8 +34,8 @@ class LLogHandler:
     def count_tries(user_id, log, email):
         counter = log[0]['counter']
         if counter > 5:
-            warning_date = datetime.fromtimestamp(log[0]['timestamp'])
-            warning_message = 'Warning: We registered an anomaly for you account login. Time: %s' % warning_date
+            warning_date = datetime.fromtimestamp(log[0]['timestamp']).strftime("%d.%m.%Y, %H:%M:%S")
+            warning_message = 'Warning: We registered an anomaly for your account login. Time: %s' % warning_date
             warning_subject = 'Warning: Anomaly registered'
             EmailSender.send_mail(warning_message, warning_subject, email)
             return False

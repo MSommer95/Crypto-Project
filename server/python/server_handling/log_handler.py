@@ -20,7 +20,7 @@ class LogHandler:
 
     @staticmethod
     def get_hour(line):
-        inside_brackets = line[line.find("[")+1:line.find("]")]
+        inside_brackets = line[line.find("[") + 1:line.find("]")]
         hour = inside_brackets.split(':')[1]
         return hour
 

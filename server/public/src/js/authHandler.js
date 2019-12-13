@@ -3,6 +3,7 @@ import * as servCon from './serverConnector';
 import * as gui from './gui';
 
 let authToken = '';
+let intervalID;
 
 function request_2fa_verified(token) {
     const url = '/check_otp_verified';
@@ -11,15 +12,27 @@ function request_2fa_verified(token) {
     };
     servCon.postRequestWithData(url, data, (cb) => {
         if (cb.responseText === '0') {
-            setTimeout(request_2fa_verified, 5000, token);
+
         } else if(cb.responseText === 'Not logged in') {
             gui.changeNotificationTextAndOpen('Not logged in');
             window.location.href = '/sign';
         } else {
+            clearInterval(intervalID);
             window.location.href = '/index';
         }
     });
 }
+
+
+export function requestNewOTP() {
+    const url = '/request_new_otp';
+    const data = {
+        auth_token: authToken
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+    });
+}
+
 
 export function login() {
     let url = '/login_account';
@@ -31,15 +44,7 @@ export function login() {
         if (cb.responseJSON.message.includes('OTP')) {
             authToken = cb.responseJSON.token;
             $('#otp-popup').modal();
-            $('#request-new-otp-btn').on('click', () => {
-                const url = '/request_new_otp';
-                const data = {
-                    auth_token: authToken
-                };
-                servCon.postRequestWithData(url, data, (cb) => {
-                });
-            });
-            setTimeout(request_2fa_verified, 5000, authToken);
+            intervalID = setInterval(request_2fa_verified, 5000, authToken);
         } else if (cb.responseJSON.message.includes('index')) {
             window.location.href = '/index'
         } else {
@@ -89,6 +94,10 @@ export function sendResetCode() {
 }
 
 export function openPasswordResetPopup() {
+    const emailAddress = $('#login_email').val();
+    if (emailAddress.length >= 1) {
+        $('#input_password-reset-email').val(emailAddress)
+    }
     $('#password-reset-popup').modal();
 }
 

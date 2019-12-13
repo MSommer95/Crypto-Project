@@ -18,7 +18,6 @@ from server.python.db_handling.db_users import DBusers
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
 from server.python.server_handling.dir_handler import DirHandler
-from server.python.server_handling.log_handler import LogHandler
 from server.python.server_handling.login_log_handler import LLogHandler
 from server.python.user_handling.settings_handler import SettingsHandler
 
@@ -116,14 +115,11 @@ class Index(object):
     @cherrypy.expose()
     def check_otp_verified(self, auth_token):
         user_id = self.check_session_value('user_id')
-        if user_id:
-            if HashHandler.check_auth_token(user_id, auth_token):
-                check_value = DBotp.check_verification(user_id)
-                if check_value:
-                    LoginHandler.verify_login(user_id)
-                return str(check_value)
-            else:
-                return self.unauthorized_response()
+        if user_id and HashHandler.check_auth_token(user_id, auth_token, cherrypy.session.id):
+            check_value = DBotp.check_verification(user_id)
+            if check_value:
+                LoginHandler.verify_login(user_id)
+            return str(check_value)
         else:
             return self.unauthorized_response()
 
@@ -213,8 +209,7 @@ class Index(object):
         user_id = self.check_session_value('user_id')
         if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
-            used_otps = DBotp.get_used(user_id)
-            return used_otps
+            return OtpHandler.prepare_used_otps(user_id)
         else:
             return self.unauthorized_response()
 
@@ -420,7 +415,7 @@ class Index(object):
     @cherrypy.expose()
     def request_new_otp(self, auth_token):
         user_id = self.check_session_value('user_id')
-        if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
+        if user_id and HashHandler.check_auth_token(user_id, auth_token, cherrypy.session.id):
             user_id = str(user_id)
             user_mail = self.check_session_value('user_mail')
             otp_option = self.check_session_value('otp_option')
@@ -447,8 +442,9 @@ class Index(object):
     @cherrypy.expose()
     def get_auth_token(self):
         user_id = self.check_session_value('user_id')
-        if self.check_for_auth(user_id) and self.check_auth_token(DBtokens.get_auth_token(user_id)[0]['token']):
-            return DBtokens.get_auth_token(user_id)[0]['token']
+        if self.check_for_auth(user_id) and HashHandler.check_auth_token(user_id, cherrypy.session.get('auth_token'),
+                                                                         cherrypy.session.id):
+            return cherrypy.session.get('auth_token')
         else:
             return self.unauthorized_response()
 
@@ -487,8 +483,9 @@ class Index(object):
 
 if __name__ == '__main__':
     os.chdir('../')
-    # LogHandler.get_access_log('access')
 
+
+    # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
     def secure_headers():
         headers = cherrypy.response.headers

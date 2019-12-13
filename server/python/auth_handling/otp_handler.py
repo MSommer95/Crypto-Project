@@ -1,6 +1,8 @@
 # 2FA Funktion nimmt eine user_id und emailadresse entgegen und erstellt einen otp. Anschließend wird dieser an die
 # emailadresse geschickt. Der otp wird in der DB gespeichert, zusammen mit einem timestamp
 import secrets
+import string
+from datetime import datetime
 
 from server.python.comm_handling.app_sender import AppSender
 from server.python.comm_handling.email_sender import EmailSender
@@ -10,14 +12,15 @@ from server.python.db_handling.db_otp import DBotp
 
 class OtpHandler:
 
+    @staticmethod
+    def create_random_string(alphabet, size=8):
+        return ''.join(secrets.choice(alphabet) for _ in range(size))
+
     # Funktion zum Erstellen eines 8-Stelligen OTP
     @staticmethod
     def create_otp(user_id):
-        otp_value = ''
-        for x in range(8):
-            otp_value += str(secrets.randbelow(9))
+        otp_value = OtpHandler.create_random_string(string.digits)
         otp_used = DBotp.check_used(user_id, otp_value)
-
         if otp_used:
             OtpHandler.create_otp(user_id)
             return
@@ -46,3 +49,15 @@ class OtpHandler:
         elif otp_option == 2:
             OtpHandler.send_otp_app(user_id, otp)
         return 'New OTP send'
+
+    @staticmethod
+    def prepare_timestamp(used_otps):
+        for otp in used_otps:
+            date_obj = datetime.fromtimestamp(int(otp['timestamp']))
+            otp['timestamp'] = date_obj.strftime("%d.%m.%Y, %H:%M:%S")
+        return used_otps
+
+    @staticmethod
+    def prepare_used_otps(user_id):
+        used_otps = DBotp.get_used(user_id)
+        return OtpHandler.prepare_timestamp(used_otps)

@@ -38,7 +38,7 @@ class LoginHandler:
             response = {'token': auth_token, 'message': 'Please send us your OTP'}
             return response
         else:
-            cherrypy.session.regenerate()
+            LoginHandler.regenerate_session(user_id)
             cherrypy.session['2fa_status'] = 0
             response = {'token': auth_token, 'message': 'Send me to index'}
             return response
@@ -47,7 +47,7 @@ class LoginHandler:
     def prepare_login(user, user_id, email):
         if len(user) > 0:
             DirHandler.check_user_dirs(user_id)
-            auth_token = HashHandler.create_auth_token(user_id, cherrypy.request.headers)
+            auth_token = HashHandler.create_auth_token(user_id, cherrypy.request.headers, cherrypy.session.id)
             user_settings = DBusers.get_user_settings(user_id)
             cherrypy.session['user_id'] = user['id']
             cherrypy.session['user_mail'] = user['email']
@@ -69,7 +69,13 @@ class LoginHandler:
         return 'Token send to Email-address'
 
     @staticmethod
+    def regenerate_session(user_id):
+        cherrypy.session.regenerate()
+        auth_token = HashHandler.create_auth_token(user_id, cherrypy.request.headers, cherrypy.session.id)
+        cherrypy.session['auth_token'] = auth_token
+
+    @staticmethod
     def verify_login(user_id):
         cherrypy.session['2fa_verified'] = 1
         DirHandler.check_user_dirs(user_id)
-        cherrypy.session.regenerate()
+        LoginHandler.regenerate_session(user_id)

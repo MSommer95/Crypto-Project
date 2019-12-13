@@ -94,6 +94,9 @@ export function onMouseClick(event) {
         case 'send-message-btn':
             hashHandler.requestHashing();
             break;
+        case 'request-new-otp-btn':
+            authHandler.requestNewOTP();
+            break;
         default:
             break;
     }

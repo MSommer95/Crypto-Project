@@ -95,17 +95,20 @@ export function changeNotificationTextAndOpen(text) {
 
 export function toggleSettings(element) {
     const deviceElement = $('#device-section');
+    const hashingElement = $('#hash-message-section');
     const otpElement = $('#otp-section');
     const fileElement = $('#file-section');
     const settingsElement = $('#settings-section');
     switch (element.id) {
         case 'settings-btn':
+            hideElement(hashingElement);
             hideElement(deviceElement);
             hideElement(otpElement);
             hideElement(fileElement);
             showElement(settingsElement);
             break;
         case 'back-to-main-btn':
+            showElement(hashingElement);
             showElement(deviceElement);
             showElement(otpElement);
             showElement(fileElement);

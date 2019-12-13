@@ -5,6 +5,7 @@ import secrets
 import string
 import time
 
+from server.python.auth_handling.otp_handler import OtpHandler
 from server.python.db_handling.db_tokens import DBtokens
 
 
@@ -33,7 +34,7 @@ class HashHandler:
     @staticmethod
     def create_token(user_id, reset_case):
         alphabet = string.ascii_uppercase + string.ascii_lowercase + string.digits
-        token = ''.join(secrets.choice(alphabet) for i in range(16))
+        token = OtpHandler.create_random_string(alphabet, 16)
         hashed_token = HashHandler.hash_password(token)
         tokens = DBtokens.all()
         if hashed_token in tokens:
@@ -44,7 +45,7 @@ class HashHandler:
             return token
 
     @staticmethod
-    def create_auth_token(user_id, headers):
+    def create_auth_token(user_id, headers, session_id):
         bit_number = secrets.randbits(64)
         user_agent = headers['User-Agent']
         host = headers['Host']
@@ -54,11 +55,12 @@ class HashHandler:
         token = hashlib.sha256(salt.encode() + pre_hashed.encode()).hexdigest()
         hashed_token = HashHandler.hash_password(token)
         tokens = DBtokens.all_auth_token()
+        hashed_session_id = HashHandler.hash_password(session_id)
         if hashed_token in tokens:
-            HashHandler.create_auth_token(user_id, headers)
+            HashHandler.create_auth_token(user_id, headers, session_id)
             return
         else:
-            DBtokens.insert_auth_token(user_id, token)
+            DBtokens.insert_auth_token(user_id, hashed_token, hashed_session_id)
             return token
 
     @staticmethod
@@ -67,9 +69,11 @@ class HashHandler:
         return HashHandler.verify_password(db_token, token)
 
     @staticmethod
-    def check_auth_token(user_id, token):
-        db_token = DBtokens.get_auth_token(user_id)[0]['token']
-        return db_token == token
+    def check_auth_token(user_id, token, session_id):
+        db_result = DBtokens.get_auth_token(user_id)[0]
+        db_session_id = db_result['session_id']
+        return HashHandler.verify_password(db_result['token'], token) and HashHandler.verify_password(db_session_id,
+                                                                                                      session_id)
 
     @staticmethod
     def verify_password(stored_password, provided_password):
@@ -119,4 +123,3 @@ class HashHandler:
             return HashHandler.hash_message_sha256(message)
         elif function == 'sha3(512)':
             return HashHandler.hash_message_sha3(message)
-

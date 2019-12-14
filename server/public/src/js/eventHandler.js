@@ -126,6 +126,18 @@ export function onInput(event) {
         case 'secure_password-length_input':
             passGen.changeRangeSliderVal();
             break;
+        case 'create_email':
+            const createEmailField = $('#create_email');
+            gui.validateEmail(createEmailField.val(), createEmailField);
+            break;
+        case 'login_email':
+            const loginEmailField = $('#login_email');
+            gui.validateEmail(loginEmailField.val(), loginEmailField);
+            break;
+        case 'input_password-reset-email':
+            const inputEmailField = $('#input_password-reset-email');
+            gui.validateEmail(inputEmailField.val(), inputEmailField);
+            break;
         default:
             break;
     }

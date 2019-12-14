@@ -56,6 +56,17 @@ export function scrollToTop() {
     return false;
 }
 
+export function validateEmail(email, emailField) {
+    const emailRegExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    if (emailRegExp.test(email)) {
+        emailField[0].setCustomValidity('');
+        return true
+    } else {
+        emailField[0].setCustomValidity('Please confirm that the email has the correct format.');
+        return false
+    }
+}
+
 export function scrollToElement(element) {
     $('html, body').animate({scrollTop: element.offset().top}, 1000);
 }

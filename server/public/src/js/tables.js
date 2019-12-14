@@ -179,7 +179,7 @@ export function initFileTable() {
         persistence: true,
         columns: [
             {title: 'Preview', field: 'preview'},
-            {title: 'Filename', field: 'file_name', editor: 'input'},
+            {title: 'Filename', field: 'file_name', editor: 'input', validator: 'required'},
             {title: 'Description', field: 'file_description', editor: 'input'},
             {
                 title: 'Encryption',

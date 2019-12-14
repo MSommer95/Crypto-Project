@@ -5,10 +5,9 @@ import * as gui from './gui';
 let authToken = '';
 let intervalID;
 
-function request_2fa_verified(token) {
+function request_2fa_verified() {
     const url = '/check_otp_verified';
     const data = {
-      auth_token: token
     };
     servCon.postRequestWithData(url, data, (cb) => {
         if (cb.responseText === '0') {
@@ -27,7 +26,6 @@ function request_2fa_verified(token) {
 export function requestNewOTP() {
     const url = '/request_new_otp';
     const data = {
-        auth_token: authToken
     };
     servCon.postRequestWithData(url, data, (cb) => {
     });
@@ -35,22 +33,27 @@ export function requestNewOTP() {
 
 
 export function login() {
-    let url = '/login_account';
-    let data = {
-        email: $('#login_email').val(),
-        password: $('#login_password').val()
-    };
-    servCon.postRequestWithData(url, data, (cb) => {
-        if (cb.responseJSON.message.includes('OTP')) {
-            authToken = cb.responseJSON.token;
-            $('#otp-popup').modal();
-            intervalID = setInterval(request_2fa_verified, 5000, authToken);
-        } else if (cb.responseJSON.message.includes('index')) {
-            window.location.href = '/index'
-        } else {
-            gui.changeNotificationTextAndOpen(cb.responseJSON.message);
-        }
-    });
+    const emailField = $('#login_email');
+    const email = emailField.val();
+    if (gui.validateEmail(email, emailField)){
+        let url = '/login_account';
+        let data = {
+            email: email,
+            password: $('#login_password').val()
+        };
+        servCon.postRequestWithData(url, data, (cb) => {
+            if (cb.responseJSON.message.includes('OTP')) {
+                authToken = cb.responseJSON.token;
+                $('#otp-popup').modal();
+                intervalID = setInterval(request_2fa_verified, 5000);
+            } else if (cb.responseJSON.message.includes('index')) {
+                window.location.href = '/index'
+            } else {
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message);
+            }
+        });
+    }
+
 }
 
 export function logout() {
@@ -74,7 +77,7 @@ export function sendOTP() {
             if (cb.responseText.includes('Verification valid')) {
                 window.location.href = '/index';
             } else {
-                gui.changeNotificationTextAndOpen('You entered the wrong OTP or the time expired, please login again.');
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message);
             }
         });
     }
@@ -103,21 +106,23 @@ export function openPasswordResetPopup() {
 
 export function requestPasswordReset() {
     const url = '/request_password_reset';
-    if ($('#input_password-reset-email').val() !== '') {
+    const emailField = $('#input_password-reset-email');
+    const email = emailField.val();
+    if (gui.validateEmail(email, emailField)){
         const data = {
-          email: $('#input_password-reset-email').val()
+          email: email
         };
         servCon.postRequestWithData(url, data, (cb) => {
             gui.changeNotificationTextAndOpen(cb.responseText)
         });
-    } else {
-        gui.changeNotificationTextAndOpen('Please insert your Email Address')
     }
 }
 
 export function sendPasswordResetCode() {
     const url = '/password_reset';
-    if ($('#input_password-reset-email').val() !== '') {
+    const emailField = $('#input_password-reset-email');
+    const email = emailField.val();
+    if (gui.validateEmail(email, emailField)){
         const token = $('#input_password-reset-code').val();
         const email = $('#input_password-reset-email').val();
         const data = {
@@ -139,19 +144,23 @@ export function sendPasswordResetCode() {
 
 export function sendNewPassword() {
     const url = '/new_password';
-    const data = {
-        password: $('#new-password-input').val(),
-        token: $('#new-password-token-input').val(),
-        email: $('#new-password-email-input').val()
-    };
-    servCon.postRequestWithData(url, data, (cb) => {
-        if (cb.responseText === 'Successfully updated password') {
-            gui.changeNotificationTextAndOpen(cb.responseText);
-        } else {
-            $('#new-password-close').click();
-            gui.changeNotificationTextAndOpen(cb.responseText);
-        }
-    });
+    const emailField = $('#new-password-email-input');
+    const email = emailField.val();
+    if (gui.validateEmail(email, emailField)) {
+        const data = {
+            password: $('#new-password-input').val(),
+            token: $('#new-password-token-input').val(),
+            email: email
+        };
+        servCon.postRequestWithData(url, data, (cb) => {
+            if (cb.responseText === 'Successfully updated password') {
+                gui.changeNotificationTextAndOpen(cb.responseText);
+            } else {
+                $('#new-password-close').click();
+                gui.changeNotificationTextAndOpen(cb.responseText);
+            }
+        });
+    }
 }
 
 export function getTokenFromField() {

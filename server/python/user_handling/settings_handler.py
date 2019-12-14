@@ -33,9 +33,9 @@ class SettingsHandler:
     @staticmethod
     def prepare_email(option_email):
         if option_email:
-            return '<input checked id="2-fa-email" name="2-fa-options" type="radio" value="1" checked>'
+            return '<input id="2-fa-email" name="2-fa-options" type="radio" value="1" checked>'
         else:
-            return '<input checked id="2-fa-email" name="2-fa-options" type="radio" value="1">'
+            return '<input id="2-fa-email" name="2-fa-options" type="radio" value="1">'
 
     @staticmethod
     def update_account_info(user_id, user_mail, email, password, old_password):

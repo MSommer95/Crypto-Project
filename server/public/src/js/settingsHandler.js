@@ -4,25 +4,9 @@ import * as gui from './gui';
 import {getTokenFromField} from './authHandler';
 
 export function initSettings() {
-    const url = '/get_user_settings';
-    const data = {
-      auth_token: getTokenFromField()
-    };
-    servCon.postRequestWithData(url, data, (cb) => {
-        const jsonCB = JSON.parse(cb.responseText);
-        const email = jsonCB['email'];
-        const emailOption = jsonCB['2FA-Mail'];
-        const appOption = jsonCB['2FA-App'];
-        $('#email-address').val(email);
-        if (appOption || emailOption) {
-            $('#2-fa').prop('checked', true);
-            $('#2-fa-email').prop('checked', emailOption);
-            $('#2-fa-app').prop('checked', appOption);
-        } else {
-            $('#2-fa').prop('checked', false);
-            gui.enableGrayOverlay($('#2-fa-options-wrapper'));
-        }
-    });
+    if (!$('#2-fa-status').prop('checked')) {
+        gui.enableGrayOverlay($('#2-fa-options-wrapper'));
+    }
 }
 
 export function saveAccInfo() {

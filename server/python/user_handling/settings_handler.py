@@ -11,7 +11,31 @@ class SettingsHandler:
         user_settings = DBusers.get_user_settings(user_id)
         user = DBusers.get_user(user_id)
         user_settings['email'] = user[0]['email']
+        user_settings['status'] = SettingsHandler.prepare_status(user_settings['2FA-App'], user_settings['2FA-Mail'])
+        user_settings['2FA-App'] = SettingsHandler.prepare_app(user_settings['2FA-App'])
+        user_settings['2FA-Mail'] = SettingsHandler.prepare_email(user_settings['2FA-Mail'])
         return user_settings
+
+    @staticmethod
+    def prepare_status(option_app, option_email):
+        if option_app or option_email:
+            return '<input id="2-fa" name="2-fa-status" type="checkbox" checked>'
+        else:
+            return '<input id="2-fa" name="2-fa-status" type="checkbox">'
+
+    @staticmethod
+    def prepare_app(option_app):
+        if option_app:
+            return '<input id="2-fa-app" name="2-fa-options" type="radio" value="1" checked>'
+        else:
+            return '<input id="2-fa-app" name="2-fa-options" type="radio" value="1">'
+
+    @staticmethod
+    def prepare_email(option_email):
+        if option_email:
+            return '<input checked id="2-fa-email" name="2-fa-options" type="radio" value="1" checked>'
+        else:
+            return '<input checked id="2-fa-email" name="2-fa-options" type="radio" value="1">'
 
     @staticmethod
     def update_account_info(user_id, user_mail, email, password, old_password):

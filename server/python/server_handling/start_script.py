@@ -24,7 +24,7 @@ from server.python.user_handling.settings_handler import SettingsHandler
 ENV = Environment(loader=FileSystemLoader('/server/'))
 
 
-class Index(object):
+class CryptoServer(object):
 
     # Index Call Function: Bearbeitet die Index Request der Website. Solange keine user_id gesetzt wurde,
     # wird der User auf die Login Seite redirected Überprüft die Session darauf, ob die 2fa aktiviert ist und ob der
@@ -32,8 +32,8 @@ class Index(object):
     @cherrypy.expose()
     def index(self):
         user_id = self.check_session_value('user_id')
-        if self.check_for_auth(user_id):
-            return open('../public/dist/index.html')
+        if self.check_for_auth(user_id) and self.check_auth_token_db(user_id):
+            return LLogHandler.prepare_index(user_id)
         else:
             cherrypy.response.status = 401
             return open('../public/dist/sign.html')
@@ -115,7 +115,7 @@ class Index(object):
     @cherrypy.expose()
     def check_otp_verified(self, auth_token):
         user_id = self.check_session_value('user_id')
-        if user_id and HashHandler.check_auth_token(user_id, auth_token, cherrypy.session.id):
+        if user_id and self.check_auth_token_db(user_id):
             check_value = DBotp.check_verification(user_id)
             if check_value:
                 LoginHandler.verify_login(user_id)
@@ -138,12 +138,12 @@ class Index(object):
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
     @cherrypy.expose()
-    def file_download(self, file_path, auth_token):
+    def file_download(self, file_id, auth_token):
         user_id = self.check_session_value('user_id')
         if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
             user_path = '../storage/users/%s' % user_id
-            absolute_file_path = os.path.abspath(user_path + file_path)
+            absolute_file_path = os.path.abspath(user_path + DBfiles.get_file_path(user_id, file_id))
             return serve_file(absolute_file_path, disposition="attachment")
         else:
             self.unauthorized_response()
@@ -172,21 +172,22 @@ class Index(object):
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
-    def file_update(self, file_id, file_description, path, file_name, is_encrypted, auth_token):
+    def file_update(self, file_id, file_description, file_name, is_encrypted, auth_token):
         user_id = self.check_session_value('user_id')
         if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
-            return FileHandler.change_file_name(user_id, file_id, file_name, path, is_encrypted, file_description)
+            return FileHandler.change_file_name(user_id, file_id, file_name, DBfiles.get_file_path(user_id, file_id),
+                                                is_encrypted, file_description)
         else:
             return self.unauthorized_response()
 
     # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
-    def file_delete(self, file_id, path, is_encrypted, auth_token):
+    def file_delete(self, file_id, is_encrypted, auth_token):
         user_id = self.check_session_value('user_id')
         if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
             user_id = str(user_id)
-            return FileHandler.delete_file(user_id, file_id, path, is_encrypted)
+            return FileHandler.delete_file(user_id, file_id, DBfiles.get_file_path(user_id, file_id), is_encrypted)
         else:
             return self.unauthorized_response()
 
@@ -415,7 +416,7 @@ class Index(object):
     @cherrypy.expose()
     def request_new_otp(self, auth_token):
         user_id = self.check_session_value('user_id')
-        if user_id and HashHandler.check_auth_token(user_id, auth_token, cherrypy.session.id):
+        if user_id and self.check_auth_token_db(user_id):
             user_id = str(user_id)
             user_mail = self.check_session_value('user_mail')
             otp_option = self.check_session_value('otp_option')
@@ -440,15 +441,6 @@ class Index(object):
         return open('../storage/other/top500passwords')
 
     @cherrypy.expose()
-    def get_auth_token(self):
-        user_id = self.check_session_value('user_id')
-        if self.check_for_auth(user_id) and HashHandler.check_auth_token(user_id, cherrypy.session.get('auth_token'),
-                                                                         cherrypy.session.id):
-            return cherrypy.session.get('auth_token')
-        else:
-            return self.unauthorized_response()
-
-    @cherrypy.expose()
     def hash_message(self, hash_function, message, auth_token):
         user_id = self.check_session_value('user_id')
         if self.check_for_auth(user_id) and self.check_auth_token(auth_token):
@@ -471,19 +463,23 @@ class Index(object):
 
     @staticmethod
     def check_for_auth(user_id):
-        if Index.check_session_value('2fa_status'):
-            return Index.check_session_value('2fa_verified')
+        if CryptoServer.check_session_value('2fa_status'):
+            return CryptoServer.check_session_value('2fa_verified')
         else:
             return user_id
 
     @staticmethod
     def check_auth_token(auth_token):
-        return auth_token == Index.check_session_value('auth_token')
+        return auth_token == CryptoServer.check_session_value('auth_token')
+
+    @staticmethod
+    def check_auth_token_db(user_id):
+        return HashHandler.check_auth_token(user_id, cherrypy.session.get('auth_token'),
+                                            cherrypy.session.id)
 
 
 if __name__ == '__main__':
     os.chdir('../')
-
 
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
@@ -519,4 +515,4 @@ if __name__ == '__main__':
     }
     DirHandler.check_server_dirs()
     HashHandler.new_server_salt()
-    cherrypy.quickstart(Index(), '/', conf)
+    cherrypy.quickstart(CryptoServer(), '/', conf)

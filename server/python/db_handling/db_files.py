@@ -30,7 +30,7 @@ class DBfiles:
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'SELECT id, file_name, file_description, path, is_encrypted FROM user_data WHERE user_id = %s'
+                sql = 'SELECT id, file_name, file_description, is_encrypted FROM user_data WHERE user_id = %s'
                 cursor.execute(sql, (user_id,))
                 db.commit()
                 result = cursor.fetchall()
@@ -40,6 +40,22 @@ class DBfiles:
             db.close()
 
         return result
+
+    @staticmethod
+    def get_file_path(user_id, file_id):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'SELECT path FROM user_data WHERE user_id = %s and id=%s'
+                cursor.execute(sql, (user_id, file_id))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()
+
+        return result[0]['path']
 
     @staticmethod
     def get_file(file_id, user_id):

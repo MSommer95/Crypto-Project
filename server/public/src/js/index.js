@@ -9,15 +9,9 @@ import '../css/custom.css';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import 'tabulator-tables/dist/css/semantic-ui/tabulator_semantic-ui.min.css';
 
-authHandler.getTokenFromServer().then(r => {
-    const deviceTable = tables.initDeviceTable();
-    const otpTable = tables.initOtpTable();
-    const fileTable = tables.initFileTable();
-    const qrImage = qrCode.initDeviceQR();
-    gui.activatePopovers();
-    settHandle.initSettings();
-});
-
-
-
-
+const deviceTable = tables.initDeviceTable();
+const otpTable = tables.initOtpTable();
+const fileTable = tables.initFileTable();
+const qrImage = qrCode.initDeviceQR();
+gui.activatePopovers();
+settHandle.initSettings();

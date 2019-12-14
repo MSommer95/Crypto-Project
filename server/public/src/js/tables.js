@@ -113,10 +113,10 @@ export function initFileTable() {
 
     function downloadFile(e, cell) {
         const rowData = cell.getRow().getData();
-        const filepath = rowData.path;
+        const fileID = rowData.id;
         const url = '/file_download';
         const method = 'post';
-        servCon.requestFile(url, filepath, method);
+        servCon.requestFile(url, fileID, method);
     }
 
     function saveChanges(e, cell) {
@@ -124,7 +124,6 @@ export function initFileTable() {
         const data = {
             file_id: rowData.id,
             file_description: rowData.file_description,
-            path: rowData.path,
             file_name: rowData.file_name,
             is_encrypted: rowData.is_encrypted,
             auth_token: getTokenFromField()
@@ -162,7 +161,6 @@ export function initFileTable() {
             const url = '/file_delete';
             const data = {
                 file_id: rowData.id,
-                path: rowData.path,
                 is_encrypted: rowData.is_encrypted,
                 auth_token: getTokenFromField()
             };

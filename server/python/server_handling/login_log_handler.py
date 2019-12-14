@@ -1,8 +1,11 @@
 import time
 from datetime import datetime
 
+import cherrypy
+
 from server.python.comm_handling.email_sender import EmailSender
 from server.python.db_handling.db_logs import DBlogs
+from server.python.user_handling.settings_handler import SettingsHandler
 
 
 class LLogHandler:
@@ -43,3 +46,13 @@ class LLogHandler:
             counter += 1
             DBlogs.update_login_log(user_id, counter)
             return True
+
+    @staticmethod
+    def prepare_index(user_id):
+        user_settings = SettingsHandler.prepare_user_settings(user_id)
+        index = open('../public/dist/index.html').read().format(auth_token=cherrypy.session.get('auth_token'),
+                                                                email=user_settings['email'],
+                                                                sec_fa_status=user_settings['status'],
+                                                                sec_fa_email=user_settings['2FA-Mail'],
+                                                                sec_fa_app=user_settings['2FA-App'])
+        return index

@@ -132,7 +132,7 @@
                                 <label class="text-normal" for="email-address">Email-address:</label>
                             </div>
                             <div class="col-md-7 ml-4">
-                                <input class="form-control" id="email-address" name="2-fa-status" type="text">
+                                <input class="form-control" id="email-address" name="2-fa-status" type="text" value="{email}">
                             </div>
                         </div>
                         <br>
@@ -174,7 +174,7 @@
                                     <label class="text-normal" for="2-fa">Enable:</label>
                                 </div>
                                 <div class="col-md-4 ml-4">
-                                    <input id="2-fa" name="2-fa-status" type="checkbox">
+                                    {sec_fa_status}
                                 </div>
                             </div>
                             <br>
@@ -184,7 +184,7 @@
                                         <label class="text-normal --flex-item-margin" for="2-fa-email">Email:</label>
                                     </div>
                                     <div class="col-md-4 ml-4 col-example radiolist">
-                                        <input checked id="2-fa-email" name="2-fa-options" type="radio" value="1">
+                                        {sec_fa_email}
                                     </div>
                                 </div>
                                 <div class="row">
@@ -192,7 +192,7 @@
                                         <label class="text-normal --flex-item-margin" for="2-fa-app">App:</label>
                                     </div>
                                     <div class="col-md-4 ml-4 col-example radiolist">
-                                        <input id="2-fa-app" name="2-fa-options" type="radio" value="1">
+                                        {sec_fa_app}
                                     </div>
                                 </div>
                             </div>
@@ -232,7 +232,7 @@
                                 <label class="custom-file-label" for="file-upload-input" id="file-upload-label">Choose
                                     file</label>
                                 <input class="custom-file-input" id="file-upload-input" name="file" type="file">
-                                <input class="hidden" id="hidden-token" name="auth_token">
+                                <input class="hidden" id="hidden-token" name="auth_token" value="{auth_token}">
                             </div>
                             <div class="row mt-5">
                                 <div class="col-md-4 mr-auto">

@@ -87,74 +87,24 @@ class HashHandler:
         return pwd_hash == stored_password
 
     @staticmethod
-    def md5(message):
-        md5_hash = hashlib.md5(message.encode())
-        return md5_hash.hexdigest()
-
-    @staticmethod
-    def sha1(message):
-        sha1_hash = hashlib.sha1(message.encode())
-        return sha1_hash.hexdigest()
-
-    @staticmethod
-    def blake2b(message):
-        blake2b_hash = hashlib.blake2b(message.encode())
-        return blake2b_hash.hexdigest()
-
-    @staticmethod
-    def blake2s(message):
-        blake2s_hash = hashlib.blake2s(message.encode())
-        return blake2s_hash.hexdigest()
-
-    @staticmethod
-    def sha256(message):
-        sha256_hash = hashlib.sha256(message.encode())
-        return sha256_hash.hexdigest()
-
-    @staticmethod
-    def sha512(message):
-        sha512_hash = hashlib.sha512(message.encode())
-        return sha512_hash.hexdigest()
-
-    @staticmethod
-    def sha3_256(message):
-        sha3_256_hash = hashlib.sha3_256(message.encode())
-        return sha3_256_hash.hexdigest()
-
-    @staticmethod
-    def sha3_512(message):
-        sha3_512_hash = hashlib.sha3_512(message.encode())
-        return sha3_512_hash.hexdigest()
-
-    @staticmethod
-    def shake_128(message):
-        shake_128_hash = hashlib.shake_128(message.encode())
-        return shake_128_hash.hexdigest(128)
-
-    @staticmethod
-    def shake_256(message):
-        shake_256_hash = hashlib.shake_256(message.encode())
-        return shake_256_hash.hexdigest(256)
-
-    @staticmethod
     def choose_hash_function(function, message):
         if function == 'md5':
-            return HashHandler.md5(message)
+            return hashlib.md5(message.encode()).hexdigest()
         elif function == 'sha1':
-            return HashHandler.sha1(message)
+            return hashlib.sha1(message.encode()).hexdigest()
         elif function == 'blake2(s)':
-            return HashHandler.blake2s(message)
+            return hashlib.blake2b(message.encode()).hexdigest()
         elif function == 'blake2(b)':
-            return HashHandler.blake2b(message)
+            return hashlib.blake2s(message.encode()).hexdigest()
         elif function == 'sha256':
-            return HashHandler.sha256(message)
+            return hashlib.sha256(message.encode()).hexdigest()
         elif function == 'sha512':
-            return HashHandler.sha512(message)
+            return hashlib.sha512(message.encode()).hexdigest()
         elif function == 'sha3(256)':
-            return HashHandler.sha3_256(message)
+            return hashlib.sha3_256(message.encode()).hexdigest()
         elif function == 'sha3(512)':
-            return HashHandler.sha3_512(message)
+            return hashlib.sha3_512(message.encode()).hexdigest()
         elif function == 'shake(128)':
-            return HashHandler.shake_128(message)
+            return hashlib.shake_128(message.encode()).hexdigest(128)
         elif function == 'shake(256)':
-            return HashHandler.shake_256(message)
+            return hashlib.shake_256(message.encode()).hexdigest(256)

@@ -87,39 +87,74 @@ class HashHandler:
         return pwd_hash == stored_password
 
     @staticmethod
-    def hash_message_md5(message):
+    def md5(message):
         md5_hash = hashlib.md5(message.encode())
         return md5_hash.hexdigest()
 
     @staticmethod
-    def hash_message_sha1(message):
+    def sha1(message):
         sha1_hash = hashlib.sha1(message.encode())
         return sha1_hash.hexdigest()
 
     @staticmethod
-    def hash_message_blake2(message):
-        blake2_hash = hashlib.blake2b(message.encode())
-        return blake2_hash.hexdigest()
+    def blake2b(message):
+        blake2b_hash = hashlib.blake2b(message.encode())
+        return blake2b_hash.hexdigest()
 
     @staticmethod
-    def hash_message_sha256(message):
+    def blake2s(message):
+        blake2s_hash = hashlib.blake2s(message.encode())
+        return blake2s_hash.hexdigest()
+
+    @staticmethod
+    def sha256(message):
         sha256_hash = hashlib.sha256(message.encode())
         return sha256_hash.hexdigest()
 
     @staticmethod
-    def hash_message_sha3(message):
-        sha3_hash = hashlib.sha3_512(message.encode())
-        return sha3_hash.hexdigest()
+    def sha512(message):
+        sha512_hash = hashlib.sha512(message.encode())
+        return sha512_hash.hexdigest()
+
+    @staticmethod
+    def sha3_256(message):
+        sha3_256_hash = hashlib.sha3_256(message.encode())
+        return sha3_256_hash.hexdigest()
+
+    @staticmethod
+    def sha3_512(message):
+        sha3_512_hash = hashlib.sha3_512(message.encode())
+        return sha3_512_hash.hexdigest()
+
+    @staticmethod
+    def shake_128(message):
+        shake_128_hash = hashlib.shake_128(message.encode())
+        return shake_128_hash.hexdigest(128)
+
+    @staticmethod
+    def shake_256(message):
+        shake_256_hash = hashlib.shake_256(message.encode())
+        return shake_256_hash.hexdigest(256)
 
     @staticmethod
     def choose_hash_function(function, message):
         if function == 'md5':
-            return HashHandler.hash_message_md5(message)
+            return HashHandler.md5(message)
         elif function == 'sha1':
-            return HashHandler.hash_message_sha1(message)
+            return HashHandler.sha1(message)
+        elif function == 'blake2(s)':
+            return HashHandler.blake2s(message)
         elif function == 'blake2(b)':
-            return HashHandler.hash_message_blake2(message)
+            return HashHandler.blake2b(message)
         elif function == 'sha256':
-            return HashHandler.hash_message_sha256(message)
+            return HashHandler.sha256(message)
+        elif function == 'sha512':
+            return HashHandler.sha512(message)
+        elif function == 'sha3(256)':
+            return HashHandler.sha3_256(message)
         elif function == 'sha3(512)':
-            return HashHandler.hash_message_sha3(message)
+            return HashHandler.sha3_512(message)
+        elif function == 'shake(128)':
+            return HashHandler.shake_128(message)
+        elif function == 'shake(256)':
+            return HashHandler.shake_256(message)

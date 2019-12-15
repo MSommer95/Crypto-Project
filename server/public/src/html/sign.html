@@ -21,11 +21,11 @@
                 <div class="form-group">
                     <label for="login_email">Email address</label>
                     <input aria-describedby="emailHelp" class="form-control" id="login_email"
-                           placeholder="Enter email" type="email" required>
+                           placeholder="Enter email" required type="email">
                 </div>
                 <div class="form-group">
                     <label for="login_password">Password</label>
-                    <input class="form-control" id="login_password" placeholder="Password" type="password" required>
+                    <input class="form-control" id="login_password" placeholder="Password" required type="password">
                 </div>
                 <button class="btn btn-dark" id="send_login-btn">Login</button>
                 <p class="mt-1">Lost your password? <a class="ml-1" href="#" id="reset-password-link">Reset it.</a></p>
@@ -51,12 +51,12 @@
                     <div class="form-group">
                         <label for="create_email">Email address</label>
                         <input aria-describedby="emailHelp" autocomplete="new-password" class="form-control"
-                               id="create_email" name="email" placeholder="Enter email" type="email" required>
+                               id="create_email" name="email" placeholder="Enter email" required type="email">
                     </div>
                     <div class="form-group">
                         <label for="create_password">Password</label>
                         <input autocomplete="new-password" class="form-control" id="create_password"
-                               name="password" placeholder="Password" type="password" required>
+                               name="password" placeholder="Password" required type="password">
                     </div>
                 </form>
                 <button class="btn btn-dark" form="create_account-form" id="send-create_account-btn" type="submit">
@@ -96,7 +96,8 @@
                                placeholder="Password" type="text">
                     </div>
                     <div class="col-md-4 ml-auto">
-                        <button class="btn btn-dark col-sm-10" data-container="body" data-content="Password copied to clipboard"
+                        <button class="btn btn-dark col-sm-10" data-container="body"
+                                data-content="Password copied to clipboard"
                                 data-placement="right" data-toggle="popover" id="secure_password-copy"
                                 type="submit">Copy
                         </button>
@@ -182,7 +183,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input id="confirm_otp" name="otp" placeholder="01234567" type="password" required>
+                <input id="confirm_otp" name="otp" placeholder="01234567" required type="password">
             </div>
             <div class="modal-footer modal-left">
                 <button class="btn btn-primary" id="send_otp" type="button">Confirm</button>
@@ -207,7 +208,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input id="confirm_reset-code" name="reset-input" placeholder="01234567" type="password" required>
+                <input id="confirm_reset-code" name="reset-input" placeholder="01234567" required type="password">
             </div>
             <div class="modal-footer modal-left">
                 <button class="btn btn-primary" id="send_reset-code" type="button">Confirm</button>
@@ -228,8 +229,10 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input id="input_password-reset-email" name="reset-input" placeholder="Email@mail.de" type="email" required>
-                <input id="input_password-reset-code" name="reset-input" placeholder="01234567" type="password" required>
+                <input id="input_password-reset-email" name="reset-input" placeholder="Email@mail.de" required
+                       type="email">
+                <input id="input_password-reset-code" name="reset-input" placeholder="01234567" required
+                       type="password">
             </div>
             <div class="modal-footer modal-left">
                 <button class="btn btn-primary" id="send_password-reset-code" type="button">Confirm</button>

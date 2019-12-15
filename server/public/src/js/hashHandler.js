@@ -11,6 +11,6 @@ export function requestHashing() {
         auth_token: authHandler.getTokenFromField()
     };
     servCon.postRequestWithData(url, data, (cb) => {
-        $('#hashed-message').val(cb.responseText);
+        $('#hashed-message').val(cb.responseJSON.message);
     });
 }

@@ -10,10 +10,10 @@ function request_2fa_verified() {
     const data = {
     };
     servCon.postRequestWithData(url, data, (cb) => {
-        if (cb.responseText === '0') {
+        if (cb.responseJSON.message === '0') {
 
-        } else if(cb.responseText === 'Not logged in') {
-            gui.changeNotificationTextAndOpen('Not logged in');
+        } else if(cb.responseJSON.message.includes('unauthorized')) {
+            gui.changeNotificationTextAndOpen(cb.responseJSON.message);
             window.location.href = '/sign';
         } else {
             clearInterval(intervalID);
@@ -73,8 +73,7 @@ export function sendOTP() {
             auth_token: authToken
         };
         servCon.postRequestWithData(url, data, (cb) => {
-            console.log(cb.responseText);
-            if (cb.responseText.includes('Verification valid')) {
+            if (cb.responseJSON.message === 'OTP valid') {
                 window.location.href = '/index';
             } else {
                 gui.changeNotificationTextAndOpen(cb.responseJSON.message);
@@ -89,8 +88,8 @@ export function sendResetCode() {
         token: $('#confirm_reset-code').val()
     };
     servCon.postRequestWithData(url, data, (cb) => {
-        gui.changeNotificationTextAndOpen(cb.responseText);
-        if (cb.responseText === 'unauthorized') {
+        gui.changeNotificationTextAndOpen(cb.responseJSON.message);
+        if (cb.responseJSON.message === 'unauthorized') {
             $('#reset-close').click();
         }
     });
@@ -113,7 +112,7 @@ export function requestPasswordReset() {
           email: email
         };
         servCon.postRequestWithData(url, data, (cb) => {
-            gui.changeNotificationTextAndOpen(cb.responseText)
+            gui.changeNotificationTextAndOpen(cb.responseJSON.message)
         });
     }
 }
@@ -130,7 +129,7 @@ export function sendPasswordResetCode() {
             email: email
         };
         servCon.postRequestWithData(url, data, (cb) => {
-            if (cb.responseText === 'valid token') {
+            if (cb.responseJSON.message === 'Correct token') {
                 $('#password-reset-close').click();
                 $('#new-password-popup').modal();
                 $('#new-password-email-input').val(email);
@@ -154,10 +153,10 @@ export function sendNewPassword() {
         };
         servCon.postRequestWithData(url, data, (cb) => {
             if (cb.responseText === 'Successfully updated password') {
-                gui.changeNotificationTextAndOpen(cb.responseText);
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message);
             } else {
                 $('#new-password-close').click();
-                gui.changeNotificationTextAndOpen(cb.responseText);
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message);
             }
         });
     }

@@ -4,22 +4,27 @@ import cherrypy
 class ResponseHandler:
 
     @staticmethod
-    def unauthorized_response():
+    def unauthorized_response(message):
         cherrypy.lib.sessions.expire()
         cherrypy.response.status = 401
-        return {'message': 'Access denied: Unauthorized'}
+        return {'message': message}
 
     @staticmethod
-    def bad_request_response():
+    def bad_request_response(message):
         cherrypy.response.status = 500
-        return {'message': 'Your request was not correct'}
+        return {'message': message}
 
     @staticmethod
-    def too_many_requests_response():
+    def too_many_requests_response(message):
         cherrypy.response.status = 418
-        return {'message': 'Too many tries.'}
+        return {'message': message}
 
     @staticmethod
-    def forbidden_response():
+    def forbidden_response(message):
         cherrypy.response.status = 403
-        return {'message': 'Forbidden Request'}
+        return {'message': message}
+
+    @staticmethod
+    def success_response(message):
+        cherrypy.response.status = 200
+        return {'message': message}

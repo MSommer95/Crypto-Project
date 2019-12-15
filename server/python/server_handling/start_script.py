@@ -17,7 +17,7 @@ from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
-from server.python.server_handling.auth_handler import AuthHandler
+from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.input_validator import InputValidator
 from server.python.server_handling.login_log_handler import LLogHandler
@@ -38,7 +38,7 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token_db(user_id):
             return LLogHandler.prepare_index(user_id)
         else:
-            ResponseHandler.unauthorized_response()
+            ResponseHandler.unauthorized_response('You are unauthorized')
             return open('../public/dist/sign.html')
 
     # Sign redirect
@@ -49,12 +49,13 @@ class CryptoServer(object):
     # create Funktion nimmt eine Emailadresse und Passwort entgegen und erstellt einen account in der DB + die
     # zugehörige Ordner Struktur
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def create_account(self, email, password):
         if InputValidator.email_validator(email) and len(password) > 0:
             DirHandler.create_user_dirs(str(DBusers.insert_user(email, password)))
-            return 'Account created'
+            return ResponseHandler.success_response('Account created')
         else:
-            return ResponseHandler.bad_request_response()
+            return ResponseHandler.bad_request_response('Please enter a valid email and password')
 
     # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
     # passwort stimmt. Innere if Abfrage checked, welche settings der User aktiviert hat und initialisiert die
@@ -71,11 +72,11 @@ class CryptoServer(object):
                     user = DBusers.check_user(email, password)
                     return LoginHandler.prepare_login(user, user_id, email)
                 else:
-                    return ResponseHandler.too_many_requests_response()
+                    return ResponseHandler.too_many_requests_response('Too many tries')
             else:
-                return ResponseHandler.forbidden_response()
+                return ResponseHandler.forbidden_response('Not authorized')
         else:
-            return ResponseHandler.bad_request_response()
+            return ResponseHandler.bad_request_response('Not a valid email address')
 
     # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
     # erfolgreichen Login
@@ -95,18 +96,23 @@ class CryptoServer(object):
 
     # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def verify_otp(self, otp, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if user_id and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            check_value = DBotp.check_current(user_id, otp)
-            if check_value:
-                LoginHandler.verify_login(user_id)
-                return 'Verification valid'
+            user_logs = LLogHandler.check_login_logs(user_id)
+            if LLogHandler.count_tries(user_id, user_logs, InputValidator.check_session_value('user_mail')):
+                check_value = DBotp.check_current(user_id, otp)
+                if check_value:
+                    LoginHandler.verify_login(user_id)
+                    return ResponseHandler.success_response('OTP valid')
+                else:
+                    return ResponseHandler.forbidden_response('OTP not valid')
             else:
-                return ResponseHandler.forbidden_response()
+                return ResponseHandler.too_many_requests_response('Too many tries')
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt und
     # nicht älter als eine Minute
@@ -122,15 +128,16 @@ class CryptoServer(object):
     # Funktion zur Überprüfung der Gültigkeit eines One-Time-Passwords, gültige Passwörter sind unbenutzt und nicht
     # älter als eine Minute
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def check_otp_verified(self):
         user_id = InputValidator.check_session_value('user_id')
         if user_id and AuthHandler.check_auth_token_db(user_id):
             check_value = DBotp.check_verification(user_id)
             if check_value:
                 LoginHandler.verify_login(user_id)
-            return str(check_value)
+            return ResponseHandler.success_response(str(check_value))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
     # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
@@ -142,7 +149,7 @@ class CryptoServer(object):
             FileHandler.write_file(user_id, file, file_description)
             return open('../public/dist/index.html')
         else:
-            ResponseHandler.unauthorized_response()
+            ResponseHandler.unauthorized_response('You are unauthorized')
             return open('../public/dist/sign.html')
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
@@ -155,50 +162,56 @@ class CryptoServer(object):
             absolute_file_path = os.path.abspath(user_path + DBfiles.get_file_path(user_id, file_id))
             return serve_file(absolute_file_path, disposition="attachment")
         else:
-            ResponseHandler.unauthorized_response()
+            ResponseHandler.unauthorized_response('You are unauthorized')
             return open('../public/dist/sign.html')
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def file_encrypt(self, file_id, file_name, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return FileEncryptor.encryption(user_id, file_id, file_name)
+            return ResponseHandler.success_response(FileEncryptor.encryption(user_id, file_id, file_name))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def file_decrypt(self, file_id, file_name, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             file_name = file_name.strip('.encrypted')
-            return FileEncryptor.decryption(user_id, file_id, file_name)
+            return ResponseHandler.success_response(FileEncryptor.decryption(user_id, file_id, file_name))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def file_update(self, file_id, file_description, file_name, is_encrypted, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return FileHandler.change_file_name(user_id, file_id, file_name, DBfiles.get_file_path(user_id, file_id),
+            message = FileHandler.change_file_name(user_id, file_id, file_name, DBfiles.get_file_path(user_id, file_id),
                                                 is_encrypted, file_description)
+            return ResponseHandler.success_response(message)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def file_delete(self, file_id, is_encrypted, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return FileHandler.delete_file(user_id, file_id, DBfiles.get_file_path(user_id, file_id), is_encrypted)
+            message = FileHandler.delete_file(user_id, file_id, DBfiles.get_file_path(user_id, file_id), is_encrypted)
+            return ResponseHandler.success_response(message)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Auslesen aller hochgeladenen Dateien des Nutzers
     @cherrypy.expose()
@@ -210,7 +223,7 @@ class CryptoServer(object):
             files = DBfiles.get_files(user_id)
             return files
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Auslesen aller bereits genutzten OTP's des Nutzers
     @cherrypy.expose()
@@ -221,7 +234,8 @@ class CryptoServer(object):
             user_id = str(user_id)
             return OtpHandler.prepare_used_otps(user_id)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
+
 
     # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
@@ -233,17 +247,18 @@ class CryptoServer(object):
             devices = DBdevices.get_by_user_id(user_id)
             return devices
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Hinzufügen eines neuen Nutzer-Devices, genutzt für Authentifikation per App als zweiten Faktor
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def insert_user_device(self, device_id, device_name, user_id):
         if not user_id:
             user_id = InputValidator.check_session_value('user_id')
             if AuthHandler.check_for_auth(user_id):
                 user_id = str(user_id)
             else:
-                return ResponseHandler.unauthorized_response()
+                return ResponseHandler.unauthorized_response('You are unauthorized')
         device = DBdevices.get_by_device_id(device_id)
         if len(device) > 0:
             if device[0]['device_is_active']:
@@ -260,39 +275,42 @@ class CryptoServer(object):
 
     # Funktion zum Löschen eines Nutzer-Devices
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def delete_user_device(self, device_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             DBdevices.delete(device_id, user_id)
             deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
-            return deleted_message
+            return ResponseHandler.success_response(deleted_message)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Aktivieren eines bereits existenten Devices für die 2-Faktor-Authentifikation, es kann nur jeweils
     # ein Device gleichzeitig aktiver zweiter Faktor sein
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def activate_user_device(self, device_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             DBdevices.deactivate_all(user_id)
-            return SecondFactorHandler.activate_device(user_id, device_id)
+            return ResponseHandler.success_response(SecondFactorHandler.activate_device(user_id, device_id))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Deaktivieren eines aktiven 2-Faktor-Devices des Nutzers
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def deactivate_user_device(self, device_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
-            return '%s %s' % (deactived_message, deactivae_addition)
+            return ResponseHandler.success_response('%s %s' % (deactived_message, deactivae_addition))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Auslesen der gewählten 2-Faktor-Eistellungen des Nutzers
     @cherrypy.expose()
@@ -303,70 +321,79 @@ class CryptoServer(object):
             user_id = str(user_id)
             return SettingsHandler.prepare_user_settings(user_id)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def update_account_info(self, email, password, old_password, auth_token):
         user_id = InputValidator.check_session_value('user_id')
-        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token) and InputValidator.email_validator(email):
+        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(
+                auth_token) and InputValidator.email_validator(email):
             user_id = str(user_id)
             user_mail = InputValidator.check_session_value('user_mail')
-            return SettingsHandler.update_account_info(user_id, user_mail, email, password, old_password)
+            message = SettingsHandler.update_account_info(user_id, user_mail, email, password, old_password)
+            return ResponseHandler.success_response(message)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers, bei Aktivierung der 2-Faktor Authentifikation
     # wird ein einmaliges Token zum Zurücksetzen der Einlstellungen generiert und in der Datenbank gespeichert
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return SettingsHandler.check_second_factor_options(sec_fa, sec_fa_email, sec_fa_app, user_id)
+            message = SettingsHandler.check_second_factor_options(sec_fa, sec_fa_email, sec_fa_app, user_id)
+            return ResponseHandler.success_response(message)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum zurücksetzen der 2-Faktor Authentifizierung mittels Token, falls Nutzer Zugang zum
     # Authentifikationsmedium verliert
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def reset_settings_sec_fa(self, token):
         user_id = InputValidator.check_session_value('user_id')
         if user_id:
             if HashHandler.check_token(user_id, token, 1):
                 SecondFactorHandler.deactivate_both_second_factor_options(user_id)
-                return 'Successfully disabled second factor. Please login again.'
+                return ResponseHandler.success_response('Successfully disabled second factor. Please login again.')
             else:
-                return ResponseHandler.forbidden_response()
+                return ResponseHandler.forbidden_response('Wrong token')
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def request_password_reset(self, email):
         if InputValidator.email_validator(email):
             user_id = DBusers.get_user_id(email)[0]['id']
             if user_id:
-                return LoginHandler.send_reset_token(user_id, email)
+                return ResponseHandler.success_response(LoginHandler.send_reset_token(user_id, email))
             else:
-                return ResponseHandler.unauthorized_response()
+                return ResponseHandler.unauthorized_response('You are unauthorized')
         else:
-            return ResponseHandler.bad_request_response()
+            return ResponseHandler.bad_request_response('Not a valid email address')
 
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def password_reset(self, token, email):
         if InputValidator.email_validator(email):
             user_id = DBusers.get_user_id(email)[0]['id']
             if user_id:
                 if HashHandler.check_token(user_id, token, 2):
-                    return 'valid token'
+                    return ResponseHandler.success_response('Correct token')
                 else:
-                    return 'Wrong Token'
+                    return ResponseHandler.forbidden_response('Wrong token')
             else:
-                return ResponseHandler.unauthorized_response()
+                return ResponseHandler.unauthorized_response('You are unauthorized')
         else:
-            return ResponseHandler.bad_request_response()
+            return ResponseHandler.bad_request_response('Not a valid email address')
 
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def new_password(self, password, token, email):
         if InputValidator.email_validator(email):
             user_id = DBusers.get_user_id(email)[0]['id']
@@ -374,15 +401,15 @@ class CryptoServer(object):
                 if HashHandler.check_token(user_id, token, 2):
                     if len(DBusers.check_user(email, password)) == 0:
                         DBtokens.delete(user_id, 2)
-                        return DBusers.update_password(user_id, password)
+                        return ResponseHandler.success_response(DBusers.update_password(user_id, password))
                     else:
-                        return 'Do not use your old password!'
+                        return ResponseHandler.forbidden_response('Do not use your old password!')
                 else:
-                    return ResponseHandler.unauthorized_response()
+                    return ResponseHandler.forbidden_response('Wrong token')
             else:
-                return ResponseHandler.unauthorized_response()
+                return ResponseHandler.unauthorized_response('You are unauthorized')
         else:
-            return ResponseHandler.bad_request_response()
+            return ResponseHandler.bad_request_response('Not a valid email address')
 
     # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()
@@ -431,13 +458,16 @@ class CryptoServer(object):
 
     # Function um einen neuen OTP zu requesten
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def request_new_otp(self):
         user_id = InputValidator.check_session_value('user_id')
         if user_id and AuthHandler.check_auth_token_db(user_id):
             user_id = str(user_id)
             user_mail = InputValidator.check_session_value('user_mail')
             otp_option = InputValidator.check_session_value('otp_option')
-            return OtpHandler.prepare_otp_send(user_id, otp_option, user_mail)
+            return ResponseHandler.success_response(OtpHandler.prepare_otp_send(user_id, otp_option, user_mail))
+        else:
+            ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
     # gescanned werden um Registrierung und Login zu vereinfachen
@@ -451,23 +481,25 @@ class CryptoServer(object):
             cherrypy.response.headers['Content-Type'] = "image/png"
             return base64.b64encode(img_string)
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
     @cherrypy.expose()
     def request_top_password(self):
         return open('../storage/other/top500passwords')
 
     @cherrypy.expose()
+    @cherrypy.tools.json_out()
     def hash_message(self, hash_function, message, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
-            return HashHandler.choose_hash_function(hash_function, message)
+            return ResponseHandler.success_response(HashHandler.choose_hash_function(hash_function, message))
         else:
-            return ResponseHandler.unauthorized_response()
+            return ResponseHandler.unauthorized_response('You are unauthorized')
 
 
 if __name__ == '__main__':
     os.chdir('../')
+
 
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)

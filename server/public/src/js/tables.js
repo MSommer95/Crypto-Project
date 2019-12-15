@@ -16,7 +16,7 @@ export function initDeviceTable() {
                     auth_token: getTokenFromField()
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
-                    gui.changeNotificationTextAndOpen(cb.responseText);
+                    gui.changeNotificationTextAndOpen(cb.responseJSON.message);
                     deviceTable.setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
                 });
             } else {
@@ -31,7 +31,7 @@ export function initDeviceTable() {
                     auth_token: getTokenFromField()
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
-                    gui.changeNotificationTextAndOpen(cb.responseText);
+                    gui.changeNotificationTextAndOpen(cb.responseJSON.message);
                     deviceTable.setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
                 });
             } else {
@@ -50,7 +50,7 @@ export function initDeviceTable() {
             };
             cell.getRow().delete();
             servCon.postRequestWithData(url, data, (cb) => {
-                gui.changeNotificationTextAndOpen(cb.responseText)
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message)
             });
         }
     }
@@ -130,7 +130,7 @@ export function initFileTable() {
         };
         const url = '/file_update';
         servCon.postRequestWithData(url, data, (cb) => {
-            gui.changeNotificationTextAndOpen(cb.responseText);
+            gui.changeNotificationTextAndOpen(cb.responseJSON.message);
         });
     }
 
@@ -150,7 +150,7 @@ export function initFileTable() {
             url = '/file_encrypt';
         }
         servCon.postRequestWithData(url, data, (cb) => {
-            gui.changeNotificationTextAndOpen(cb.responseText);
+            gui.changeNotificationTextAndOpen(cb.responseJSON.message);
             filesTable.setData('/get_user_files');
         });
     }
@@ -166,7 +166,7 @@ export function initFileTable() {
             };
             cell.getRow().delete();
             servCon.postRequestWithData(url, data, (cb) => {
-                gui.changeNotificationTextAndOpen(cb.responseText)
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message)
             });
         }
     }

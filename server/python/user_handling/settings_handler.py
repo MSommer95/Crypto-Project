@@ -19,9 +19,9 @@ class SettingsHandler:
     @staticmethod
     def prepare_status(option_app, option_email):
         if option_app or option_email:
-            return '<input id="2-fa" name="2-fa-status" type="checkbox" checked>'
+            return '<input id="2-fa-status" name="2-fa-status" type="checkbox" checked>'
         else:
-            return '<input id="2-fa" name="2-fa-status" type="checkbox">'
+            return '<input id="2-fa-status" name="2-fa-status" type="checkbox">'
 
     @staticmethod
     def prepare_app(option_app):

@@ -31,9 +31,9 @@ class FileEncryptor:
             encrypted_file_path = '/files/encrypted/%s' % encrypted_filename
             with open(user_path + encrypted_file_path, 'wb') as f:
                 f.write(encrypted)
-
+            file_description = 'My encrypted file'
             is_encrypted = 1
-            DBfiles.insert(file_id_encrypt, user_id, encrypted_filename, encrypted_file_path, is_encrypted)
+            DBfiles.insert(file_id_encrypt, user_id, encrypted_filename, file_description, encrypted_file_path, is_encrypted)
             DBfiles.insert_file_key(user_id, file_id_encrypt, key_file_path)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong while encrypting the file'
@@ -64,9 +64,9 @@ class FileEncryptor:
             decrypted_file_path = '/files/unencrypted/%s' % filename
             with open(user_path + decrypted_file_path, 'wb') as f:
                 f.write(decrypted)
-
+            file_description = 'My decrypted file'
             is_encrypted = 0
-            DBfiles.insert(file_id_decrypt, user_id, filename, decrypted_file_path, is_encrypted)
+            DBfiles.insert(file_id_decrypt, user_id, filename, file_description, decrypted_file_path, is_encrypted)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong while decrypting the file'
         else:

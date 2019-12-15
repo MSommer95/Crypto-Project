@@ -107,7 +107,7 @@ export function onStateChange(event) {
         case 'file-upload-input':
             gui.filenameExtract(event.target);
             break;
-        case '2-fa':
+        case '2-fa-status':
             gui.secfacStateChange(event.target);
             break;
         case 'secure_password-pwd':

@@ -104,29 +104,22 @@ export function changeNotificationTextAndOpen(text) {
     $('#notification-popup').modal();
 }
 
+function switchUI(elementsToShow, elementsToHide) {
+    elementsToShow.forEach(element => showElement(element));
+    elementsToHide.forEach(element => hideElement(element))
+}
+
 export function toggleSettings(element) {
-    const deviceElement = $('#device-section');
-    const hashingElement = $('#hash-message-section');
-    const otpElement = $('#otp-section');
-    const fileElement = $('#file-section');
-    const settingsElement = $('#settings-section');
-    switch (element.id) {
-        case 'settings-btn':
-            hideElement(hashingElement);
-            hideElement(deviceElement);
-            hideElement(otpElement);
-            hideElement(fileElement);
-            showElement(settingsElement);
-            break;
-        case 'back-to-main-btn':
-            showElement(hashingElement);
-            showElement(deviceElement);
-            showElement(otpElement);
-            showElement(fileElement);
-            hideElement(settingsElement);
-            break;
+    const elementsMainPage = [$('#hash-message-section'), $('#device-section'), $('#otp-section'), $('#file-section')];
+    const elementsSettings = [$('#settings-section')];
+    if (element.id === 'settings-btn') {
+        switchUI(elementsSettings, elementsMainPage);
+    } else {
+        switchUI(elementsMainPage, elementsSettings);
     }
 }
+
+
 
 export function filenameExtract(input) {
     const fileName = $(input).val().split('\\').pop();

@@ -28,17 +28,21 @@ export function onMouseClick(event) {
         case 'settings-btn':
             gui.toggleSettings(event.target);
             break;
-        case 'file_nav-btn':
-            gui.scrollToElement($('#file-section'));
-            break;
-        case 'otp_nav-btn':
-            gui.scrollToElement($('#otp-section'));
+        case 'hash_nav-btn':
+            gui.toggleSettings(event.target);
+            gui.scrollToElement($('#hash-message-section'));
             break;
         case 'device_nav-btn':
+            gui.toggleSettings(event.target);
             gui.scrollToElement($('#device-section'));
             break;
-        case 'hash_nav-btn':
-            gui.scrollToElement($('#hash-message-section'));
+        case 'otp_nav-btn':
+            gui.toggleSettings(event.target);
+            gui.scrollToElement($('#otp-section'));
+            break;
+        case 'file_nav-btn':
+            gui.toggleSettings(event.target);
+            gui.scrollToElement($('#file-section'));
             break;
         case 'secure_password-copy':
             passGen.copyPassword();

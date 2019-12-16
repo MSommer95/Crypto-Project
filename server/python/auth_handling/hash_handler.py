@@ -33,7 +33,7 @@ class HashHandler:
 
     @staticmethod
     def create_token(user_id, reset_case):
-        alphabet = string.ascii_uppercase + string.ascii_lowercase + string.digits
+        alphabet = f'{string.ascii_uppercase}{string.ascii_lowercase}{string.digits}'
         token = OtpHandler.create_random_string(alphabet, 16)
         hashed_token = HashHandler.hash_password(token)
         tokens = DBtokens.all()

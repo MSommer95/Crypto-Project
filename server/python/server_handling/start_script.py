@@ -5,6 +5,7 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
 
+from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.auth_handling.hash_handler import HashHandler
 from server.python.auth_handling.login_handler import LoginHandler
 from server.python.auth_handling.otp_handler import OtpHandler
@@ -17,7 +18,6 @@ from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
 from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
-from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.input_validator import InputValidator
 from server.python.server_handling.login_log_handler import LLogHandler
@@ -36,10 +36,10 @@ class CryptoServer(object):
     def index(self):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token_db(user_id):
-            return LLogHandler.prepare_index(user_id)
+            return ResponseHandler.prepare_index(user_id)
         else:
             ResponseHandler.unauthorized_response('You are unauthorized')
-            return open('../public/dist/sign.html')
+            raise cherrypy.HTTPRedirect('/sign')
 
     # Sign redirect
     @cherrypy.expose()
@@ -52,7 +52,7 @@ class CryptoServer(object):
     @cherrypy.tools.json_out()
     def create_account(self, email, password):
         if InputValidator.email_validator(email) and len(password) > 0:
-            DirHandler.create_user_dirs(str(DBusers.insert_user(email, password)))
+            DirHandler.check_user_dirs(str(DBusers.insert_user(email, password)))
             return ResponseHandler.success_response('Account created')
         else:
             return ResponseHandler.bad_request_response('Please enter a valid email and password')
@@ -147,10 +147,10 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             FileHandler.write_file(user_id, file, file_description)
-            return open('../public/dist/index.html')
+            raise cherrypy.HTTPRedirect('/')
         else:
             ResponseHandler.unauthorized_response('You are unauthorized')
-            return open('../public/dist/sign.html')
+            raise cherrypy.HTTPRedirect('/sign')
 
     # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
     @cherrypy.expose()
@@ -158,12 +158,12 @@ class CryptoServer(object):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            user_path = '../storage/users/%s' % user_id
-            absolute_file_path = os.path.abspath(user_path + DBfiles.get_file_path(user_id, file_id))
+            user_path = f'../storage/users/{user_id}'
+            absolute_file_path = os.path.abspath(f'{user_path}{DBfiles.get_file_path(user_id, file_id)}')
             return serve_file(absolute_file_path, disposition="attachment")
         else:
             ResponseHandler.unauthorized_response('You are unauthorized')
-            return open('../public/dist/sign.html')
+            raise cherrypy.HTTPRedirect('/sign')
 
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
@@ -196,7 +196,7 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             message = FileHandler.change_file_name(user_id, file_id, file_name, DBfiles.get_file_path(user_id, file_id),
-                                                is_encrypted, file_description)
+                                                   is_encrypted, file_description)
             return ResponseHandler.success_response(message)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
@@ -235,7 +235,6 @@ class CryptoServer(object):
             return OtpHandler.prepare_used_otps(user_id)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
-
 
     # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
@@ -281,7 +280,7 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             DBdevices.delete(device_id, user_id)
-            deleted_message = 'Device was deleted. \n' + SecondFactorHandler.check_for_active_device(user_id)
+            deleted_message = f'Device was deleted. \n {SecondFactorHandler.check_for_active_device(user_id)}'
             return ResponseHandler.success_response(deleted_message)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
@@ -308,7 +307,7 @@ class CryptoServer(object):
             user_id = str(user_id)
             deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
             deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
-            return ResponseHandler.success_response('%s %s' % (deactived_message, deactivae_addition))
+            return ResponseHandler.success_response(f'{deactived_message} {deactivae_addition}')
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
@@ -500,6 +499,18 @@ class CryptoServer(object):
 if __name__ == '__main__':
     os.chdir('../')
 
+    def force_tls():
+        if cherrypy.request.scheme == "http":
+            raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
+                                        status=301)
+
+    cherrypy.tools.force_tls = cherrypy.Tool("before_handler", force_tls)
+
+    def load_http_server():
+        # extra server instance to dispatch HTTP
+        server = cherrypy._cpserver.Server()
+        server.socket_port = 80
+        server.subscribe()
 
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
@@ -509,30 +520,9 @@ if __name__ == '__main__':
         headers['X-XSS-Protection'] = '1; mode=block'
         # headers['Content-Security-Policy'] = "default-src 'self';"
 
-
-    conf = {
-        'global': {
-            'server.socket_port': 8000,
-            'server.ssl_module': 'builtin',
-            'server.ssl_certificate': '../storage/ca/cert.pem',
-            'server.ssl_private_key': '../storage/ca/privkey.pem'
-        },
-        '/': {
-            'tools.secure_headers.on': True,
-            'tools.sessions.on': True,
-            'tools.sessions.timeout': 20,
-            'tools.sessions.secure': True,
-            'tools.sessions.httponly': True,
-            'tools.staticdir.root': os.path.abspath(os.getcwd()),
-            'log.access_file': "./server_handling/logs/access.log",
-            'log.error_file': "./server_handling/logs/error.log",
-            'log.screen': False,
-        },
-        '/static': {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': '../public/dist/'
-        }
-    }
+    conf = os.path.join(os.path.dirname(__file__) + '/conf/', 'server_conf')
     DirHandler.check_server_dirs()
     HashHandler.new_server_salt()
+    load_http_server()
     cherrypy.quickstart(CryptoServer(), '/', conf)
+

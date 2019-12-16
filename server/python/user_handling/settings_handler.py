@@ -64,7 +64,7 @@ class SettingsHandler:
         elif sec_fa_app == 'true':
             SecondFactorHandler.activate_device_as_second_factor(user_id)
         token = HashHandler.create_token(user_id, 1)
-        return 'Successfully changed the second factor, use token: "%s" to reset your 2FA settings ' % token
+        return f'Successfully changed the second factor, use token: "{token}" to reset your 2FA settings '
 
     @staticmethod
     def check_second_factor_options(sec_fa, sec_fa_email, sec_fa_app, user_id):

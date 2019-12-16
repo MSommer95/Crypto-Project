@@ -1,7 +1,19 @@
 import cherrypy
 
+from server.python.user_handling.settings_handler import SettingsHandler
+
 
 class ResponseHandler:
+
+    @staticmethod
+    def prepare_index(user_id):
+        user_settings = SettingsHandler.prepare_user_settings(user_id)
+        index = open('../public/dist/index.html').read().format(auth_token=cherrypy.session.get('auth_token'),
+                                                                email=user_settings['email'],
+                                                                sec_fa_status=user_settings['status'],
+                                                                sec_fa_email=user_settings['2FA-Mail'],
+                                                                sec_fa_app=user_settings['2FA-App'])
+        return index
 
     @staticmethod
     def unauthorized_response(message):

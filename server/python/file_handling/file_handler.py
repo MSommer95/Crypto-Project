@@ -9,12 +9,12 @@ class FileHandler:
     @staticmethod
     def write_file(user_id, file, file_description):
         file_id = int(round(time.time() * 1000))
-        user_path = '../storage/users/%s' % user_id
+        user_path = f'../storage/users/{user_id}'
         print(type(file))
         size = 0
-        path = '/files/unencrypted/%s' % file.filename
+        path = f'/files/unencrypted/{file.filename}'
         # Write the unencrypted file
-        with open(user_path + path, 'wb') as f:
+        with open(f'{user_path}{path}', 'wb') as f:
             while True:
                 data = file.file.read(8192)
                 if not data:
@@ -28,14 +28,14 @@ class FileHandler:
     @staticmethod
     def change_file_name(user_id, file_id, new_file_name, old_path, is_encrypted, file_description):
         try:
-            user_path = '../storage/users/%s' % user_id
+            user_path = f'../storage/users/{user_id}'
             if int(is_encrypted):
-                new_path = '/files/encrypted/%s' % new_file_name
+                new_path = f'/files/encrypted/{new_file_name}'
                 FileHandler.change_key_name(user_id, file_id, new_file_name, user_path)
             else:
-                new_path = '/files/unencrypted/%s' % new_file_name
+                new_path = f'/files/unencrypted/{new_file_name}'
             DBfiles.update_file(user_id, file_id, new_file_name, file_description, new_path)
-            os.rename(user_path + old_path, user_path + new_path)
+            os.rename(f'{user_path}{old_path}', f'{user_path}{new_path}')
         except OSError:
             return 'Something went wrong while changing the file'
         else:
@@ -44,8 +44,8 @@ class FileHandler:
     @staticmethod
     def delete_file(user_id, file_id, path, is_encrypted):
         try:
-            user_path = '../storage/users/%s' % user_id
-            os.remove(user_path + path)
+            user_path = f'../storage/users/{user_id}'
+            os.remove(f'{user_path}{path}')
             if int(is_encrypted):
                 FileHandler.delete_key(user_id, file_id, user_path)
             DBfiles.delete_file(file_id, user_id)
@@ -57,9 +57,9 @@ class FileHandler:
     @staticmethod
     def change_key_name(user_id, file_id, new_file_name, user_path):
         key = DBfiles.get_file_key(file_id, user_id)
-        new_path = '/keys/%s' % new_file_name
+        new_path = f'/keys/{new_file_name}'
         try:
-            os.rename(user_path + key[0]['key_path'], user_path + new_path)
+            os.rename(f'{user_path}{key[0]["key_path"]}', f'{user_path}{new_path}')
             DBfiles.update_file_key(key[0]['id'], user_id, file_id, new_path)
         except OSError:
             return 'Something went wrong while changing the key'
@@ -70,7 +70,7 @@ class FileHandler:
     def delete_key(user_id, file_id, user_path):
         key = DBfiles.get_file_key(file_id, user_id)
         try:
-            os.remove(user_path + key[0]['key_path'])
+            os.remove(f'{user_path}{key[0]["key_path"]}')
         except OSError:
             return 'Something went wrong while deleting the key'
         else:

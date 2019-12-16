@@ -30,7 +30,7 @@ class OtpHandler:
     # Funktion zum Versenden eines OTPs via Emailadresse
     @staticmethod
     def send_otp_mail(email, otp):
-        message = 'Your HOTP: %s' % otp
+        message = f'Your HOTP: {otp}'
         EmailSender.send_mail(message, '2-Faktor-Auth', email)
 
     # Funktion zum Versenden eines OTPs via Push Nachricht

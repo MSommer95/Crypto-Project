@@ -30,6 +30,6 @@ class EmailSender:
             # send the message via the server.
             server_ssl.sendmail(msg['From'], msg['To'], msg.as_string())
             server_ssl.close()
-            print("successfully sent email to %s:" % (msg['To']))
+            print(f'successfully sent email to {msg["To"]}:')
         except smtplib.SMTPException as e:
             logging.error(e)

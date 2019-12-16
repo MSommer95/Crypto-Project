@@ -1,0 +1,24 @@
+
+[global]
+server.socket_port          = 443
+server.ssl_module           : 'builtin'
+server.ssl_certificate      : '../storage/ca/cert.pem'
+server.ssl_private_key      : '../storage/ca/privkey.pem'
+tools.force_tls.on          : True
+
+[/]
+tools.secure_headers.on     : True
+tools.sessions.on           : True
+tools.sessions.timeout      : 20
+tools.sessions.secure       : True
+tools.sessions.httponly     : True
+tools.staticdir.root        : os.path.abspath(os.getcwd())
+log.access_file             : './server_handling/logs/access.log'
+log.error_file              : './server_handling/logs/error.log'
+log.screen                  : False
+tools.proxy.on              : True
+
+[/static]
+tools.staticdir.on          : True
+tools.staticdir.dir         : '../public/dist/'
+tools.staticdir.index       : 'index.html'

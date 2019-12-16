@@ -59,7 +59,6 @@ export function login() {
 export function logout() {
     let url = '/logout_account';
     servCon.getData(url, (cb) => {
-        console.log(cb.responseText);
         location.reload();
     });
 }

@@ -8,7 +8,7 @@ class LogHandler:
     def get_access_log(logs):
         try:
             counter_login = []
-            access_log_path = './server_handling/logs/%s.log' % logs
+            access_log_path = f'./server_handling/logs/{logs}.log'
             with open(access_log_path, 'r') as f:
                 for line in f:
                     counter_login.append(LogHandler.get_hour(line))

@@ -1,5 +1,5 @@
-from server.python.auth_handling.hash_handler import HashHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
+from server.python.crypto_handler.hash_handler import HashHandler
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_users import DBusers
 

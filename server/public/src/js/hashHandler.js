@@ -14,3 +14,41 @@ export function requestHashing() {
         $('#hashed-message').val(cb.responseJSON.message);
     });
 }
+
+export function requestCaesarEncryption() {
+    const url = '/caesar_cipher';
+    const data = {
+        message: $('#caesar_plaintext-message').val(),
+        shift: $('#caesar_shift-encrypt').val(),
+        option: 'encrypt',
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#caesar_cipher-message').val(cb.responseJSON.message);
+    });
+}
+
+export function requestCaesarDecrypion() {
+    const url = '/caesar_cipher';
+    const data = {
+        message: $('#caesar_cipher-message').val(),
+        shift: $('#caesar_shift-decrypt').val(),
+        option: 'decrypt',
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#caesar_plaintext-message').val(cb.responseJSON.message);
+    });
+}
+
+export function requestCaesarCrack() {
+    const url = '/caesar_cipher_crack';
+    const data = {
+        message: $('#caesar_cipher-message').val(),
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#caesar_shift-decrypt').val(cb.responseJSON.message);
+        $('#caesar_decrypt-message-btn').click();
+    });
+}

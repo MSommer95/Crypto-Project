@@ -33,7 +33,8 @@ class FileEncryptor:
                 f.write(encrypted)
             file_description = 'My encrypted file'
             is_encrypted = 1
-            DBfiles.insert(file_id_encrypt, user_id, encrypted_filename, file_description, encrypted_file_path, is_encrypted)
+            DBfiles.insert(file_id_encrypt, user_id, encrypted_filename, file_description, encrypted_file_path,
+                           is_encrypted)
             DBfiles.insert_file_key(user_id, file_id_encrypt, key_file_path)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong while encrypting the file'

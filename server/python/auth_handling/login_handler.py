@@ -1,8 +1,8 @@
 import cherrypy
 
-from server.python.auth_handling.hash_handler import HashHandler
-from server.python.auth_handling.otp_handler import OtpHandler
 from server.python.comm_handling.email_sender import EmailSender
+from server.python.crypto_handler.hash_handler import HashHandler
+from server.python.crypto_handler.otp_handler import OtpHandler
 from server.python.db_handling.db_otp import DBotp
 from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers

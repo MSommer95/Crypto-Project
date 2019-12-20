@@ -6,11 +6,12 @@ from cherrypy.lib.static import serve_file
 from jinja2 import Environment, FileSystemLoader
 
 from server.python.auth_handling.auth_handler import AuthHandler
-from server.python.auth_handling.hash_handler import HashHandler
 from server.python.auth_handling.login_handler import LoginHandler
-from server.python.auth_handling.otp_handler import OtpHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
 from server.python.comm_handling.qr_handler import QRHandler
+from server.python.crypto_handler.caesar_cipher import CaesarCipher
+from server.python.crypto_handler.hash_handler import HashHandler
+from server.python.crypto_handler.otp_handler import OtpHandler
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp
@@ -495,22 +496,44 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def caesar_cipher(self, message, shift, option, auth_token):
+        user_id = InputValidator.check_session_value('user_id')
+        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
+            return ResponseHandler.success_response(CaesarCipher().cipher(message, option, int(shift)))
+        else:
+            return ResponseHandler.unauthorized_response('You are unauthorized')
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def caesar_cipher_crack(self, message, auth_token):
+        user_id = InputValidator.check_session_value('user_id')
+        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
+            return ResponseHandler.success_response(CaesarCipher().crack_cipher(message))
+        else:
+            return ResponseHandler.unauthorized_response('You are unauthorized')
+
 
 if __name__ == '__main__':
     os.chdir('../')
+
 
     def force_tls():
         if cherrypy.request.scheme == "http":
             raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                         status=301)
 
+
     cherrypy.tools.force_tls = cherrypy.Tool("before_handler", force_tls)
+
 
     def load_http_server():
         # extra server instance to dispatch HTTP
         server = cherrypy._cpserver.Server()
         server.socket_port = 80
         server.subscribe()
+
 
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
@@ -520,9 +543,9 @@ if __name__ == '__main__':
         headers['X-XSS-Protection'] = '1; mode=block'
         # headers['Content-Security-Policy'] = "default-src 'self';"
 
+
     conf = os.path.join(os.path.dirname(__file__) + '/conf/', 'server_conf')
     DirHandler.check_server_dirs()
     HashHandler.new_server_salt()
     load_http_server()
     cherrypy.quickstart(CryptoServer(), '/', conf)
-

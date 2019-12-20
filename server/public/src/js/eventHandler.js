@@ -101,6 +101,15 @@ export function onMouseClick(event) {
         case 'request-new-otp-btn':
             authHandler.requestNewOTP();
             break;
+        case 'caesar_encrypt-message-btn':
+            hashHandler.requestCaesarEncryption();
+            break;
+        case 'caesar_decrypt-message-btn':
+            hashHandler.requestCaesarDecrypion();
+            break;
+        case 'caesar_crack-message-btn':
+            hashHandler.requestCaesarCrack();
+            break;
         default:
             break;
     }

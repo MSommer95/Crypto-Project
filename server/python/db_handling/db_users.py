@@ -2,7 +2,7 @@ import logging
 
 import pymysql
 
-from server.python.auth_handling.hash_handler import HashHandler
+from server.python.crypto_handler.hash_handler import HashHandler
 from server.python.db_handling.db_connector import DBconnector
 
 

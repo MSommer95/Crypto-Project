@@ -3,8 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    mode: 'development',
-    watch: true,
     entry: {
         main: './src/js/index.js',
         sign: './src/js/sign.js'
@@ -23,7 +21,6 @@ module.exports = {
         }),
         new CopyWebpackPlugin([]),
     ],
-    devtool: 'inline-source-map',
     output: {
         filename: 'js/[name].js',
         path: path.resolve(__dirname, 'dist'),

@@ -10,8 +10,10 @@ from server.python.auth_handling.login_handler import LoginHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
 from server.python.comm_handling.qr_handler import QRHandler
 from server.python.crypto_handler.caesar_cipher import CaesarCipher
+from server.python.crypto_handler.cipher_helper import CipherHelper
 from server.python.crypto_handler.hash_handler import HashHandler
 from server.python.crypto_handler.otp_handler import OtpHandler
+from server.python.crypto_handler.vigenere_cipher import VigenereCipher
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp
@@ -501,7 +503,7 @@ class CryptoServer(object):
     def caesar_cipher(self, message, shift, option, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
-            return ResponseHandler.success_response(CaesarCipher().cipher(message, option, int(shift)))
+            return ResponseHandler.success_response(CaesarCipher(shift).cipher(message, option))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
@@ -510,7 +512,27 @@ class CryptoServer(object):
     def caesar_cipher_crack(self, message, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
-            return ResponseHandler.success_response(CaesarCipher().crack_cipher(message))
+            return ResponseHandler.success_response(CaesarCipher(0).crack_cipher(message))
+        else:
+            return ResponseHandler.unauthorized_response('You are unauthorized')
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def vigenere_cipher(self, message, key, option, auth_token):
+        user_id = InputValidator.check_session_value('user_id')
+        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
+            clean_message = CipherHelper.remove_special_chars(message)
+            return ResponseHandler.success_response(VigenereCipher().cipher(clean_message, key, option))
+        else:
+            return ResponseHandler.unauthorized_response('You are unauthorized')
+
+    @cherrypy.expose()
+    @cherrypy.tools.json_out()
+    def vigenere_cipher_crack(self, message, auth_token):
+        user_id = InputValidator.check_session_value('user_id')
+        if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
+            clean_message = CipherHelper.remove_special_chars(message)
+            return ResponseHandler.success_response(VigenereCipher().crack_cipher(clean_message))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 

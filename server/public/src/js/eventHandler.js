@@ -110,6 +110,15 @@ export function onMouseClick(event) {
         case 'caesar_crack-message-btn':
             hashHandler.requestCaesarCrack();
             break;
+        case 'vigenere_encrypt-message-btn':
+            hashHandler.requestVigenereEncryption();
+            break;
+        case 'vigenere_decrypt-message-btn':
+            hashHandler.requestVigenereDecrypion();
+            break;
+        case 'vigenere_crack-message-btn':
+            hashHandler.requestVigenereCrack();
+            break;
         default:
             break;
     }
@@ -125,6 +134,9 @@ export function onStateChange(event) {
             break;
         case 'secure_password-pwd':
             passGen.passInputchange(event.target);
+            break;
+        case 'cipher-chooser':
+            gui.toggleCipherDisplay(event.target);
             break;
         default:
             break;

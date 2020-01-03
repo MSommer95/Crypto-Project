@@ -52,3 +52,42 @@ export function requestCaesarCrack() {
         $('#caesar_decrypt-message-btn').click();
     });
 }
+
+export function requestVigenereEncryption() {
+    const url = '/vigenere_cipher';
+    const data = {
+        message: $('#vigenere_plaintext-message').val(),
+        key: $('#vigenere_key-encrypt').val(),
+        option: 'encrypt',
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#vigenere_cipher-message').val(cb.responseJSON.message);
+    });
+}
+
+export function requestVigenereDecrypion() {
+    const url = '/vigenere_cipher';
+    const data = {
+        message: $('#vigenere_cipher-message').val(),
+        key: $('#vigenere_key-decrypt').val(),
+        option: 'decrypt',
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#vigenere_plaintext-message').val(cb.responseJSON.message);
+    });
+}
+
+export function requestVigenereCrack() {
+    const url = '/vigenere_cipher_crack';
+    const data = {
+        message: $('#vigenere_cipher-message').val(),
+        auth_token: authHandler.getTokenFromField()
+    };
+    servCon.postRequestWithData(url, data, (cb) => {
+        $('#vigenere_key-decrypt').val(cb.responseJSON.message);
+        $('#vigenere_decrypt-message-btn').click();
+    });
+}
+

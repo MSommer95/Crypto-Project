@@ -119,7 +119,19 @@ export function toggleSettings(element) {
     }
 }
 
-
+export function toggleCipherDisplay(element) {
+    if (element.value === 'Caesar Cipher') {
+        hideElement($('#vigenere_card-body'));
+        hideElement($('#vigenere_card-footer'));
+        showElement($('#caesar_card-body'));
+        showElement($('#caesar_card-footer'));
+    } else {
+        hideElement($('#caesar_card-body'));
+        hideElement($('#caesar_card-footer'));
+        showElement($('#vigenere_card-body'));
+        showElement($('#vigenere_card-footer'));
+    }
+}
 
 export function filenameExtract(input) {
     const fileName = $(input).val().split('\\').pop();

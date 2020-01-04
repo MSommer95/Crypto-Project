@@ -1,4 +1,5 @@
 from server.python.crypto_handler.caesar_cipher import CaesarCipher
+from server.python.crypto_handler.cipher_helper import CipherHelper
 from server.python.crypto_handler.distribution_analyzer import DistAnalyzer
 
 
@@ -18,11 +19,12 @@ class VigenereCipher:
         i = 0
         while i < len(text):
             for caesar in self.caesar_cipher_key(key):
+                ascii_position = CipherHelper.case_distinction(text[i])
                 if option == 'encrypt':
-                    cipher_letter = caesar.encrypt(ord(text[i].lower()) - 97)
+                    cipher_letter = caesar.encrypt(ord(text[i]) - ascii_position)
                 else:
-                    cipher_letter = caesar.decrypt(ord(text[i].lower()) - 97)
-                crypt_text += chr(cipher_letter + 97)
+                    cipher_letter = caesar.decrypt(ord(text[i]) - ascii_position)
+                crypt_text += chr(cipher_letter + ascii_position)
                 i += 1
                 if i >= len(text):
                     break

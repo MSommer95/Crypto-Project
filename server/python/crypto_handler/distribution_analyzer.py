@@ -23,7 +23,7 @@ class DistAnalyzer:
         return dist_avg
 
     def split_cipher_text(self, split_value):
-        split_chars_holder = ["" for x in range(split_value)]
+        split_chars_holder = ["" for _ in range(split_value)]
         cipher_parts = textwrap.wrap(self.cipher_text, split_value)
 
         for i in range(len(cipher_parts)):

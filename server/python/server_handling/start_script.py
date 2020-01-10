@@ -145,6 +145,9 @@ class CryptoServer(object):
     @cherrypy.expose()
     def file_upload(self, file, file_description, auth_token):
         user_id = InputValidator.check_session_value('user_id')
+        if not InputValidator.file_validator(file):
+            ResponseHandler.bad_request_response('You didnt submit a valid file')
+            return cherrypy.HTTPRedirect('/')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             FileHandler.write_file(user_id, file, file_description)
@@ -500,6 +503,8 @@ class CryptoServer(object):
     @cherrypy.tools.json_out()
     def caesar_cipher(self, message, shift, option, auth_token):
         user_id = InputValidator.check_session_value('user_id')
+        if not InputValidator.int_validator(shift):
+            return ResponseHandler.bad_request_response('Your Shift value has to be an int')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             return ResponseHandler.success_response(CaesarCipher(shift).cipher(message, option))
         else:
@@ -572,5 +577,8 @@ if __name__ == '__main__':
     load_http_server()
     cherrypy.tree.mount(CryptoServer(), '/', config=conf)
     cherrypy.config.update(conf)
-    cherrypy.config.update({'error_page.404': os.path.join(os.path.dirname(__file__) + '/error_templates/', '404.html')})
+    cherrypy.config.update(
+        {'error_page.404': os.path.join(os.path.dirname(__file__) + '/error_templates/', '404.html')})
+    cherrypy.config.update(
+        {'error_page.500': os.path.join(os.path.dirname(__file__) + '/error_templates/', '500.html')})
     cherrypy.engine.start()

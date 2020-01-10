@@ -65,3 +65,16 @@ class DBlogs:
             return 'Successful login_logs deleted'
         finally:
             db.close()
+
+    @staticmethod
+    def set_is_send(user_id):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE login_logs SET is_send = 1 WHERE user_id = %s'
+                cursor.execute(sql, (user_id,))
+                db.commit()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        finally:
+            db.close()

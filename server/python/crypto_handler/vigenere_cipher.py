@@ -31,14 +31,14 @@ class VigenereCipher:
         return crypt_text
 
     def guess_key_length(self, cipher_text):
-        best_guess = 0
-        split_value = 1
+        guess_length = 0
+        key_length = 1
 
-        while best_guess == 0 and split_value <= 50:
-            best_guess = DistAnalyzer(cipher_text).kappa_test(split_value)
-            split_value += 1
+        while guess_length == 0 and key_length <= 100:
+            guess_length = DistAnalyzer(cipher_text).kappa_test(key_length)
+            key_length += 1
 
-        return best_guess
+        return guess_length
 
     def crack_cipher(self, cipher_text):
         key_length = self.guess_key_length(cipher_text)
@@ -49,4 +49,4 @@ class VigenereCipher:
                 key += chr((max_value - (ord('e') - 97)) % 26 + 97)
             return key
         else:
-            return 'Not able to crack'
+            return 'Not able to crack or key is longer then 100 characters'

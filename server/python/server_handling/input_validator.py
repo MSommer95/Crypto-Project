@@ -12,4 +12,7 @@ class InputValidator:
 
     @staticmethod
     def email_validator(email):
-        return email if '@' in email else False
+        if len(email) <= 50:
+            return email if '@' in email else False
+        else:
+            return False

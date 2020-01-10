@@ -46,4 +46,3 @@ class DistAnalyzer:
             return split_value
         else:
             return 0
-

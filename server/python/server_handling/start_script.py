@@ -27,8 +27,6 @@ from server.python.server_handling.login_log_handler import LLogHandler
 from server.python.server_handling.response_handler import ResponseHandler
 from server.python.user_handling.settings_handler import SettingsHandler
 
-ENV = Environment(loader=FileSystemLoader('/server/'))
-
 
 class CryptoServer(object):
 
@@ -556,13 +554,15 @@ if __name__ == '__main__':
         server.socket_port = 80
         server.subscribe()
 
-
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
     def secure_headers():
         headers = cherrypy.response.headers
         headers['X-Frame-Options'] = 'DENY'
         headers['X-XSS-Protection'] = '1; mode=block'
+        headers['X-Content-Type-Options'] = 'nosniff'
+        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        headers['Pragma'] = 'no-cache'
         # headers['Content-Security-Policy'] = "default-src 'self';"
 
 
@@ -570,4 +570,7 @@ if __name__ == '__main__':
     DirHandler.check_server_dirs()
     HashHandler.new_server_salt()
     load_http_server()
-    cherrypy.quickstart(CryptoServer(), '/', conf)
+    cherrypy.tree.mount(CryptoServer(), '/', config=conf)
+    cherrypy.config.update(conf)
+    cherrypy.config.update({'error_page.404': os.path.join(os.path.dirname(__file__) + '/error_templates/', '404.html')})
+    cherrypy.engine.start()

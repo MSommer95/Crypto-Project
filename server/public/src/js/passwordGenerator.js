@@ -36,7 +36,7 @@ function checkIfTopPasswordIsSubstring(password) {
 }
 
 function changeRankDisplay(timeInDaysToCrack) {
-    let passwordRank = 'High';
+    let passwordRank;
     const passwordRankPTag = $('#password-rank');
     const passwordBruteForceDisplay = $('#brute-force-days');
     if (timeInDaysToCrack >= 1000000) {

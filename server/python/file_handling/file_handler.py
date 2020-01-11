@@ -1,7 +1,9 @@
 import os
 import time
 
+from server.python.crypto_handler.hash_handler import HashHandler
 from server.python.db_handling.db_files import DBfiles
+from server.python.file_handling.file_encryptor import FileEncryptor
 
 
 class FileHandler:
@@ -12,7 +14,7 @@ class FileHandler:
         user_path = f'../storage/users/{user_id}'
         print(type(file))
         size = 0
-        path = f'/files/unencrypted/{file.filename}'
+        path = f'/files/unencrypted/{HashHandler.choose_hash_function("sha1", str(file_id))}'
         # Write the unencrypted file
         with open(f'{user_path}{path}', 'wb') as f:
             while True:
@@ -21,20 +23,12 @@ class FileHandler:
                     break
                 f.write(data)
                 size += len(data)
-
         DBfiles.insert(file_id, user_id, file.filename, file_description, path, is_encrypted=0)
 
     @staticmethod
-    def change_file_name(user_id, file_id, new_file_name, old_path, is_encrypted, file_description):
+    def change_file_name(user_id, file_id, new_file_name, file_description):
         try:
-            user_path = f'../storage/users/{user_id}'
-            if int(is_encrypted):
-                new_path = f'/files/encrypted/{new_file_name}'
-                FileHandler.change_key_name(user_id, file_id, new_file_name, user_path)
-            else:
-                new_path = f'/files/unencrypted/{new_file_name}'
-            DBfiles.update_file(user_id, file_id, new_file_name, file_description, new_path)
-            os.rename(f'{user_path}{old_path}', f'{user_path}{new_path}')
+            DBfiles.update_file(user_id, file_id, new_file_name, file_description)
         except OSError:
             return 'Something went wrong while changing the file'
         else:
@@ -46,31 +40,9 @@ class FileHandler:
             user_path = f'../storage/users/{user_id}'
             os.remove(f'{user_path}{path}')
             if int(is_encrypted):
-                FileHandler.delete_key(user_id, file_id, user_path)
+                FileEncryptor.delete_key(user_id, file_id, user_path)
             DBfiles.delete_file(file_id, user_id)
         except OSError:
             return 'Something went wrong while deleting the file'
         else:
             return 'Successfully deleted the file'
-
-    @staticmethod
-    def change_key_name(user_id, file_id, new_file_name, user_path):
-        key = DBfiles.get_file_key(file_id, user_id)
-        new_path = f'/keys/{new_file_name}'
-        try:
-            os.rename(f'{user_path}{key[0]["key_path"]}', f'{user_path}{new_path}')
-            DBfiles.update_file_key(key[0]['id'], user_id, file_id, new_path)
-        except OSError:
-            return 'Something went wrong while changing the key'
-        else:
-            return 'Successfully changed the key'
-
-    @staticmethod
-    def delete_key(user_id, file_id, user_path):
-        key = DBfiles.get_file_key(file_id, user_id)
-        try:
-            os.remove(f'{user_path}{key[0]["key_path"]}')
-        except OSError:
-            return 'Something went wrong while deleting the key'
-        else:
-            return 'Successfully deleted the key'

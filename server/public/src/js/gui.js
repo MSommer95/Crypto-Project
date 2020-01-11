@@ -5,6 +5,14 @@ import deletePng from '../img/baseline_delete_forever_black_18dp.png';
 import locked from '../img/baseline_lock_black_18dp.png';
 import unlocked from '../img/baseline_lock_open_black_18dp.png';
 import downloadPng from '../img/baseline_cloud_download_black_18dp.png';
+import encryptedFile from '../img/encrypted-file.png';
+import pdfFile from '../img/baseline_picture_as_pdf_black_18dp.png';
+import videoFile from '../img/baseline_videocam_black_18dp.png';
+import imageFile from '../img/baseline_insert_photo_black_18dp.png';
+import musicFile from '../img/baseline_queue_music_black_18dp.png';
+import docFile from '../img/file.png';
+import * as th from "./tableHelper";
+
 
 export const saveIcon = (cell, formatterParams, onRendered) => {
     const icon = new Image();
@@ -13,6 +21,7 @@ export const saveIcon = (cell, formatterParams, onRendered) => {
     icon.width = 32;
     return icon
 };
+
 export const deleteIcon = (cell, formatterParams, onRendered) => {
     const icon = new Image();
     icon.src = deletePng;
@@ -32,9 +41,35 @@ export const encryptIcon = (cell, formatterParams, onRendered) => {
     }
     return icon
 };
+
 export const downloadIcon = (cell, formatterParams, onRendered) => {
     const icon = new Image();
     icon.src = downloadPng;
+    icon.height = 32;
+    icon.width = 32;
+    return icon
+};
+
+export const previewIcon = (cell, formatterParams, onRendered) => {
+    const icon = new Image();
+    const fileExtension = th.preparePreview(cell);
+    const documentExtension = ['txt', 'doc', 'docx', 'odt', 'rtf'];
+    const musicExtensions = ['mp3', 'ogg', 'wav'];
+    const videoExtensions = ['mp4', 'avi', 'flv', 'wmv'];
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
+    if (documentExtension.includes(fileExtension)) {
+        icon.src = docFile;
+    } else if (musicExtensions.includes(fileExtension)) {
+        icon.src = musicFile;
+    } else if (videoExtensions.includes(fileExtension)) {
+        icon.src = videoFile;
+    } else if (imageExtensions.includes(fileExtension)) {
+        icon.src = imageFile;
+    } else if ('pdf' === fileExtension) {
+        icon.src = pdfFile;
+    } else if ('encrypted' === fileExtension) {
+        icon.src = encryptedFile;
+    }
     icon.height = 32;
     icon.width = 32;
     return icon

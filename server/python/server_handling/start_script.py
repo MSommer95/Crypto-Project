@@ -3,6 +3,7 @@ import os
 
 import cherrypy
 from cherrypy.lib.static import serve_file
+
 from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.auth_handling.login_handler import LoginHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
@@ -66,12 +67,8 @@ class CryptoServer(object):
             user_id = DBusers.get_user_id(email)
             if len(user_id) > 0:
                 user_id = user_id[0]['id']
-                user_logs = LLogHandler.check_login_logs(user_id)
-                if LLogHandler.count_tries(user_id, user_logs, email):
-                    user = DBusers.check_user(email, password)
-                    return LoginHandler.prepare_login(user, user_id, email)
-                else:
-                    return ResponseHandler.too_many_requests_response('Too many tries')
+                user = DBusers.check_user(email, password)
+                return LoginHandler.prepare_login(user, user_id, email)
             else:
                 return ResponseHandler.forbidden_response('Not authorized')
         else:
@@ -162,7 +159,8 @@ class CryptoServer(object):
             user_id = str(user_id)
             user_path = f'../storage/users/{user_id}'
             absolute_file_path = os.path.abspath(f'{user_path}{DBfiles.get_file_path(user_id, file_id)}')
-            return serve_file(absolute_file_path, disposition="attachment")
+            file_name = DBfiles.get_file_name(file_id, user_id)
+            return serve_file(absolute_file_path, disposition="attachment", name=file_name)
         else:
             ResponseHandler.unauthorized_response('You are unauthorized')
             raise cherrypy.HTTPRedirect('/sign')
@@ -170,35 +168,33 @@ class CryptoServer(object):
     # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    def file_encrypt(self, file_id, file_name, auth_token):
+    def file_encrypt(self, file_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return ResponseHandler.success_response(FileEncryptor.encrypt(user_id, file_id, file_name))
+            return ResponseHandler.success_response(FileEncryptor.encrypt(user_id, file_id))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    def file_decrypt(self, file_id, file_name, auth_token):
+    def file_decrypt(self, file_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            file_name = file_name.strip('.encrypted')
-            return ResponseHandler.success_response(FileEncryptor.decrypt(user_id, file_id, file_name))
+            return ResponseHandler.success_response(FileEncryptor.decrypt(user_id, file_id))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
     # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
-    def file_update(self, file_id, file_description, file_name, is_encrypted, auth_token):
+    def file_update(self, file_id, file_description, file_name, auth_token):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            message = FileHandler.change_file_name(user_id, file_id, file_name, DBfiles.get_file_path(user_id, file_id),
-                                                   is_encrypted, file_description)
+            message = FileHandler.change_file_name(user_id, file_id, file_name, file_description)
             return ResponseHandler.success_response(message)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
@@ -541,17 +537,22 @@ class CryptoServer(object):
 if __name__ == '__main__':
     os.chdir('../')
 
+
     def force_tls():
         if cherrypy.request.scheme == "http":
             raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                         status=301)
+
+
     cherrypy.tools.force_tls = cherrypy.Tool("before_handler", force_tls)
+
 
     def load_http_server():
         # extra server instance to dispatch HTTP
         server = cherrypy._cpserver.Server()
         server.socket_port = 80
         server.subscribe()
+
 
     # LogHandler.get_access_log('access')
     @cherrypy.tools.register('before_finalize', priority=60)
@@ -563,6 +564,7 @@ if __name__ == '__main__':
         headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         headers['Pragma'] = 'no-cache'
         # headers['Content-Security-Policy'] = "default-src 'self';"
+
 
     conf = os.path.join(os.path.dirname(__file__) + '/conf/', 'server_conf')
     DirHandler.check_server_dirs()

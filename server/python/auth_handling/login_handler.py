@@ -7,6 +7,8 @@ from server.python.db_handling.db_otp import DBotp
 from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
 from server.python.server_handling.dir_handler import DirHandler
+from server.python.server_handling.login_log_handler import LLogHandler
+from server.python.server_handling.response_handler import ResponseHandler
 
 
 class LoginHandler:
@@ -55,9 +57,7 @@ class LoginHandler:
             cherrypy.session['auth_token'] = auth_token
             return LoginHandler.finalize_login(user_id, user_settings, auth_token, email)
         else:
-            cherrypy.response.status = 403
-            response = {'message': 'Wrong Data. Please try again.'}
-            return response
+            return LoginHandler.fail_login(user_id, email)
 
     @staticmethod
     def send_reset_token(user_id, email):
@@ -79,3 +79,12 @@ class LoginHandler:
         cherrypy.session['2fa_verified'] = 1
         DirHandler.check_user_dirs(user_id)
         LoginHandler.regenerate_session(user_id)
+
+    @staticmethod
+    def fail_login(user_id, email):
+        user_logs = LLogHandler.check_login_logs(user_id)
+        if LLogHandler.count_tries(user_id, user_logs, email):
+            cherrypy.response.status = 403
+            return ResponseHandler.unauthorized_response('Wrong Data. Please try again.')
+        else:
+            return ResponseHandler.too_many_requests_response('Too many tries')

@@ -74,13 +74,31 @@ class DBfiles:
         return result
 
     @staticmethod
-    def update_file(user_id, file_id, file_name, file_description, path):
+    def get_file_name(file_id, user_id):
         db = DBconnector.connect()
         try:
             with db.cursor() as cursor:
-                sql = 'UPDATE user_data SET file_name = %s, file_description = %s, path = %s WHERE id = %s AND ' \
-                      'user_id = %s '
-                cursor.execute(sql, (file_name, file_description, path, file_id, user_id))
+                sql = 'SELECT file_name FROM user_data WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_id, user_id))
+                db.commit()
+                result = cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logging.error(e)
+        else:
+            if result[0]['file_name']:
+                return result[0]['file_name']
+            else:
+                return result
+        finally:
+            db.close()
+
+    @staticmethod
+    def update_file(user_id, file_id, file_name, file_description):
+        db = DBconnector.connect()
+        try:
+            with db.cursor() as cursor:
+                sql = 'UPDATE user_data SET file_name = %s, file_description = %s WHERE id = %s AND user_id = %s'
+                cursor.execute(sql, (file_name, file_description, file_id, user_id))
                 db.commit()
         except pymysql.MySQLError as e:
             logging.error(e)
@@ -88,15 +106,18 @@ class DBfiles:
             db.close()
 
     @staticmethod
-    def insert_file_key(user_id, file_id, key_path):
+    def insert_file_key(user_id, file_id, key_path, key_id):
         db = DBconnector.connect()
         db_connection_state = 'pending'
         try:
             with db.cursor() as cursor:
-                sql = 'INSERT INTO user_key (user_id, file_id, key_path) VALUES (%s, %s, %s)'
-                cursor.execute(sql, (user_id, file_id, key_path))
+                sql = 'INSERT INTO user_key (id, user_id, file_id, key_path) VALUES (%s, %s, %s, %s)'
+                cursor.execute(sql, (key_id, user_id, file_id, key_path))
+                sql = 'UPDATE user_data SET encrypt_key = %s WHERE id = %s'
+                cursor.execute(sql, (key_id, file_id))
                 db.commit()
                 db_connection_state = 'success'
+
         except pymysql.MySQLError as e:
             logging.error(e)
             db_connection_state = 'failed'

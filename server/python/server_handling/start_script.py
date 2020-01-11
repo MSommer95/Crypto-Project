@@ -3,8 +3,6 @@ import os
 
 import cherrypy
 from cherrypy.lib.static import serve_file
-from jinja2 import Environment, FileSystemLoader
-
 from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.auth_handling.login_handler import LoginHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
@@ -176,7 +174,7 @@ class CryptoServer(object):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return ResponseHandler.success_response(FileEncryptor.encryption(user_id, file_id, file_name))
+            return ResponseHandler.success_response(FileEncryptor.encrypt(user_id, file_id, file_name))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
@@ -188,7 +186,7 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             file_name = file_name.strip('.encrypted')
-            return ResponseHandler.success_response(FileEncryptor.decryption(user_id, file_id, file_name))
+            return ResponseHandler.success_response(FileEncryptor.decrypt(user_id, file_id, file_name))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
@@ -543,15 +541,11 @@ class CryptoServer(object):
 if __name__ == '__main__':
     os.chdir('../')
 
-
     def force_tls():
         if cherrypy.request.scheme == "http":
             raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                         status=301)
-
-
     cherrypy.tools.force_tls = cherrypy.Tool("before_handler", force_tls)
-
 
     def load_http_server():
         # extra server instance to dispatch HTTP
@@ -569,7 +563,6 @@ if __name__ == '__main__':
         headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         headers['Pragma'] = 'no-cache'
         # headers['Content-Security-Policy'] = "default-src 'self';"
-
 
     conf = os.path.join(os.path.dirname(__file__) + '/conf/', 'server_conf')
     DirHandler.check_server_dirs()

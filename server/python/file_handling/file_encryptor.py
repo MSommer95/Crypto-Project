@@ -7,35 +7,57 @@ from server.python.db_handling.db_files import DBfiles
 
 class FileEncryptor:
 
+    @staticmethod
+    def create_key(user_id, file_id_encrypt, user_path, filename):
+        key = Fernet.generate_key()
+        key_file_path = f'/keys/{filename}.key'
+        key_file = open(f'{user_path}{key_file_path}', 'wb')
+        key_file.write(key)
+        key_file.close()
+        DBfiles.insert_file_key(user_id, file_id_encrypt, key_file_path)
+        return key
+
+    @staticmethod
+    def get_key(user_id, file_id, user_path):
+        db_file_key = DBfiles.get_file_key(file_id, user_id)
+        key_file_path = db_file_key[0]['key_path']
+        with open(f'{user_path}{key_file_path}', 'rb') as f:
+            key = f.read()
+        return key
+
+    @staticmethod
+    def prepare_for_encrypt(user_id, file_id, user_path):
+        db_file = DBfiles.get_file(user_id, file_id)
+        unencrypted_file_path = db_file[0]['path']
+        with open(f'{user_path}{unencrypted_file_path}', 'rb') as f:
+            file_data = f.read()
+        return file_data
+
+    @staticmethod
+    def prepare_for_decryption(user_id, file_id, user_path):
+        db_file = DBfiles.get_file(file_id, user_id)
+        encrypted_file_path = db_file[0]['path']
+        with open(f'{user_path}{encrypted_file_path}', 'rb') as f:
+            file = f.read()
+        return file
+
     # Funktion zum Verschlüsseln einer Datei
     @staticmethod
-    def encryption(user_id, file_id, filename):
+    def encrypt(user_id, file_id, filename):
         try:
             file_id_encrypt = int(round(time.time() * 1000))
             user_path = f'../storage/users/{user_id}'
-
-            key = Fernet.generate_key()
-            key_file_path = f'/keys/{filename}.key'
-            key_file = open(f'{user_path}{key_file_path}', 'wb')
-            key_file.write(key)
-            key_file.close()
-
-            db_file = DBfiles.get_file(file_id, user_id)
-            unencrypted_file_path = db_file[0]['path']
-            with open(f'{user_path}{unencrypted_file_path}', 'rb') as f:
-                data_file = f.read()
-
+            key = FileEncryptor.create_key(user_id, file_id_encrypt, user_path, filename)
+            file_data = FileEncryptor.prepare_for_encrypt(file_id, user_id, user_path)
             fernet = Fernet(key)
-            encrypted = fernet.encrypt(data_file)
+            encrypted_file = fernet.encrypt(file_data)
             encrypted_filename = f'{filename}.encrypted'
             encrypted_file_path = f'/files/encrypted/{encrypted_filename}'
             with open(user_path + encrypted_file_path, 'wb') as f:
-                f.write(encrypted)
+                f.write(encrypted_file)
             file_description = 'My encrypted file'
-            is_encrypted = 1
             DBfiles.insert(file_id_encrypt, user_id, encrypted_filename, file_description, encrypted_file_path,
-                           is_encrypted)
-            DBfiles.insert_file_key(user_id, file_id_encrypt, key_file_path)
+                           is_encrypted=1)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong while encrypting the file'
         else:
@@ -43,31 +65,19 @@ class FileEncryptor:
 
     # Funktion zum Entschlüsseln einer Datei
     @staticmethod
-    def decryption(user_id, file_id, filename):
+    def decrypt(user_id, file_id, filename):
         try:
-            db_file_key = DBfiles.get_file_key(file_id, user_id)
             file_id_decrypt = int(round(time.time() * 1000))
             user_path = f'../storage/users/{user_id}'
-
-            key_file_path = db_file_key[0]['key_path']
-            with open(f'{user_path}{key_file_path}', 'rb') as f:
-                key = f.read()
-
-            db_file = DBfiles.get_file(file_id, user_id)
-
-            encrypted_file_path = db_file[0]['path']
-            with open(f'{user_path}{encrypted_file_path}', 'rb') as f:
-                file = f.read()
-
+            key = FileEncryptor.get_key(user_id, file_id, user_path)
+            file = FileEncryptor.prepare_for_decryption(user_id, file_id, user_path)
             fernet = Fernet(key)
             decrypted = fernet.decrypt(file)
-
             decrypted_file_path = f'/files/unencrypted/{filename}'
             with open(f'{user_path}{decrypted_file_path}', 'wb') as f:
                 f.write(decrypted)
             file_description = 'My decrypted file'
-            is_encrypted = 0
-            DBfiles.insert(file_id_decrypt, user_id, filename, file_description, decrypted_file_path, is_encrypted)
+            DBfiles.insert(file_id_decrypt, user_id, filename, file_description, decrypted_file_path, is_encrypted=0)
         except (RuntimeError, TypeError, NameError):
             return 'Something went wrong while decrypting the file'
         else:

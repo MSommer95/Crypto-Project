@@ -24,10 +24,10 @@ class HashHandler:
         return salt
 
     @staticmethod
-    def hash_password(password):
+    def hash_string(password, algorithm, rounds):
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-        pwd_hash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
-                                       salt, 100000)
+        pwd_hash = hashlib.pbkdf2_hmac(algorithm, password.encode('utf-8'),
+                                       salt, rounds)
         pwd_hash = binascii.hexlify(pwd_hash)
         return (salt + pwd_hash).decode('ascii')
 
@@ -35,7 +35,7 @@ class HashHandler:
     def create_token(user_id, reset_case):
         alphabet = f'{string.ascii_uppercase}{string.ascii_lowercase}{string.digits}'
         token = OtpHandler.create_random_string(alphabet, 16)
-        hashed_token = HashHandler.hash_password(token)
+        hashed_token = HashHandler.hash_string(token, 'sha512', 10000)
         tokens = DBtokens.all()
         if hashed_token in tokens:
             HashHandler.create_token(user_id, reset_case)
@@ -53,9 +53,9 @@ class HashHandler:
         pre_hashed = str(bit_number) + user_agent + host + str(millis)
         salt = HashHandler.get_server_salt()
         token = hashlib.sha256(salt.encode() + pre_hashed.encode()).hexdigest()
-        hashed_token = HashHandler.hash_password(token)
+        hashed_token = HashHandler.hash_string(token, 'sha256', 1)
         tokens = DBtokens.all_auth_token()
-        hashed_session_id = HashHandler.hash_password(session_id)
+        hashed_session_id = HashHandler.hash_string(session_id, 'sha256', 1)
         if hashed_token in tokens:
             HashHandler.create_auth_token(user_id, headers, session_id)
             return
@@ -66,23 +66,24 @@ class HashHandler:
     @staticmethod
     def check_token(user_id, token, reset_case):
         db_token = DBtokens.get(user_id, reset_case)[0]['token']
-        return HashHandler.verify_password(db_token, token)
+        return HashHandler.verify_hash(db_token, token, 'sha512', 10000)
 
     @staticmethod
     def check_auth_token(user_id, token, session_id):
         db_result = DBtokens.get_auth_token(user_id)[0]
         db_session_id = db_result['session_id']
-        return HashHandler.verify_password(db_result['token'], token) and HashHandler.verify_password(db_session_id,
-                                                                                                      session_id)
+        return HashHandler.verify_hash(db_result['token'], token, 'sha256', 1) and HashHandler.verify_hash(
+            db_session_id,
+            session_id, 'sha256', 1)
 
     @staticmethod
-    def verify_password(stored_password, provided_password):
+    def verify_hash(stored_password, provided_password, algorithm, rounds):
         salt = stored_password[:64]
         stored_password = stored_password[64:]
-        pwd_hash = hashlib.pbkdf2_hmac('sha512',
+        pwd_hash = hashlib.pbkdf2_hmac(algorithm,
                                        provided_password.encode('utf-8'),
                                        salt.encode('ascii'),
-                                       100000)
+                                       rounds)
         pwd_hash = binascii.hexlify(pwd_hash).decode('ascii')
         return pwd_hash == stored_password
 

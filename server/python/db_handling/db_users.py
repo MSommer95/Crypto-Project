@@ -72,7 +72,7 @@ class DBusers:
 
         user_db_password = result[0]['password']
 
-        if len(result) > 0 and HashHandler.verify_password(user_db_password, password):
+        if len(result) > 0 and HashHandler.verify_hash(user_db_password, password, 'sha512', 10000):
             return result[0]
         else:
             return []
@@ -101,7 +101,7 @@ class DBusers:
     @staticmethod
     def insert_user(email, password):
         db = DBconnector.connect()
-        hashed_password = HashHandler.hash_password(password)
+        hashed_password = HashHandler.hash_string(password, 'sha512', 10000)
         try:
             with db.cursor() as cursor:
                 sql = 'INSERT INTO users (email, password) VALUES (%s, %s)'
@@ -142,7 +142,7 @@ class DBusers:
     @staticmethod
     def update_password(user_id, password):
         db = DBconnector.connect()
-        hashed_password = HashHandler.hash_password(password)
+        hashed_password = HashHandler.hash_string(password, 'sha512', 10000)
         try:
             with db.cursor() as cursor:
                 sql = 'UPDATE users SET password = %s WHERE id = %s'

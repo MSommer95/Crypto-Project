@@ -17,8 +17,11 @@ log.access_file             : './server_handling/logs/access.log'
 log.error_file              : './server_handling/logs/error.log'
 log.screen                  : False
 tools.proxy.on              : True
+tools.gzip.on               : True
+tools.gzip.mime_types:      ['text/html', 'text/plain', 'text/javascript', 'text/css']
 
 [/static]
 tools.staticdir.on          : True
 tools.staticdir.dir         : '../public/dist/'
 tools.staticdir.index       : 'index.html'
+

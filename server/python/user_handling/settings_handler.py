@@ -79,4 +79,4 @@ class SettingsHandler:
     @staticmethod
     def varify_old_password(user_id, old_password):
         db_old_password = DBusers.get_password(user_id)[0]['password']
-        return HashHandler.verify_password(db_old_password, old_password)
+        return HashHandler.verify_hash(db_old_password, old_password, 'sha512', 10000)

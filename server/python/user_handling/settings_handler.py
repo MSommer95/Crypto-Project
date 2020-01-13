@@ -63,7 +63,7 @@ class SettingsHandler:
             SecondFactorHandler.activate_email_as_second_factor(user_id)
         elif sec_fa_app == 'true':
             SecondFactorHandler.activate_device_as_second_factor(user_id)
-        token = HashHandler.create_token(user_id, 1)
+        token = HashHandler.create_reset_token(user_id, 1)
         return f'Successfully changed the second factor, use token: "{token}" to reset your 2FA settings '
 
     @staticmethod

@@ -62,7 +62,7 @@ class LoginHandler:
     @staticmethod
     def send_reset_token(user_id, email):
         DBtokens.delete(user_id, 2)
-        token = HashHandler.create_token(user_id, 2)
+        token = HashHandler.create_reset_token(user_id, 2)
         subject = 'Password Reset Token'
         message = f'Here is your reset token: {token}'
         EmailSender.send_mail(message, subject, email)

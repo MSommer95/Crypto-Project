@@ -52,3 +52,18 @@ export function saveSettings() {
         });
     }
 }
+
+export function updateSettings(settings) {
+    if (settings['2FA-Mail'] === 0 && settings['2FA-App'] === 0){
+        gui.enableGrayOverlay($('#2-fa-options-wrapper'));
+        $('#2-fa-status').prop('checked', false);
+        $('#2-fa-email').prop('checked', false);
+        $('#2-fa-app').prop('checked', false);
+    } else {
+        gui.disableGrayOverlay($('#2-fa-options-wrapper'));
+        $('#2-fa-status').prop('checked', true);
+        $('#2-fa-email').prop('checked', settings['2FA-Mail']);
+        $('#2-fa-app').prop('checked', settings['2FA-App']);
+
+    }
+}

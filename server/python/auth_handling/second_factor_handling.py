@@ -5,6 +5,14 @@ from server.python.db_handling.db_users import DBusers
 class SecondFactorHandler:
 
     @staticmethod
+    def check_for_second_factor(user_id):
+        settings = DBusers.get_user_settings(user_id)
+        if settings['2FA-Mail'] == 1 or settings['2FA-Mail'] == 1:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def check_for_active_device(user_id):
         user_devices = DBdevices.get_by_user_id(user_id)
         if not len(user_devices):
@@ -34,9 +42,12 @@ class SecondFactorHandler:
     @staticmethod
     def deactivate_device_as_second_factor(user_id):
         DBusers.set_second_factor_option(user_id, 2, 0)
-        DBusers.set_second_factor_option(user_id, 1, 1)
-        return 'Device as second factor deactivated (Email second factor activated. You can deactivate this too if ' \
-               'you want)'
+        if SecondFactorHandler.check_for_second_factor(user_id):
+            DBusers.set_second_factor_option(user_id, 1, 1)
+            return 'Device as second factor deactivated (Email second factor activated. You can deactivate this too if ' \
+                   'you want)'
+        else:
+            return ''
 
     @staticmethod
     def activate_email_as_second_factor(user_id):

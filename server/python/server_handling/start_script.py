@@ -303,9 +303,9 @@ class CryptoServer(object):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            deactived_message = SecondFactorHandler.deactivate_device(user_id, device_id)
-            deactivae_addition = SecondFactorHandler.check_for_active_device(user_id)
-            return ResponseHandler.success_response(f'{deactived_message} {deactivae_addition}')
+            deactivate_message = SecondFactorHandler.deactivate_device(user_id, device_id)
+            deactivate_addition = SecondFactorHandler.check_for_active_device(user_id)
+            return ResponseHandler.success_response(f'{deactivate_message} {deactivate_addition}')
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
@@ -316,7 +316,7 @@ class CryptoServer(object):
         user_id = InputValidator.check_session_value('user_id')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            return SettingsHandler.prepare_user_settings(user_id)
+            return DBusers.get_user_settings(user_id)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 

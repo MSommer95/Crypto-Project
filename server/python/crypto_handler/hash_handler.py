@@ -24,21 +24,32 @@ class HashHandler:
         return salt
 
     @staticmethod
-    def hash_string(password, algorithm, rounds):
+    def hash_string(provided_string, algorithm, rounds):
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-        pwd_hash = hashlib.pbkdf2_hmac(algorithm, password.encode('utf-8'),
+        pwd_hash = hashlib.pbkdf2_hmac(algorithm, provided_string.encode('utf-8'),
                                        salt, rounds)
         pwd_hash = binascii.hexlify(pwd_hash)
         return (salt + pwd_hash).decode('ascii')
 
     @staticmethod
-    def create_token(user_id, reset_case):
+    def verify_hash(stored_hash, provided_string, algorithm, rounds):
+        salt = stored_hash[:64]
+        stored_hash = stored_hash[64:]
+        provided_hash = hashlib.pbkdf2_hmac(algorithm,
+                                            provided_string.encode('utf-8'),
+                                            salt.encode('ascii'),
+                                            rounds)
+        provided_hash = binascii.hexlify(provided_hash).decode('ascii')
+        return provided_hash == stored_hash
+
+    @staticmethod
+    def create_reset_token(user_id, reset_case):
         alphabet = f'{string.ascii_uppercase}{string.ascii_lowercase}{string.digits}'
         token = OtpHandler.create_random_string(alphabet, 16)
         hashed_token = HashHandler.hash_string(token, 'sha512', 10000)
         tokens = DBtokens.all()
         if hashed_token in tokens:
-            HashHandler.create_token(user_id, reset_case)
+            HashHandler.create_reset_token(user_id, reset_case)
             return
         else:
             DBtokens.insert(user_id, hashed_token, reset_case)
@@ -75,17 +86,6 @@ class HashHandler:
         return HashHandler.verify_hash(db_result['token'], token, 'sha256', 1) and HashHandler.verify_hash(
             db_session_id,
             session_id, 'sha256', 1)
-
-    @staticmethod
-    def verify_hash(stored_password, provided_password, algorithm, rounds):
-        salt = stored_password[:64]
-        stored_password = stored_password[64:]
-        pwd_hash = hashlib.pbkdf2_hmac(algorithm,
-                                       provided_password.encode('utf-8'),
-                                       salt.encode('ascii'),
-                                       rounds)
-        pwd_hash = binascii.hexlify(pwd_hash).decode('ascii')
-        return pwd_hash == stored_password
 
     @staticmethod
     def choose_hash_function(function, message):

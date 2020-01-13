@@ -2,6 +2,8 @@ import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import {getTokenFromField} from "./authHandler";
 import * as servCon from "./serverConnector";
 import * as gui from "./gui";
+import * as settHandler from "./settingsHandler";
+
 
 export function setActive(cell) {
         const cellValue = cell.getValue();
@@ -15,7 +17,12 @@ export function setActive(cell) {
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseJSON.message);
-                    Tabulator.prototype.findTable('#device-table').setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
+                    cell.getTable().setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
+
+                    const url = '/get_user_settings';
+                    servCon.postRequestWithData(url, {auth_token: getTokenFromField()}, (cb) => {
+                       settHandler.updateSettings(cb.responseJSON);
+                    });
                 });
             } else {
                 cell.setValue(cell.getOldValue());
@@ -30,7 +37,12 @@ export function setActive(cell) {
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
                     gui.changeNotificationTextAndOpen(cb.responseJSON.message);
-                    Tabulator.prototype.findTable('#device-table').setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
+                    cell.getTable().setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
+
+                    const url = '/get_user_settings';
+                    servCon.postRequestWithData(url, {auth_token: getTokenFromField()}, (cb) => {
+                       settHandler.updateSettings(cb.responseJSON);
+                    });
                 });
             } else {
                 cell.setValue(cell.getOldValue());
@@ -90,7 +102,7 @@ export function encryption(e, cell) {
     }
     servCon.postRequestWithData(url, data, (cb) => {
         gui.changeNotificationTextAndOpen(cb.responseJSON.message);
-        Tabulator.prototype.findTable('#files-table').setData('/get_user_files');
+        cell.getTable().setData('/get_user_files');
     });
 }
 

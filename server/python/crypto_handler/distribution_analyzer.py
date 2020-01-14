@@ -25,23 +25,20 @@ class DistAnalyzer:
     def split_cipher_text(self, split_value):
         split_chars_holder = ["" for _ in range(split_value)]
         cipher_parts = textwrap.wrap(self.cipher_text, split_value)
-
         for i in range(len(cipher_parts)):
             for j in range(split_value):
                 if j < len(cipher_parts[i]):
                     split_chars_holder[j] += cipher_parts[i][j]
                 else:
                     break
-
         return split_chars_holder
 
-    def kappa_test(self, split_value):
+    def kasiski_test(self, split_value):
         coincidence_index = 0
         split_chars_holder = self.split_cipher_text(split_value)
         for split_char in split_chars_holder:
             coincidence_index += DistAnalyzer.coincidence_index(split_char)
         coincidence_index /= len(split_chars_holder)
-
         if 0.064 < coincidence_index < 0.072:
             return split_value
         else:

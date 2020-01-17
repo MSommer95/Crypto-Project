@@ -1,0 +1,52 @@
+
+- Verwendete Module
+
+-- cherrypy
+---- Framework für die Webapplikation
+---- Kümmert sich um Request Handling, Port Konfiguration, Logging, Session Management, TLS/SSL...
+
+-- base64
+
+-- os
+
+-- pyfcm
+---- Wird zur Kommunikation über den Firebase Cloud Messaging (FCM) Dienst verwendet
+
+-- logging
+---- Für das Exception Handling bei den Datenbankverbindungenn
+
+-- smtplib
+---- Zur Kommunikation mit dem Google SMTP Dienst
+
+-- email.mime
+---- Zum Erstellen von MIME Objekten zur Email Kommunikation
+
+-- io
+
+-- qrcode
+
+-- collections
+---- Zum schnellen Erstellen von dynamischen Dictionaries 
+
+-- binascii
+---- Konvertiert Bytes zu lesbarem Hexadezimal
+
+-- hashlib
+---- Wird für sämtliche verwendete Hash Funktionen verwendet
+
+-- secrets
+---- Bietet uns eine Funktion um kryptografisch zufällige Zahlen zu generieren
+
+-- string
+
+-- time
+
+-- datetime
+
+-- time
+
+-- pymysql
+---- Wird verwendet, um die Verbindungen zwischen dem Server und der Datenbank zu beschwerkstelligen
+
+-- cryptography.fernet
+---- Wird zur Ver- und Entschlüsselung von Dateien verwendet (AES 128)

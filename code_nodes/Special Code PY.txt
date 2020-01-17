@@ -1,0 +1,161 @@
+
+-- standard auth mechanism:
+---- Die Sessionvariable user_id wird aus der aktuellen Session des Users extrahiert
+---- Der AuthHandler überprüft mit der Funktion check_for_auth(user_id), ob weitere Flags für eine 2FA gesetzt wurden und was deren Status ist
+---- Gleichzeitigt wird mit der Funktion check_auth_token_db(user_id) überprüft, ob das Auth_Token in der Datenbank mit dem der Session übereinstimmt
+---- Falls ein auth_token in der Request mitgeschickt wurde, wird der Zugriff auf die Datenbank gespart und das mitgesendete Auth_Token wird mit dem Auth_Token der Session verglichen
+---- Falls beide Überprüfungen True zurückgeben, wird die Request erfolgreich abgehandelt und mit der jeweiligen Response beantwortet
+---- Falls eine der beiden oder beide Funktionen False wiedergeben, wird die Request mit dem Status Code 401 beantwortet und der User wird auf die Login page weitergeleitet
+
+-- db_handling:
+---- Beinhaltet alle db_handler für die jeweiligen Datenbank Kommunikationen
+---- db_connector.py baut Verbindung zur Datenbank auf
+---- db_name kümmert sich um die Funktionen, welche die jeweiligen Queries zur Datenbank beinhalten
+
+-- LLog_Handler:
+---- Der LLogHandler überprüft während des Logins, wie viele Versuche in der letzten halbe Stunde bei dem jeweiligen User unternommen wurden
+---- Sollte der Loginversuch mit den falschen Daten geschehen, wird ein Counter in der Datenbank hochgezählt
+---- Überschreitet dieser Counter innerhalb einer halben Stunde 5 Versuche, wird dem User eine Email gesendet mit der Zeit des letzten Login Versuchs und einer Warnung:
+------ Anomaly detected
+---- Funktionen:
+------ check_login:logs(user_id) gibt den Log Eintrag des jeweiligen Users zurück und legt einen Eintrag an, falls der User noch keinen Login Eintrag besitzt
+------ check_timestamp(user_id, log) überprüft ob der Timestamp der Logs älter als 1800 Sekunden ist (30 Minuten), löscht und legt einen neuen Eintrag an, falls True
+------ count_tries(user_id, log, email) überprüft ob der counter des Logs >= 5 Versuche ist und sendet eine Email an die Addresse des Users, falls noch keine email gesendet wurde (dies wird mit dem Wert is_send überprüft)
+
+-- SecondFactorHandler:
+---- check_for_active_device():
+------ Die Funktion überprüft, ob der User ein aktives Gerät im Profil gespeichert
+------ Falls ein kein Gerät gefunden wird, welches aktiv ist, wird die ZweiFaktorAuth via App deaktiviert und auf den default email gestellt
+
+-- AppSender:
+---- send_otp_to_app():
+------ Die Funktion sendet eine Firebase Cloud Messaging Notification, mit dem dazugehörigen api_key der App
+------ In der Notification wird der neu generierte OTP des Users gesendet, um im Anschluss vom User approved oder manuell eingegebn zu werden
+------ Falls der User die Notification approved, wird der Login im Browser automatisch durchgeführt
+
+-- EmailSender:
+---- send_mail():
+------ Die Funktion holt sich über die get_email_key() Funktion den Email_key des Servers
+------ Baut mit der Funktion create_msg ein MIMEMultipart Objekt mit dem Nachrichteninhalt, Email-Subject und Emailadresse
+------ Im Anschluss wird eine SSL Kommunikation mit dem Google SMTP Server aufgebaut
+------ Bevor das MSG Object mit der sendmail Funktion rausgeschickt wird, muss sich der Dienst noch unter der Serveremailadresse + Email_key einloggen
+
+-- HashHandler:
+---- hash_string(provided_string, algorithm, rounds):
+------ Nutzt den PBKDF2_HMAC Algorithmus von hashlib Lib, um den provided_string zu hashen
+------ Der algorithm Parameter übergibt der PBKDF2_HMAC Funktion den zu verwendenen Hashalgorithmus (bspw. Sha256)
+------ Der rounds Parameter übergibts der PBKDF2_HMAC Funktion die Anzahl der Hash-Runden, welche der Algorithmus anwenden soll
+------ Das Salt der Funktion wird aus einem zufälligen 60 Bytes langem String, welcher Sha256 gehashed wird gebildet
+
+---- verify_hash(stored_hash, provided_string, algorithm, rounds):
+------ die Funktion liest das salt des stored_hash aus und sperariert dieses vom restlichen Hash
+------ der provided_string wird anschließend mit dem ausgelesenen Salt mit der PBKDF2_HMAC Funktion gehashed
+------ Als Return Wert, wird der provided_hash (provided_string gehashed) mit dem stored_hash verglichen
+
+---- create_reset_token(user_id, reset_case):
+------ Die Funktion erstellt ein random 16 stelligen String, aus Groß-, Kleinbuchstaben und Zahlen
+------ Der String wird anschließend mit der hash_string() Funktion 10000x Sha512 gehashed
+------ Falls das gehashte Token nicht in der DB vorkommt, wird es für den jeweiligen User in der DB gespeichert
+------ Falls es schon vorkommt, wird die Funktion erneut aufgerufen, um eine doppelte Token Zuweisung zu vermeiden
+
+---- create_auth_token(user_id, headers, session_id):
+------ Die Funktion erstellt mit der secrets.randbits(64) Funktion einen 64 bit großen random string
+------ Des Weiteren wird aus dem Header der Request des Users der User-Agent, der Host und der aktuelle Timestamp in Millisekunden ausgelesen
+------ Anschließend wird das Server-salt, random-bits, user-agent, host und Millisekunden sha256 gehashed und kann nun als Authentifizierungs Token genutzt werden
+------ Des Weiteren wird das erstellte Token für die Datenbank noch einmal Sha256 gehashed, um das richtige Token vor ungewollten Zugriffen zu schützen
+------ Falls in das Token in der DB nicht existiert wird dieses nun zusammen mit der sha256 gehashten user_id gespeichert
+------ Falls es existiert, wird die Funktion erneut aufgerufen
+
+-- otp_handler:
+---- create_otp(user_id):
+------ erstellt ein 8 (Zahlen) stelliges OTP und speichert dieses für den user in der DB
+------ überprüft ob das OTP für den User schon einmal erstellt und gespeichert wurde
+------ Hierfür wird eine DB Table mit dem aktuellen OTP geführt und eine weitere Table mit allen zuvor schon verwendeten OTPs
+------ Falls das OTP schon verwendet wurde, wird ein Neues erstellt
+
+-- cipher_helper:
+---- case_distinction(letter):
+------ Diese Funktion überprüft, ob der es sich bei dem übergebenen Buchstaben um einen Klein- oder Großbuchstaben handelt
+------ Dies ermöglich es, Groß- und Kleinschreibung beim Verschlüsseln zu behalten
+
+-- distribution_analyzer:
+---- Ein Klassenobjekt, welches dabei helfen soll, Cipher Texte auf Buchstaben Frequenzen zu analysieren
+---- letter_distribution()
+------ zählt zunächst die Häufigkeit der einzelnen Buchstaben
+------ Gibt den Buchstaben mit der höchsten Häufigkeit zurück
+------ Wir treffen an dieser Stelle die Annahme, dass dieser Buchstabe in der Regel das E ist (Für Deutsche und Englische Texte)
+
+---- coincidence_index(cipher_text):
+------ Diese Funktion berechnet den Koinzidenzindex eines übergebenen Ciphertextes
+------ Hierfür wird die Formel:
+--------- k = Buchstabe, N = Anzahl aller Buchstaben im Text
+--------- coincidence = Sum(k * (k - 1)) / N * (N - 1)
+
+---- split_cipher_text(split_value):
+------ Teilt die Buchstaben gemäß eines split_value in ein split_chars_holder array
+------ Bsp.: diesisteintext, split value 3
+------ "dstnx" "iiett" "esie"
+
+---- kasiski_test(split_value):
+------ Nutzt die split_cipher_text() Funktion, um einen Cipher_Text in einzelne Komponenten zu zerlegen
+------ Berechnet den Koinzidenzindex der einzelnen Komponenten mit coincidence_index() und summiert diese auf
+------ im Anschluss wird der Durchschnitt der summierten Koinzidenzindex gebildet
+------ Sollte der Durschschnitt zwischen 0.064 und 0.072 liegen, wird angenommen, dass der split_value die Länge des verwendeten Schlüssels ist
+
+-- caesar_cipher:
+---- encrypt(letter):
+------ addiert den Wert des Buchstaben zum shift value und rechnet dieses im Modulo 26
+
+---- decrypt(letter):
+------ Tut das gleich, wie encrypt() doch anstatt zu addieren, wird subtrahiert
+
+---- shift_letter(letter, option):
+------ Bestimmt mit der CipherHelper.case_distinction() Funktion, ob der Buchstabe groß oder klein geschrieben ist
+------ Berechnet den Wert des Buchstaben auf die Anzahl an Buchstaben im Alphabet normiert:
+-------- Wert des Buchstaben - Groß oder Klein Wert
+------ nutzt die encrypt oder decrypt Funktion + Groß oder Klein Wert, um den neuen Buchstaben zu bestimmen
+
+---- cipher(message, option):
+------ Die Funktion spaltet den übergebenen Text in seine einzelnen Wörter und geht diese anschließend Buchstabe für Buchstabe durch
+------ Nutzt auf die einzelnen Buchstaben die shift_letter() Funktion
+
+---- crack_cipher(cipher_text):
+------ Nutzt die Funktion letter_distribution() vom distribution_analyzer, um den Buchstaben mit der größten Häufigkeit zu bestimmten
+------ Anschließend wird der Wert des Buchstaben "e" vom Wert des bestimmten Buchstaben subtrahiert und modulo 26 gerechnet, um den Shift wert der Chiphre zu erraten
+
+-- vigenere_cipher:
+---- caesar_cipher_key(key):
+------ Erstellt ein array mit einer Caesar Cipher für jeden Buchstaben im key
+
+---- cipher(self, text, key, option):
+------ Nutzt die caesar_cipher_key() Funktion, um die encrypt Funktion des jeweiligen Caesar Cipher Objekts auf die Buchstaben des übergebenen Texts anzuwenden
+
+---- guess_key_length(cipher_text):
+------ Die Funktion nutzt die distribution_analyzer Funktion kasiski_test(), um die Länge des Keys eines Cipher_Text zu erraten
+
+---- crack_cipher(cipher_text):
+------ Nutzt die guess_key_length() Funktion, um die Länge des Keys zu erraten
+------ Anschließend wird der Text über die Länge des Keys in seine Einzelteile aufgeteilt
+------ Die Einzelteile werden nun mit Hilfe der distribution_analyzer letter_distribution() Funktion analysiert
+------ Und auf den Buchstaben "e" normiert
+------ Daraus resultiert eine mögliche Variante eines Keys
+------ Der entstandene Key halt allerdings nur die richtige Länge und kann vom eigentlichen Key abweichen, falls bei der letter_distribution Funktion der Buchstabe mit der höchsten Häufigkeit nicht das "e" ist
+
+-- File_Encryptor:
+---- Kümmert sich um die Ver- und Entschlüsselung von Dateien, mit Hilfe der cryptography Lib. und der Fernet Funktion
+
+-- File_Handler:
+---- write_file():
+------ Kümmert sich darum, Dateien zu schreiben, zu speichern und den Pfad in der Datenbank zu hinterlegen
+---- change_file_name():
+------ Ändert den Namen der jeweiligen Datei und ändert, falls die Datei Verschlüsselt ist, den Namen des dazugehörigen Schlüssels
+
+---- Verschlüsselung:
+------ key = Fernet.generate_key()
+------ fernet = Fernet(key)
+------ encrypted_file = fernet.encrypt(file)
+
+---- Entschlüsselung:
+------- key = getting_key_from_database
+------- fernet = Fernet(key)
+------- decrypted_file = fernet.decrypt(file)

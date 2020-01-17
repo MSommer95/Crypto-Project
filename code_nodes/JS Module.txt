@@ -1,0 +1,17 @@
+
+- Verwendete Module JS
+
+-- jquery
+---- Für funktionale Erweiterungen und Erleichterungen 
+
+-- npm
+---- Zum Managen von Packages, Updates, Konfigurationen, etc.
+
+-- webpack
+---- Hauptsächlich zum Zusammenführen aller .js Dateien, Kompilieren, Minification
+
+-- bootstrap
+---- Dient als Grundlage für das Fronend Web-Design
+
+-- tabulator
+---- Zum Erstellen von dynamischen Tabellen, Data Handling, Darstellung etc. 

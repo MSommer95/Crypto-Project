@@ -1,0 +1,23 @@
+
+-- passwordGenerator.js
+
+---- generatePassword(lower, upper, digit, special, length)
+------ Der Passwort Generator gibt dem Nutzer die Gelegenheit ein sicheres Passwort aus Groß-, Kleinbuchstaben, Zahlen und Sonderzeichen zu erstellen
+------ Hierfür erstellt der Generator ein Int32Array mit der Länge des Passworts als Größe
+------ Das Array wird nun mit random Zahlen befüllt über die window.crypto.getRandomValues() Funktion
+------ In einer For Loop wird nun über die Zahlen iteriert und die Rechnung: RandomNumber mod(k)                     |  k = Länge der ausgewählten Charaktere
+------ Die resultierende Zahl wird anschließend als Index für den jeweiligen Charakter des Passworts verwendet
+------ Die Charaktere werden abschließend aneinander gekettet und ergeben somit ein zufälliges Passwort
+
+---- calculatePasswordRank(password)
+------ Diese Funktion überprüft den Komplexitätsgrad eines Passworts, auf basis der enthaltenen Charaktere, der Länge und ob ein Teil des Passworts in einer bekannter Passwortliste vorkommt
+------ Die Funktion checkIfTopPasswordIsSubstring(password) überprüft, ob eines der Top 500 meist verwendeten Passwörter in dem Passwort vorkommt
+------ Falls dies der Fall ist, wird der Substring vom Passwort entfernt, sodass bspw.: "abcd12345secretP4ssw0rt" als unsicheres Passwort geflagt wird, obwohl die Länge überdurchschnittlich ist
+------ Im Anschluss an diesen Filter, wird die Komplexität des Passworts berechnet:
+-------- Komplexität = Komplexität der Charaktere ^ Passwort Länge
+------ Daraufhin wird die Zeit in Tagen berechnet, die ein Computer braucht, welcher 50.000.000.000 Passwörter in der Sekunde hashen kann
+-------- Zeit = Komplexität / 50.000.000.000 / 3600 / 24
+------ Die Komplexität wird abschließend in 3 Kategorien eingestuft:
+-------- Hoch: Zeit >= 1.000.000
+-------- Mittel: Zeit >= 1.000
+-------- Niedrig: Zeit < 1.000

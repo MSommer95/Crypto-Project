@@ -1,7 +1,7 @@
 import os
 import time
 
-from server.python.crypto_handler.hash_handler import HashHandler
+from server.python.crypto_handling.hash_handler import HashHandler
 from server.python.db_handling.db_files import DBfiles
 from server.python.file_handling.file_encryptor import FileEncryptor
 

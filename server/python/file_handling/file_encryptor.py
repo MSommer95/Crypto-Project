@@ -3,7 +3,7 @@ import time
 
 from cryptography.fernet import Fernet
 
-from server.python.crypto_handler.hash_handler import HashHandler
+from server.python.crypto_handling.hash_handler import HashHandler
 from server.python.db_handling.db_files import DBfiles
 
 

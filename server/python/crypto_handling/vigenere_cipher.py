@@ -1,6 +1,6 @@
-from server.python.crypto_handler.caesar_cipher import CaesarCipher
-from server.python.crypto_handler.cipher_helper import CipherHelper
-from server.python.crypto_handler.distribution_analyzer import DistAnalyzer
+from server.python.crypto_handling.caesar_cipher import CaesarCipher
+from server.python.crypto_handling.cipher_helper import CipherHelper
+from server.python.crypto_handling.distribution_analyzer import DistAnalyzer
 
 
 class VigenereCipher:

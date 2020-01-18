@@ -1,6 +1,6 @@
 import cherrypy
 
-from server.python.crypto_handler.hash_handler import HashHandler
+from server.python.crypto_handling.hash_handler import HashHandler
 from server.python.server_handling.input_validator import InputValidator
 
 

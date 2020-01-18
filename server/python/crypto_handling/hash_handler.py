@@ -5,7 +5,7 @@ import secrets
 import string
 import time
 
-from server.python.crypto_handler.otp_handler import OtpHandler
+from server.python.crypto_handling.otp_handler import OtpHandler
 from server.python.db_handling.db_tokens import DBtokens
 
 

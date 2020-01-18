@@ -8,11 +8,11 @@ from server.python.auth_handling.auth_handler import AuthHandler
 from server.python.auth_handling.login_handler import LoginHandler
 from server.python.auth_handling.second_factor_handling import SecondFactorHandler
 from server.python.comm_handling.qr_handler import QRHandler
-from server.python.crypto_handler.caesar_cipher import CaesarCipher
-from server.python.crypto_handler.cipher_helper import CipherHelper
-from server.python.crypto_handler.hash_handler import HashHandler
-from server.python.crypto_handler.otp_handler import OtpHandler
-from server.python.crypto_handler.vigenere_cipher import VigenereCipher
+from server.python.crypto_handling.caesar_cipher import CaesarCipher
+from server.python.crypto_handling.cipher_helper import CipherHelper
+from server.python.crypto_handling.hash_handler import HashHandler
+from server.python.crypto_handling.otp_handler import OtpHandler
+from server.python.crypto_handling.vigenere_cipher import VigenereCipher
 from server.python.db_handling.db_devices import DBdevices
 from server.python.db_handling.db_files import DBfiles
 from server.python.db_handling.db_otp import DBotp

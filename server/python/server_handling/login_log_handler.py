@@ -39,9 +39,11 @@ class LLogHandler:
             warning_subject = 'Warning: Anomaly registered'
             EmailSender.send_mail(warning_message, warning_subject, email)
             DBlogs.set_is_send(user_id)
+            DBlogs.update_login_log(user_id, counter)
             return False
         elif counter >= 5 and log[0]['is_send'] == 1:
             counter += 1
+            DBlogs.update_login_log(user_id, counter)
             return False
         else:
             counter += 1

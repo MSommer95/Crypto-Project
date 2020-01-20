@@ -22,7 +22,6 @@ from server.python.file_handling.file_encryptor import FileEncryptor
 from server.python.file_handling.file_handler import FileHandler
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.input_validator import InputValidator
-from server.python.server_handling.login_log_handler import LLogHandler
 from server.python.server_handling.response_handler import ResponseHandler
 from server.python.user_handling.settings_handler import SettingsHandler
 
@@ -97,16 +96,7 @@ class CryptoServer(object):
         user_id = InputValidator.check_session_value('user_id')
         if user_id and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
-            user_logs = LLogHandler.check_login_logs(user_id)
-            if LLogHandler.count_tries(user_id, user_logs, InputValidator.check_session_value('user_mail')):
-                check_value = DBotp.check_current(user_id, otp)
-                if check_value:
-                    LoginHandler.verify_login(user_id)
-                    return ResponseHandler.success_response('OTP valid')
-                else:
-                    return ResponseHandler.forbidden_response('OTP not valid')
-            else:
-                return ResponseHandler.too_many_requests_response('Too many tries')
+            return LoginHandler.prepare_otp_login(user_id, otp)
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 

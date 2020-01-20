@@ -26,10 +26,10 @@ class HashHandler:
     @staticmethod
     def hash_string(provided_string, algorithm, rounds):
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-        pwd_hash = hashlib.pbkdf2_hmac(algorithm, provided_string.encode('utf-8'),
-                                       salt, rounds)
-        pwd_hash = binascii.hexlify(pwd_hash)
-        return (salt + pwd_hash).decode('ascii')
+        hashed_string = hashlib.pbkdf2_hmac(algorithm, provided_string.encode('utf-8'),
+                                            salt, rounds)
+        hashed_string = binascii.hexlify(hashed_string)
+        return (salt + hashed_string).decode('ascii')
 
     @staticmethod
     def verify_hash(stored_hash, provided_string, algorithm, rounds):

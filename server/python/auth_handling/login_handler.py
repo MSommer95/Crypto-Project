@@ -24,12 +24,12 @@ class LoginHandler:
         OtpHandler.send_otp_mail(email, otp)
 
     @staticmethod
-    def login_app(user_id):
+    def login_app(user_id, auth_token):
         cherrypy.session['2fa_status'] = 1
         cherrypy.session['otp_option'] = 2
         otp = OtpHandler.create_otp(user_id)
         DBotp.insert(user_id, otp)
-        OtpHandler.send_otp_app(user_id, otp)
+        OtpHandler.send_otp_app(user_id, otp, auth_token)
 
     @staticmethod
     def finalize_login(user_id, user_settings, auth_token, email):
@@ -38,7 +38,7 @@ class LoginHandler:
             response = {'token': auth_token, 'message': 'Please send us your OTP'}
             return response
         elif user_settings['2FA-App'] == 1:
-            LoginHandler.login_app(user_id)
+            LoginHandler.login_app(user_id, auth_token)
             response = {'token': auth_token, 'message': 'Please send us your OTP'}
             return response
         else:

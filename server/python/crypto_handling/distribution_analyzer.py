@@ -14,13 +14,13 @@ class DistAnalyzer:
     @staticmethod
     def coincidence_index(cipher_text):
         distribution = Counter(cipher_text)
-        dist_avg = 0
+        sum_coincidence_index = 0
         for dist in distribution:
-            dist_avg += (distribution[dist] * (distribution[dist] - 1))
-        if dist_avg == 0:
-            return dist_avg
-        dist_avg /= (len(cipher_text) * (len(cipher_text) - 1))
-        return dist_avg
+            sum_coincidence_index += (distribution[dist] * (distribution[dist] - 1))
+        if sum_coincidence_index == 0:
+            return sum_coincidence_index
+        coincidence_index = sum_coincidence_index / (len(cipher_text) * (len(cipher_text) - 1))
+        return coincidence_index
 
     def split_cipher_text(self, split_value):
         split_chars_holder = ["" for _ in range(split_value)]
@@ -33,7 +33,7 @@ class DistAnalyzer:
                     break
         return split_chars_holder
 
-    def kasiski_test(self, split_value):
+    def avg_coincidence_index_test(self, split_value):
         coincidence_index = 0
         split_chars_holder = self.split_cipher_text(split_value)
         for split_char in split_chars_holder:

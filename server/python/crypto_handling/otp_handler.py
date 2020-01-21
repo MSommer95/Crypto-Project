@@ -19,7 +19,7 @@ class OtpHandler:
     # Funktion zum Erstellen eines 8-Stelligen OTP
     @staticmethod
     def create_otp(user_id):
-        otp_value = OtpHandler.create_random_string(string.digits)
+        otp_value = OtpHandler.create_random_string(f'{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}')
         otp_used = DBotp.check_used(user_id, otp_value)
         if otp_used:
             OtpHandler.create_otp(user_id)
@@ -35,19 +35,19 @@ class OtpHandler:
 
     # Funktion zum Versenden eines OTPs via Push Nachricht
     @staticmethod
-    def send_otp_app(user_id, otp):
+    def send_otp_app(user_id, otp, auth_token):
         device = DBdevices.get_active_devices_by_user_id(user_id)
         device_id = device[0]['device_id']
-        AppSender.send_otp_to_app(otp, user_id, device_id)
+        AppSender.send_otp_to_app(otp, user_id, device_id, auth_token)
 
     @staticmethod
-    def prepare_otp_send(user_id, otp_option, user_mail):
+    def prepare_otp_send(user_id, otp_option, user_mail, auth_token):
         otp = OtpHandler.create_otp(user_id)
         DBotp.insert(user_id, otp)
         if otp_option == 1:
             OtpHandler.send_otp_mail(user_mail, otp)
         elif otp_option == 2:
-            OtpHandler.send_otp_app(user_id, otp)
+            OtpHandler.send_otp_app(user_id, otp, auth_token)
         return 'New OTP send'
 
     @staticmethod

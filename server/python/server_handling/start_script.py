@@ -103,9 +103,9 @@ class CryptoServer(object):
     # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt und
     # nicht älter als eine Minute
     @cherrypy.expose()
-    def verify_otp_app(self, otp, user_id):
+    def verify_otp_app(self, otp, user_id, auth_token):
         check_value = DBotp.check_current(user_id, otp)
-        if check_value:
+        if check_value and AuthHandler.check_auth_token(auth_token):
             DBotp.update_verification(user_id)
             return 'Verification valid'
         else:

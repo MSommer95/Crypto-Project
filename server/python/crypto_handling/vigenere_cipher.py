@@ -34,7 +34,7 @@ class VigenereCipher:
         guess_length = 0
         key_length = 1
         while guess_length == 0 and key_length <= 100:
-            guess_length = DistAnalyzer(cipher_text).kasiski_test(key_length)
+            guess_length = DistAnalyzer(cipher_text).avg_coincidence_index_test(key_length)
             key_length += 1
         return guess_length
 

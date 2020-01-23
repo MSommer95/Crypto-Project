@@ -11,14 +11,15 @@ class VigenereCipher:
     def caesar_cipher_key(self, key):
         caesar_array = []
         for char in key:
-            caesar_array.append(CaesarCipher((ord(char.lower()) - 97) % self.modulus))
+            caesar_array.append(CaesarCipher(ord(char.lower()) - 97))
         return caesar_array
 
     def cipher(self, text, key, option):
         crypt_text = ''
         i = 0
+        caesar_key = self.caesar_cipher_key(key)
         while i < len(text):
-            for caesar in self.caesar_cipher_key(key):
+            for caesar in caesar_key:
                 ascii_position = CipherHelper.case_distinction(text[i])
                 if option == 'encrypt':
                     cipher_letter = caesar.encrypt(ord(text[i]) - ascii_position)

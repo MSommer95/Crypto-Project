@@ -164,3 +164,12 @@ export function sendNewPassword() {
 export function getTokenFromField() {
     return $('#hidden-token').val();
 }
+
+export function invalidEmail() {
+    const url_string = window.location.href;
+    const url = new URL(url_string);
+    const message = url.searchParams.get("message");
+    if (message === "Invalid Email") {
+        gui.changeNotificationTextAndOpen(message);
+    }
+}

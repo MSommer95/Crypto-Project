@@ -59,18 +59,18 @@ class LoginHandler:
             return ResponseHandler.forbidden_response('OTP not valid')
 
     @staticmethod
-    def prepare_login(user):
-        user_logs = LLogHandler.check_login_logs(user['id'])
-        login_count = LLogHandler.count_tries(user['id'], user_logs, user['email'])
+    def prepare_login(user, user_id, email):
+        user_logs = LLogHandler.check_login_logs(user_id)
+        login_count = LLogHandler.count_tries(user_id, user_logs, email)
         if len(user) > 0 and login_count:
-            DirHandler.check_user_dirs(user['id'])
-            auth_token = HashHandler.create_auth_token(user['id'], cherrypy.request.headers, cherrypy.session.id)
-            user_settings = DBusers.get_user_settings(user['id'])
-            cherrypy.session['user_id'] = user['id']
-            cherrypy.session['user_mail'] = user['email']
+            DirHandler.check_user_dirs(user_id)
+            auth_token = HashHandler.create_auth_token(user_id, cherrypy.request.headers, cherrypy.session.id)
+            user_settings = DBusers.get_user_settings(user_id)
+            cherrypy.session['user_id'] = user_id
+            cherrypy.session['user_mail'] = email
             cherrypy.session['2fa_verified'] = 0
             cherrypy.session['auth_token'] = auth_token
-            return LoginHandler.finalize_login(user['id'], user_settings, auth_token, user['email'])
+            return LoginHandler.finalize_login(user_id, user_settings, auth_token, email)
         else:
             return LoginHandler.fail_login(login_count)
 

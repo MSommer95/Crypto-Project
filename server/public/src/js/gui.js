@@ -121,7 +121,6 @@ export function disableGrayOverlay(element) {
 export function switchLoginCreate(button) {
     const registrationDiv = $('#registration-section');
     const loginDiv = $('#login-section');
-    // Anzeigen/ausblenden der entsprechenden Container
     switch (button.id) {
         case 'registrationButton':
             showElement(registrationDiv);

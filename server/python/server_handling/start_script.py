@@ -38,28 +38,31 @@ class CryptoServer(object):
             raise cherrypy.HTTPRedirect('/sign')
 
     @cherrypy.expose()
-    def sign(self):
-        return open('../public/dist/sign.html')
+    def sign(self, **params):
+        if len(params) > 0:
+            ResponseHandler.unauthorized_response(params['message'])
+            return open('../public/dist/sign.html')
+        else:
+            return open('../public/dist/sign.html')
 
     @cherrypy.expose()
     def create_account(self, email, password):
-        if InputValidator.email_validator(email) and len(password) > 0:
+        if InputValidator.email_validator(email) and len(password) > 0 and DBusers.get_user_id(email) == []:
             user_id = DBusers.insert_user(email, password)
             DirHandler.check_user_dirs(str(user_id))
             LoginHandler.prepare_login(DBusers.check_user(email, password))
             raise cherrypy.HTTPRedirect('/index')
         else:
-            ResponseHandler.bad_request_response('No valid input')
-            raise cherrypy.HTTPRedirect('/sign')
+            raise cherrypy.HTTPRedirect('/sign?message=Invalid Email')
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def login_account(self, email, password):
         if InputValidator.email_validator(email):
-            user_id = DBusers.get_user_id(email)
+            user_id = DBusers.get_user_id(email)[0]
             if len(user_id) > 0:
                 user = DBusers.check_user(email, password)
-                return LoginHandler.prepare_login(user)
+                return LoginHandler.prepare_login(user, str(user_id['id']), email)
             else:
                 return ResponseHandler.forbidden_response('Not authorized')
         else:

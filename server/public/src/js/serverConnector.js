@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import * as authHandler from './authHandler';
 
-// Get Funktion für die Server(-Datenbank) Abfragen
 export function getData(url, cb) {
     $.ajax({
         type: 'GET',
@@ -12,7 +11,6 @@ export function getData(url, cb) {
     });
 }
 
-// Post Funktion für die Server-Datenbank Abfragen
 export function postRequestWithData(url, data, cb) {
     $.ajax({
         type: 'POST',
@@ -29,7 +27,6 @@ export function postRequestWithData(url, data, cb) {
 export function requestFile(url, fileID, method) {
     let filepathInput = '<input type="hidden" name="file_id" value="' + fileID + '" />';
     let tokenInput = '<input type="hidden" name="auth_token" value="' + authHandler.getTokenFromField() + '" />';
-    //send request
     $('<form action="' + url + '" method="' + (method || 'post') + '">' + filepathInput + tokenInput + '</form>')
         .appendTo('body').submit().remove();
 }

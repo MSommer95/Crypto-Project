@@ -37,19 +37,20 @@ class CryptoServer(object):
             ResponseHandler.unauthorized_response('You are unauthorized')
             raise cherrypy.HTTPRedirect('/sign')
 
-    # Sign redirect
     @cherrypy.expose()
     def sign(self):
         return open('../public/dist/sign.html')
 
     @cherrypy.expose()
-    @cherrypy.tools.json_out()
     def create_account(self, email, password):
         if InputValidator.email_validator(email) and len(password) > 0:
-            DirHandler.check_user_dirs(str(DBusers.insert_user(email, password)))
-            return ResponseHandler.success_response('Account created')
+            user_id = DBusers.insert_user(email, password)
+            DirHandler.check_user_dirs(str(user_id))
+            LoginHandler.prepare_login(DBusers.check_user(email, password))
+            raise cherrypy.HTTPRedirect('/index')
         else:
-            return ResponseHandler.bad_request_response('Please enter a valid email and password')
+            ResponseHandler.bad_request_response('No valid input')
+            raise cherrypy.HTTPRedirect('/sign')
 
     @cherrypy.expose()
     @cherrypy.tools.json_out()
@@ -57,9 +58,8 @@ class CryptoServer(object):
         if InputValidator.email_validator(email):
             user_id = DBusers.get_user_id(email)
             if len(user_id) > 0:
-                user_id = user_id[0]['id']
                 user = DBusers.check_user(email, password)
-                return LoginHandler.prepare_login(user, user_id, email)
+                return LoginHandler.prepare_login(user)
             else:
                 return ResponseHandler.forbidden_response('Not authorized')
         else:

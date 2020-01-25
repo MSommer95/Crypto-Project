@@ -3,10 +3,10 @@ import cherrypy
 from server.python.comm_handling.email_sender import EmailSender
 from server.python.crypto_handling.hash_handler import HashHandler
 from server.python.crypto_handling.otp_handler import OtpHandler
+from server.python.db_handling.db_logs import DBlogs
 from server.python.db_handling.db_otp import DBotp
 from server.python.db_handling.db_tokens import DBtokens
 from server.python.db_handling.db_users import DBusers
-from server.python.db_handling.db_logs import DBlogs
 from server.python.server_handling.dir_handler import DirHandler
 from server.python.server_handling.input_validator import InputValidator
 from server.python.server_handling.login_log_handler import LLogHandler

@@ -7,7 +7,7 @@ class DBconnector:
     def connect():
         params = {'dbname': 'project',
                   'user': 'root',
-                  'password': 'HMpXB44P',  # root
+                  'password': 'HMpXB44P',
                   'dbhost': '127.0.0.1',
                   'charset': 'utf8mb4'}
 

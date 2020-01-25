@@ -3,7 +3,6 @@ import os
 
 class DirHandler:
 
-    # make_dir Funktion erstellt ein Verzeichnis beim angegebenen Pfad
     @staticmethod
     def create_dir(path):
         try:
@@ -13,7 +12,6 @@ class DirHandler:
         else:
             print(f'Successfully created Dir {path}')
 
-    # create_dirs Funktion nimmt die user_id entgegen und erstellt alle notwendigen Ordner für den User
     @staticmethod
     def create_user_dirs(base_path, sub_paths, inner_paths):
         DirHandler.create_dir(base_path)
@@ -28,8 +26,6 @@ class DirHandler:
             if not os.path.isdir(f'{base_path}{sub_paths[0]}{path}'):
                 DirHandler.create_dir(f'{base_path}{sub_paths[0]}{path}')
 
-    # check_for_dirs Funktion nimmt eine user_id und überprüft, ob die notwendigen Ordner existieren / wenn nicht werden
-    # die fehlenden Ordner erstellt
     @staticmethod
     def check_user_dirs(user_id):
         base_path = f'../storage/users/{user_id}'

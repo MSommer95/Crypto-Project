@@ -16,7 +16,6 @@ class OtpHandler:
     def create_random_string(alphabet, size=8):
         return ''.join(secrets.choice(alphabet) for _ in range(size))
 
-    # Funktion zum Erstellen eines 8-Stelligen OTP
     @staticmethod
     def create_otp(user_id):
         otp_value = OtpHandler.create_random_string(f'{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}')
@@ -27,13 +26,11 @@ class OtpHandler:
         else:
             return otp_value
 
-    # Funktion zum Versenden eines OTPs via Emailadresse
     @staticmethod
     def send_otp_mail(email, otp):
         message = f'Your HOTP: {otp}'
         EmailSender.send_mail(message, '2-Faktor-Auth', email)
 
-    # Funktion zum Versenden eines OTPs via Push Nachricht
     @staticmethod
     def send_otp_app(user_id, otp, auth_token):
         device = DBdevices.get_active_devices_by_user_id(user_id)

@@ -28,9 +28,6 @@ from server.python.user_handling.settings_handler import SettingsHandler
 
 class CryptoServer(object):
 
-    # Index Call Function: Bearbeitet die Index Request der Website. Solange keine user_id gesetzt wurde,
-    # wird der User auf die Login Seite redirected Überprüft die Session darauf, ob die 2fa aktiviert ist und ob der
-    # 2te Faktor schon bestätigt wurde
     @cherrypy.expose()
     def index(self):
         user_id = InputValidator.check_session_value('user_id')
@@ -45,8 +42,6 @@ class CryptoServer(object):
     def sign(self):
         return open('../public/dist/sign.html')
 
-    # create Funktion nimmt eine Emailadresse und Passwort entgegen und erstellt einen account in der DB + die
-    # zugehörige Ordner Struktur
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def create_account(self, email, password):
@@ -56,9 +51,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.bad_request_response('Please enter a valid email and password')
 
-    # login Funktion nimmt Emailadresse und Passwort entgegen und überprüft, ob ein user existiert und ob das
-    # passwort stimmt. Innere if Abfrage checked, welche settings der User aktiviert hat und initialisiert die
-    # jeweiligen Session Variablen
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def login_account(self, email, password):
@@ -73,8 +65,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.bad_request_response('Not a valid email address')
 
-    # Funktion zum automatischen Login innerhalb der App, benötigt die id des vom Nutzer aktivierten Gerätes zum
-    # erfolgreichen Login
     @cherrypy.expose()
     def login_account_app(self, device_id):
         device = DBdevices.get_by_device_id(device_id)
@@ -83,13 +73,11 @@ class CryptoServer(object):
                 return 'Login successful'
         return 'Device unauthorized, please register and activate this device'
 
-    # Funktion zum Ausloggen des Nutzers, beendet die derzeitige Session und entfernt damit verbundenene Session-Daten
     @cherrypy.expose()
     def logout_account(self):
         cherrypy.lib.sessions.expire()
         return 'You are logged out'
 
-    # verify Funktion überprüft, ob der eingegebene otp gültig ist (Innerhalb des Zeitraums und richtiger Code)
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def verify_otp(self, otp, auth_token):
@@ -100,8 +88,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zur Überprüfung eines per App gesendeten One-Time-Passwords, gültige Passwörter sind unbenutzt und
-    # nicht älter als eine Minute
     @cherrypy.expose()
     def verify_otp_app(self, otp, user_id):
         check_value = DBotp.check_current(user_id, otp)
@@ -111,8 +97,6 @@ class CryptoServer(object):
         else:
             return 'Verification invalid'
 
-    # Funktion zur Überprüfung der Gültigkeit eines One-Time-Passwords, gültige Passwörter sind unbenutzt und nicht
-    # älter als eine Minute
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def check_otp_verified(self):
@@ -125,8 +109,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # upload Funktion nimmt eine file als Parameter entgegen und schreib sie in den unencrypted Fileordner des Users
-    # nach dem Speichern der Datei wird die Datei verschlüsselt in den encrypted Ordner gelegt
     @cherrypy.expose()
     def file_upload(self, file, file_description, auth_token):
         user_id = InputValidator.check_session_value('user_id')
@@ -141,7 +123,6 @@ class CryptoServer(object):
             ResponseHandler.unauthorized_response('You are unauthorized')
             raise cherrypy.HTTPRedirect('/sign')
 
-    # Funktion zum Herunterladen einer bestehenden Datei des Nutzers auf dem Server
     @cherrypy.expose()
     def file_download(self, file_id, auth_token):
         user_id = InputValidator.check_session_value('user_id')
@@ -155,7 +136,6 @@ class CryptoServer(object):
             ResponseHandler.unauthorized_response('You are unauthorized')
             raise cherrypy.HTTPRedirect('/sign')
 
-    # encryption Funktion nimmt einen Filename entgegen und verschlüsselt die jeweilige Datei
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def file_encrypt(self, file_id, auth_token):
@@ -166,7 +146,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # decryption Funktion nimmt einen Filename entgegen und entschlüsselt die jeweilige Datei
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def file_decrypt(self, file_id, auth_token):
@@ -177,7 +156,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zur Änderung einer bestehenden hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def file_update(self, file_id, file_description, file_name, auth_token):
@@ -189,7 +167,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Entfernen einer hochgeladenen Datei des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def file_delete(self, file_id, is_encrypted, auth_token):
@@ -201,7 +178,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Auslesen aller hochgeladenen Dateien des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_files(self, auth_token):
@@ -213,7 +189,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Auslesen aller bereits genutzten OTP's des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_used_otps(self, auth_token):
@@ -224,7 +199,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Auslesen aller registrierten Nutzer-Devices
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_devices(self, auth_token):
@@ -236,7 +210,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Hinzufügen eines neuen Nutzer-Devices, genutzt für Authentifikation per App als zweiten Faktor
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def insert_user_device(self, device_id, device_name, user_id):
@@ -252,15 +225,12 @@ class CryptoServer(object):
                 return 'Device already active'
             else:
                 return 'Device already registered'
-
         db_connection_state = DBdevices.insert(user_id, device_id, device_name)
-
         if db_connection_state == 'success':
             return 'Successfully inserted device'
         elif db_connection_state == 'failed':
             return 'Failed to insert device'
 
-    # Funktion zum Löschen eines Nutzer-Devices
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def delete_user_device(self, device_id, auth_token):
@@ -273,8 +243,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Aktivieren eines bereits existenten Devices für die 2-Faktor-Authentifikation, es kann nur jeweils
-    # ein Device gleichzeitig aktiver zweiter Faktor sein
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def activate_user_device(self, device_id, auth_token):
@@ -286,7 +254,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Deaktivieren eines aktiven 2-Faktor-Devices des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def deactivate_user_device(self, device_id, auth_token):
@@ -299,7 +266,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Auslesen der gewählten 2-Faktor-Eistellungen des Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def get_user_settings(self, auth_token):
@@ -310,7 +276,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum Ändern des Passworts oder der Email eines Nutzers
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def update_account_info(self, email, password, old_password, auth_token):
@@ -324,8 +289,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum anpassen der 2-Faktor-Einstellungen des Nutzers, bei Aktivierung der 2-Faktor Authentifikation
-    # wird ein einmaliges Token zum Zurücksetzen der Einlstellungen generiert und in der Datenbank gespeichert
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def update_settings_sec_fa(self, sec_fa, sec_fa_email, sec_fa_app, auth_token):
@@ -337,8 +300,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum zurücksetzen der 2-Faktor Authentifizierung mittels Token, falls Nutzer Zugang zum
-    # Authentifikationsmedium verliert
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def reset_settings_sec_fa(self, token):
@@ -398,7 +359,6 @@ class CryptoServer(object):
         else:
             return ResponseHandler.bad_request_response('Not a valid email address')
 
-    # Funktion zum Registrieren des Devices per App mittels Email und Passwort, falls App als 2-Faktor Authentifikator
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def authenticate_app(self, email, password, device_id, device_name):
@@ -430,7 +390,6 @@ class CryptoServer(object):
             response = {'status': 403, 'message': 'No such user found or password wrong'}
             return response
 
-    # Funktion zum Erstellen und Senden eines One-Time-Passwords, falls App als 2-Faktor Authentifikator genutzt wird
     @cherrypy.expose()
     def request_otp_app(self, device_id):
         device = DBdevices.get_by_device_id(device_id)
@@ -443,7 +402,6 @@ class CryptoServer(object):
             DBotp.insert(user_id, otp)
             return otp
 
-    # Function um einen neuen OTP zu requesten
     @cherrypy.expose()
     @cherrypy.tools.json_out()
     def request_new_otp(self):
@@ -456,8 +414,6 @@ class CryptoServer(object):
         else:
             ResponseHandler.unauthorized_response('You are unauthorized')
 
-    # Funktion zum erstellen eines QR-Code Bildes auf Basis der Daten user_id und otp im JSON Format, kann in der App
-    # gescanned werden um Registrierung und Login zu vereinfachen
     @cherrypy.expose()
     def request_qr(self, auth_token):
         user_id = InputValidator.check_session_value('user_id')
@@ -533,11 +489,11 @@ if __name__ == '__main__':
             raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                         status=301)
 
+
     cherrypy.tools.force_tls = cherrypy.Tool("before_handler", force_tls)
 
 
     def load_http_server():
-        # extra server instance to dispatch HTTP
         server = cherrypy._cpserver.Server()
         server.socket_port = 80
         server.subscribe()

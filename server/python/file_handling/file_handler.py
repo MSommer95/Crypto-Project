@@ -12,10 +12,8 @@ class FileHandler:
     def write_file(user_id, file, file_description):
         file_id = int(round(time.time() * 1000))
         user_path = f'../storage/users/{user_id}'
-        print(type(file))
         size = 0
         path = f'/files/unencrypted/{HashHandler.choose_hash_function("sha1", str(file_id))}'
-        # Write the unencrypted file
         with open(f'{user_path}{path}', 'wb') as f:
             while True:
                 data = file.file.read(8192)

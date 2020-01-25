@@ -38,13 +38,12 @@ class FileEncryptor:
     @staticmethod
     def prepare_for_crypt(file_id, user_id, user_path):
         db_file = DBfiles.get_file(file_id, user_id)
-        unencrypted_file_path = db_file[0]['path']
+        file_path = db_file[0]['path']
         file_name = db_file[0]['file_name']
-        with open(f'{user_path}{unencrypted_file_path}', 'rb') as f:
+        with open(f'{user_path}{file_path}', 'rb') as f:
             file_data = f.read()
         return file_data, file_name
 
-    # Funktion zum Verschlüsseln einer Datei
     @staticmethod
     def encrypt(user_id, file_id):
         try:
@@ -52,9 +51,9 @@ class FileEncryptor:
             user_path = f'../storage/users/{user_id}'
             key_file_path = f'/keys/{HashHandler.choose_hash_function("sha1", str(multi_id + 1))}.key'
             key = FileEncryptor.create_key(user_path, key_file_path)
-            file_data, file_name = FileEncryptor.prepare_for_crypt(file_id, user_id, user_path)
+            file, file_name = FileEncryptor.prepare_for_crypt(file_id, user_id, user_path)
             fernet = Fernet(key)
-            encrypted_file = fernet.encrypt(file_data)
+            encrypted_file = fernet.encrypt(file)
             encrypted_filename = f'{file_name}.encrypted'
             encrypted_file_path = f'/files/encrypted/{HashHandler.choose_hash_function("sha1", str(multi_id))}'
             with open(user_path + encrypted_file_path, 'wb') as f:
@@ -68,7 +67,6 @@ class FileEncryptor:
         else:
             return 'Successfully encrypted the file'
 
-    # Funktion zum Entschlüsseln einer Datei
     @staticmethod
     def decrypt(user_id, file_id):
         try:

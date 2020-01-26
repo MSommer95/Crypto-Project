@@ -121,9 +121,3 @@ export function deleteRow(e, cell) {
         });
     }
 }
-
-export function preparePreview(cell) {
-    const rowData = cell.getRow().getData();
-    const filenameSplit = rowData.file_name.split('.');
-    return filenameSplit[filenameSplit.length-1]
-}

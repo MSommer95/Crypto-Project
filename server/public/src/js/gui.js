@@ -11,7 +11,6 @@ import videoFile from '../img/baseline_videocam_black_18dp.png';
 import imageFile from '../img/baseline_insert_photo_black_18dp.png';
 import musicFile from '../img/baseline_queue_music_black_18dp.png';
 import docFile from '../img/file.png';
-import * as th from "./tableHelper";
 
 
 export const saveIcon = (cell, formatterParams, onRendered) => {
@@ -50,9 +49,15 @@ export const downloadIcon = (cell, formatterParams, onRendered) => {
     return icon
 };
 
+function preparePreview(cell) {
+    const rowData = cell.getRow().getData();
+    const filenameSplit = rowData.file_name.split('.');
+    return filenameSplit[filenameSplit.length-1]
+}
+
 export const previewIcon = (cell, formatterParams, onRendered) => {
     const icon = new Image();
-    const fileExtension = th.preparePreview(cell);
+    const fileExtension = preparePreview(cell);
     const documentExtension = ['txt', 'doc', 'docx', 'odt', 'rtf'];
     const musicExtensions = ['mp3', 'ogg', 'wav'];
     const videoExtensions = ['mp4', 'avi', 'flv', 'wmv'];

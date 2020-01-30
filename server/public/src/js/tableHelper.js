@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import Tabulator from 'tabulator-tables/dist/js/tabulator.min';
 import {getTokenFromField} from "./authHandler";
 import * as servCon from "./serverConnector";
@@ -36,12 +37,16 @@ export function setActive(cell) {
                     auth_token: getTokenFromField()
                 };
                 servCon.postRequestWithData(url, data, (cb) => {
-                    gui.changeNotificationTextAndOpen(cb.responseJSON.message);
+                    const message = cb.responseJSON.message;
                     cell.getTable().setData('/get_user_devices', {auth_token: getTokenFromField()}, 'POST');
-
                     const url = '/get_user_settings';
                     servCon.postRequestWithData(url, {auth_token: getTokenFromField()}, (cb) => {
                        settHandler.updateSettings(cb.responseJSON);
+                       if (cb.responseJSON['2FA-App'] === 0) {
+                           $('#activate_sec_app-popup').modal();
+                       } else {
+                           gui.changeNotificationTextAndOpen(message);
+                       }
                     });
                 });
             } else {

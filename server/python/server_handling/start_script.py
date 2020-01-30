@@ -400,7 +400,7 @@ class CryptoServer(object):
             return
         user_id = str(device[0]['user_id'])
         user_settings = DBusers.get_user_settings(user_id)
-        if user_settings['2FA-App'] and user_settings['2FA-App'] == 1:
+        if user_settings['2FA-App'] == 1:
             otp = OtpHandler.create_otp(user_id)
             DBotp.insert(user_id, otp)
             return otp
@@ -423,6 +423,7 @@ class CryptoServer(object):
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
             user_id = str(user_id)
             otp = OtpHandler.create_otp(user_id)
+            DBotp.insert(user_id, otp)
             img_string = QRHandler.create_qr_image(user_id, otp)
             cherrypy.response.headers['Content-Type'] = "image/png"
             return base64.b64encode(img_string)

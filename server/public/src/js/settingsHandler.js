@@ -53,6 +53,29 @@ export function saveSettings() {
     }
 }
 
+export function activateAppAuth() {
+        const url = '/update_settings_sec_fa';
+        const data = {
+            sec_fa: true,
+            sec_fa_email: false,
+            sec_fa_app: true,
+            auth_token: getTokenFromField()
+        };
+        servCon.postRequestWithData(url, data, (cb) => {
+            if (cb.responseJSON.message.includes('No active device found!')) {
+                $('#activate_sec_app-close').click();
+                $('#device-register-text-popup').modal();
+            } else {
+                $('#activate_sec_app-close').click();
+                gui.changeNotificationTextAndOpen(cb.responseJSON.message);
+            }
+            const url = '/get_user_settings';
+            servCon.postRequestWithData(url, {auth_token: getTokenFromField()}, (cb) => {
+               updateSettings(cb.responseJSON);
+            });
+        });
+}
+
 export function updateSettings(settings) {
     if (settings['2FA-Mail'] === 0 && settings['2FA-App'] === 0){
         gui.enableGrayOverlay($('#2-fa-options-wrapper'));

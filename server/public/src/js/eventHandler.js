@@ -119,6 +119,9 @@ export function onMouseClick(event) {
         case 'vigenere_crack-message-btn':
             hashHandler.requestVigenereCrack();
             break;
+        case 'activate_sec_app-activate':
+            settHandler.activateAppAuth();
+            break;
         default:
             break;
     }

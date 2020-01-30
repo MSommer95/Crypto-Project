@@ -378,13 +378,23 @@ class CryptoServer(object):
                 devices = DBdevices.get_by_user_id(user_id)
                 print(str(devices))
                 if len(devices) > 0 and any(x['device_id'] == device_id for x in devices):
-                    cherrypy.session['2fa_status'] = 1
-                    response = {'status': 200, 'message': 'Success'}
-                    print('response', str(response))
-                    return response
+                    device = {}
+
+                    for x in devices:
+                        if x['device_id'] == device_id:
+                            device = x
+
+                    if device['device_is_active'] and device['device_is_active'] == 1:
+                        cherrypy.session['2fa_status'] = 1
+                        response = {'status': 200, 'message': 'Success'}
+                        print('response', str(response))
+                        return response
+                    else:
+                        response = {'status': 403, 'message': 'Device must be activated in web-interface'}
+                        return response
                 else:
                     DBdevices.insert(user_id, device_id, device_name)
-                    response = {'status': 200, 'message': 'Device added'}
+                    response = {'status': 403, 'message': 'Device added, but must be activated in web-interface'}
                     return response
             else:
                 response = {'status': 403, 'message': 'App auth inactive'}

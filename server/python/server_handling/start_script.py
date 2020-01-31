@@ -47,10 +47,11 @@ class CryptoServer(object):
 
     @cherrypy.expose()
     def create_account(self, email, password):
-        if InputValidator.email_validator(email) and len(password) > 0 and DBusers.get_user_id(email) == []:
+        email_check = DBusers.get_user_id(email)
+        if InputValidator.email_validator(email) and len(password) > 0 and len(email_check) == 0:
             user_id = DBusers.insert_user(email, password)
             DirHandler.check_user_dirs(str(user_id))
-            LoginHandler.prepare_login(DBusers.check_user(email, password))
+            LoginHandler.prepare_login(DBusers.check_user(email, password), user_id, email)
             raise cherrypy.HTTPRedirect('/index')
         else:
             raise cherrypy.HTTPRedirect('/sign?message=Invalid Email')

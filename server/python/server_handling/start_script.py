@@ -458,10 +458,10 @@ class CryptoServer(object):
     @cherrypy.tools.json_out()
     def caesar_cipher(self, message, shift, option, auth_token):
         user_id = InputValidator.check_session_value('user_id')
-        if not InputValidator.int_validator(shift):
+        if not InputValidator.int_validator(int(shift)):
             return ResponseHandler.bad_request_response('Your Shift value has to be an int')
         if AuthHandler.check_for_auth(user_id) and AuthHandler.check_auth_token(auth_token):
-            return ResponseHandler.success_response(CaesarCipher(shift).cipher(message, option))
+            return ResponseHandler.success_response(CaesarCipher(int(shift)).cipher(message, option))
         else:
             return ResponseHandler.unauthorized_response('You are unauthorized')
 
